@@ -323,7 +323,7 @@ El panel la avanza paso a paso siguiendo la **secuencia de la sala** del apartad
 | Portadas | Las 12 portadas en mosaico, antes de votar |
 | Resultados | Ganadoras aprobadas, con su titular |
 
-Ejemplo de alerta: «Atención, equipo 07. Las empresas ya no pueden publicar ofertas de empleo. ¿Cómo conseguís que el talento y las oportunidades se encuentren? Tenéis 10 minutos».
+Ejemplo de alerta: «Atención, equipo G. Las empresas ya no pueden publicar ofertas de empleo. ¿Cómo conseguís que el talento y las oportunidades se encuentren? Tenéis 10 minutos».
 
 ### `/panel` · Equipo facilitador
 
@@ -415,16 +415,20 @@ interface EventState { areasRevealed: boolean }
 
 ## 9. Datos de ejemplo
 
-Crea `src/data/seed.ts` con 12 equipos repartidos en estos 6 ámbitos:
+**Los equipos se llaman con letras, de la A a la L** (decidido el 12/11/2026), dos por ámbito y en este orden:
 
-1. Ciudad y calidad de vida
-2. Desarrollo empresarial
-3. Educación y futuro
-4. Atracción de talento
-5. Administración pública
-6. Movilidad y sostenibilidad (nombre pendiente; puede llamarse «Mirada abierta»)
+| Equipos | Ámbito |
+| --- | --- |
+| A y B | Mirada abierta |
+| C y D | Ciudad y calidad de vida |
+| E y F | Desarrollo empresarial |
+| G y H | Atracción de talento |
+| I y J | Educación y futuro |
+| K y L | Administración pública |
 
-**El equipo 07 · Atracción de talento** está completo con el ejemplo de la metodología:
+Está en `src/data/config.ts`. Los equipos empiezan en blanco: el reto lo construyen durante la jornada. En la revelación de ámbitos (sala) aparecen los nombres de pila de cada equipo según los escriben al entrar.
+
+**El equipo G · Atracción de talento** lleva el ejemplo de la metodología (donde aparece como «equipo 07»), marcado como ejemplo y para borrar antes del evento:
 
 | Campo | Valor |
 | --- | --- |
@@ -503,7 +507,6 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Alojamiento | El plan gratuito de Vercel (Hobby) no permite uso comercial. Opciones: Vercel Pro (20 $) o Cloudflare Pages gratis |
 | Propiedad de las cuentas | A nombre de quién van Vercel y Supabase |
 | Criterios de valoración | Los provisionales no coinciden con los del cliente |
-| Sexto ámbito | «Movilidad y sostenibilidad» o «Mirada abierta» |
 | Datos personales | Fichas y votos van sin nombre. Falta confirmar el aviso con Las Rozas Innova |
 | Conecta 2040 | Forma parte de la plataforma, pero tiene datos personales. No entra en esta base ni en un repositorio público |
 | Texto de la portada y la votación | Si la foto sustituye a las respuestas, ¿de dónde salen el titular y el nombre de la iniciativa para la portada del speed pitch y para votar? Opciones: el equipo escribe solo esos pocos datos, o se proyecta la foto de la ficha. Decidir antes del hito 5 |

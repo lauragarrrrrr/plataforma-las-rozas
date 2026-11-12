@@ -1,17 +1,21 @@
 // Datos iniciales (CLAUDE.md, apartado 9).
 //
-// · Los 12 equipos empiezan EN BLANCO: solo número y ámbito. El reto lo construyen durante la jornada.
-// · El equipo 07 lleva datos de EJEMPLO para poder probar las pantallas: nombres ficticios y
-//   el ejemplo de la metodología («Primer Paso»). Se vacía antes del evento desde el panel.
+// · Los 12 equipos (A a L) empiezan EN BLANCO: solo letra y ámbito. El reto lo construyen durante la jornada.
+// · El equipo G (Atracción de talento) lleva datos de EJEMPLO para poder probar las pantallas:
+//   nombres ficticios y el ejemplo de la metodología («Primer Paso»). Se vacía antes del evento desde el panel.
 // · Todo es ficticio: ni nombres reales, ni partidos, ni cargos.
+//
+// ⚠️ Cambiar DB_VERSION borra los datos guardados (también en Supabase) y vuelve a estos.
+//    No cambiarlo cerca del evento.
 import { TEAM_AREAS } from './config'
 import type { Database, Team } from './types'
 
-export const DB_VERSION = 2
-export const DEMO_TEAM_ID = '07'
+export const DB_VERSION = 3
+export const DEMO_TEAM_ID = 'G'
 
+/** Letra del equipo: 1 → «A», 12 → «L» */
 export function teamId(n: number): string {
-  return String(n).padStart(2, '0')
+  return String.fromCharCode(64 + n)
 }
 
 function blankTeams(): Team[] {
@@ -38,7 +42,7 @@ export function createBlank(): Database {
   }
 }
 
-/** Base de datos para probar: en blanco, con los ámbitos ya revelados y el equipo 07 de ejemplo. */
+/** Base de datos para probar: en blanco, con los ámbitos ya revelados y el equipo G de ejemplo. */
 export function createSeed(): Database {
   const db = createBlank()
   const id = DEMO_TEAM_ID

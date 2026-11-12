@@ -7,6 +7,7 @@ import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { AREAS, TEAM_AREAS } from '../data/config'
 import { revealAreas, setRoomStep, startRoomTimer, stopRoomTimer, useStore } from '../data/store'
+import { teamId } from '../data/seed'
 import { formatClock, useNow } from '../composables/useNow'
 import type { AreaId } from '../data/types'
 
@@ -21,7 +22,10 @@ const ambitos = computed(() =>
   (Object.keys(AREAS) as AreaId[]).map((a) => ({
     id: a,
     name: AREAS[a],
-    teams: TEAM_AREAS.map((x, i) => (x === a ? String(i + 1).padStart(2, '0') : null)).filter(Boolean),
+    // Cada equipo con las personas que escribieron al entrar en su ordenador
+    teams: TEAM_AREAS.map((x, i) => (x === a ? teamId(i + 1) : null))
+      .filter((id): id is string => !!id)
+      .map((id) => ({ id, members: store.setup(id)?.members ?? [] })),
   })),
 )
 
@@ -64,7 +68,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <ul v-if="store.db.event.areasRevealed" class="ambitos">
         <li v-for="a in ambitos" :key="a.id">
           <strong>{{ a.name }}</strong>
-          <span>Equipos {{ a.teams.join(' y ') }}</span>
+          <p v-for="t in a.teams" :key="t.id" class="equipo-sala">
+            <b>Equipo {{ t.id }}</b>
+            <span v-if="t.members.length">{{ t.members.join(' · ') }}</span>
+            <span v-else class="sin-nombres">Esperando sus nombres…</span>
+          </p>
         </li>
       </ul>
       <button v-else class="sala__boton" type="button" @click="revealAreas(true)">Revelar los ámbitos</button>
@@ -132,7 +140,10 @@ h1{color:var(--c-white)}
 .ambitos li{display:grid;gap:.4rem;background:color-mix(in srgb,var(--c-white) 10%,transparent);border:1px solid color-mix(in srgb,var(--c-white) 25%,transparent);border-radius:var(--radius-card);padding:3vh 2vw;animation:entra .6s var(--ease-out) both}
 .ambitos li:nth-child(2){animation-delay:.1s}.ambitos li:nth-child(3){animation-delay:.2s}.ambitos li:nth-child(4){animation-delay:.3s}.ambitos li:nth-child(5){animation-delay:.4s}.ambitos li:nth-child(6){animation-delay:.5s}
 .ambitos strong{font-size:clamp(1.1rem,2vw,2.2rem);color:var(--c-white);font-weight:600;letter-spacing:-.02em}
-.ambitos span{color:var(--c-green-mid);font-size:clamp(.9rem,1.3vw,1.4rem)}
+.equipo-sala{display:grid;gap:.1rem;padding-top:.6rem;border-top:1px solid color-mix(in srgb,var(--c-white) 20%,transparent)}
+.equipo-sala b{color:var(--c-green-mid);font-size:clamp(.8rem,1.1vw,1.2rem);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.equipo-sala span{color:var(--c-white);font-size:clamp(.95rem,1.4vw,1.5rem)}
+.equipo-sala .sin-nombres{color:var(--c-green-mid);font-style:italic;opacity:.8}
 @media(max-width:800px){.ambitos{grid-template-columns:1fr 1fr}}
 @keyframes entra{from{opacity:0;transform:translateY(20px) scale(.97)}}
 

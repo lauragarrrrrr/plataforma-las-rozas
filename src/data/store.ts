@@ -107,6 +107,12 @@ function applyRow(row: Row, deleted: boolean) {
   } else {
     list.push(row.datos as Record<string, unknown>)
   }
+  // Supabase devuelve las filas en cualquier orden: equipos de la A a la L,
+  // y chat, fotos y ayudas por orden de llegada
+  if (coll === 'teams') state.teams.sort((a, b) => a.number - b.number)
+  if (coll === 'chat' || coll === 'photos' || coll === 'helpRequests') {
+    ;(state[coll] as { createdAt: string }[]).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  }
 }
 
 function fromRows(rows: Row[]): Database {
@@ -120,8 +126,11 @@ function fromRows(rows: Row[]): Database {
 async function initRemote() {
   try {
     let rows = await fetchAll()
-    if (!rows.some((r) => r.coleccion === 'teams')) {
+    const meta = rows.find((r) => r.coleccion === 'meta')?.datos as { version?: number } | undefined
+    // Base vacía o de una versión anterior de la plataforma: se rellena con los datos de ejemplo
+    if (!rows.some((r) => r.coleccion === 'teams') || meta?.version !== DB_VERSION) {
       rows = toRows(createSeed())
+      await deleteAll()
       await upsertRows(rows)
     }
     fromRows(rows)

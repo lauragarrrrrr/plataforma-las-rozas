@@ -1,7 +1,7 @@
 // Modelo de datos de la plataforma (CLAUDE.md, apartado 8).
 // Nombres en inglés en el código; los textos de pantalla van en español.
 
-export type AreaId = 'city' | 'business' | 'education' | 'talent' | 'public' | 'mobility'
+export type AreaId = 'open' | 'city' | 'business' | 'talent' | 'education' | 'public'
 
 export type PhaseId = 'foresight' | 'research' | 'ideation' | 'pitch'
 export type PhaseState = 'locked' | 'active' | 'done'
