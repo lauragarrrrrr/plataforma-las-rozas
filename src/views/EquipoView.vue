@@ -101,9 +101,9 @@ async function onPremortem(url: string) {
     saveFailed.value = true
   }
 }
-function seguirSinTodas() {
-  const faltan = (setup.value?.members.length ?? 0) - premortemPhotos.value.length
-  if (confirm(`Faltan ${faltan} ${faltan === 1 ? 'ficha' : 'fichas'}. ¿Seguir igualmente?`)) finishPremortem(props.id)
+/** El reto no es obligatorio: si no hay fichas, solo se confirma */
+function seguirReto() {
+  if (premortemPhotos.value.length || confirm('No has subido ninguna ficha. ¿Seguir sin subirlas?')) finishPremortem(props.id)
 }
 
 const expediente = computed(() =>
@@ -168,16 +168,13 @@ const expediente = computed(() =>
 
         <div class="card reto__contador">
           <span class="kicker">Fichas subidas</span>
-          <strong class="reto__cifra">{{ premortemPhotos.length }} <small>de {{ setup.members.length }}</small></strong>
-          <div class="reto__barra"><span :style="{ width: `${Math.min(100, (premortemPhotos.length / setup.members.length) * 100)}%` }"></span></div>
+          <strong class="reto__cifra">{{ premortemPhotos.length }}</strong>
           <div v-if="premortemPhotos.length" class="reto__fotos">
             <img v-for="p in premortemPhotos" :key="p.id" :src="p.url" alt="Ficha individual" />
           </div>
-          <button class="boton" type="button" :disabled="premortemPhotos.length < setup.members.length" @click="finishPremortem(id)">
-            ¡Reto superado! Seguir →
-          </button>
-          <button v-if="premortemPhotos.length < setup.members.length" class="enlace" type="button" @click="seguirSinTodas">
-            Falta la ficha de alguien: seguir igualmente
+          <p class="nota">Cuando hayas subido las fichas que tengáis, sigue.</p>
+          <button class="boton" type="button" @click="seguirReto">
+            {{ premortemPhotos.length ? '¡Reto superado! Seguir →' : 'Seguir →' }}
           </button>
           <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez.</p>
         </div>
@@ -238,7 +235,7 @@ const expediente = computed(() =>
               <dt>Cómo</dt>
               <dd><ol class="como"><li v-for="h in dynamic.how" :key="h">{{ h }}</li></ol></dd>
             </div>
-            <div><dt>Qué obtenemos</dt><dd>{{ dynamic.output }}</dd></div>
+            <div><dt>¿Qué tendríais que obtener?</dt><dd>{{ dynamic.output }}</dd></div>
           </dl>
         </div>
 
@@ -362,7 +359,7 @@ const expediente = computed(() =>
 .dinamica__titulo{font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
 .que{font-size:1.1rem;color:var(--c-ink)}
 .qpco{margin:.4rem 0 0;display:grid;border-top:1px solid var(--c-gris-10)}
-.qpco > div{display:grid;grid-template-columns:7.5rem 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--c-gris-10)}
+.qpco > div{display:grid;grid-template-columns:9rem 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--c-gris-10)}
 .qpco dt{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);padding-top:.2rem}
 .qpco dd{margin:0;min-width:0}
 .como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}

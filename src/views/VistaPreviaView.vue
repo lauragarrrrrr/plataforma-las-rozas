@@ -4,7 +4,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { backToRoomAfter, PREMORTEM, TEAM_DYNAMICS, photoOf, type TeamDynamic } from '../data/dynamics'
-import { formatClock } from '../composables/useNow'
+import { formatClock, useNow } from '../composables/useNow'
+import PhotoQr from '../components/PhotoQr.vue'
+import CoachChat from '../components/CoachChat.vue'
 
 /** Pasos: el reto del digital owner y las 8 dinámicas */
 const pasos: { tipo: 'reto' | 'dinamica'; d: TeamDynamic }[] = [
@@ -15,8 +17,16 @@ const i = ref(0)
 const paso = computed(() => pasos[i.value])
 const d = computed(() => paso.value.d)
 
+// Cronómetro de muestra: empieza de nuevo cada vez que se entra en una dinámica
+const ahora = useNow()
+const inicio = ref(Date.now())
+const restante = computed(() => inicio.value + d.value.minutes * 60_000 - ahora.value)
+const transcurrido = computed(() => Math.min(100, 100 - (restante.value / (d.value.minutes * 60_000)) * 100))
+
 function ir(n: number) {
-  if (n >= 0 && n < pasos.length) i.value = n
+  if (n < 0 || n >= pasos.length) return
+  i.value = n
+  inicio.value = Date.now()
 }
 function onKey(e: KeyboardEvent) {
   if (e.key === 'ArrowRight') ir(i.value + 1)
@@ -25,13 +35,6 @@ function onKey(e: KeyboardEvent) {
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-/** Cómo se vería el chat: la bienvenida, la presentación de la dinámica y sus preguntas */
-const chat = computed(() => {
-  const msgs: string[] = []
-  if (d.value.research) msgs.push(`Unidad de Investigación · ${d.value.title}. No os daré soluciones: os haré preguntas para que afinéis.`)
-  else msgs.push(`Seguimos con «${d.value.title}».`)
-  return [...msgs, ...d.value.challenges]
-})
 </script>
 
 <template>
@@ -60,8 +63,17 @@ const chat = computed(() => {
       <p class="lema">Te ponemos un reto:</p>
       <p class="intro">Sube las fichas individuales de <strong>«{{ PREMORTEM.title }}»</strong> que ha rellenado cada persona de tu equipo. Una foto por ficha, una detrás de otra.</p>
       <div class="grid2">
-        <div class="card"><span class="kicker">Con el móvil</span><div class="qr-falso">QR</div><p>Las fichas aparecen aquí según llegan.</p></div>
-        <div class="card"><span class="kicker">Fichas subidas</span><strong class="cifra">0 <small>de 5</small></strong><button class="boton" type="button" disabled>¡Reto superado! Seguir →</button></div>
+        <div class="card">
+          <span class="kicker">Con el móvil</span>
+          <!-- QR real, pero de un equipo que no existe: si se escanea, no guarda nada -->
+          <PhotoQr team-id="vista-previa" :dynamic-id="PREMORTEM.id" multi />
+        </div>
+        <div class="card">
+          <span class="kicker">Fichas subidas</span>
+          <strong class="cifra">0</strong>
+          <p class="nota">Cuando hayas subido las fichas que tengáis, sigue.</p>
+          <button class="boton" type="button">Seguir →</button>
+        </div>
       </div>
     </section>
 
@@ -75,27 +87,24 @@ const chat = computed(() => {
           <dl class="qpco">
             <div><dt>Para qué</dt><dd>{{ d.why }}</dd></div>
             <div><dt>Cómo</dt><dd><ol class="como"><li v-for="h in d.how" :key="h">{{ h }}</li></ol></dd></div>
-            <div><dt>Qué obtenemos</dt><dd>{{ d.output }}</dd></div>
+            <div><dt>¿Qué tendríais que obtener?</dt><dd>{{ d.output }}</dd></div>
           </dl>
         </div>
         <div class="card reloj">
           <span class="kicker">Tiempo</span>
-          <strong class="reloj__cifra">{{ formatClock(d.minutes * 60_000) }}</strong>
+          <strong class="reloj__cifra">{{ formatClock(restante) }}</strong>
+          <div class="reloj__barra"><span :style="{ width: `${transcurrido}%` }"></span></div>
         </div>
         <div class="card">
           <span class="kicker">Al terminar</span>
           <p>Subid una foto {{ photoOf(d) }}. Sin la foto no podéis pasar a la siguiente dinámica.</p>
+          <PhotoQr team-id="vista-previa" :dynamic-id="d.id" />
           <p v-if="backToRoomAfter(d)" class="aviso-sala">Después de la foto les sale: <strong>«¡Volved a la sala principal!»</strong></p>
         </div>
       </div>
 
-      <section v-if="!d.noChat" class="card chat">
-        <span class="kicker">{{ d.research ? 'Unidad de Investigación' : 'Os reta' }}</span>
-        <small>Así preguntará el chat, una pregunta cada vez, según respondan.</small>
-        <ol class="burbujas">
-          <li v-for="(m, n) in chat" :key="n">{{ m }}</li>
-        </ol>
-      </section>
+      <!-- El mismo chat que los equipos: responded para ver la siguiente pregunta (no se guarda) -->
+      <CoachChat v-if="!d.noChat" class="chat-demo" team-id="vista-previa" :dynamic="d" demo />
     </section>
   </main>
 </template>
@@ -118,10 +127,8 @@ const chat = computed(() => {
 .lema{font-size:clamp(1.3rem,2.6vw,2rem);font-weight:500;color:var(--c-innova-dark)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
 @media(max-width:800px){.grid2{grid-template-columns:1fr}}
-.qr-falso{width:9rem;height:9rem;border:3px dashed var(--c-green-mid);border-radius:1rem;display:grid;place-items:center;font-weight:700;color:var(--c-green-mid)}
 .cifra{font-size:3rem;font-weight:600;line-height:1;color:var(--c-ink)}
-.cifra small{font-size:1.2rem;color:var(--c-green-dark)}
-.boton:disabled{opacity:.45}
+.nota{font-size:.85rem;font-style:italic}
 
 .dinamica{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:1.25rem;padding-block:1.5rem;align-items:start}
 .dinamica--sin-chat{grid-template-columns:1fr}
@@ -130,14 +137,14 @@ const chat = computed(() => {
 .titulo{font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
 .que{font-size:1.1rem;color:var(--c-ink)}
 .qpco{margin:.4rem 0 0;display:grid;border-top:1px solid var(--c-gris-10)}
-.qpco > div{display:grid;grid-template-columns:7.5rem 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--c-gris-10)}
+.qpco > div{display:grid;grid-template-columns:9rem 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--c-gris-10)}
 .qpco dt{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);padding-top:.2rem}
 .qpco dd{margin:0}
 .como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
 .reloj__cifra{font-size:3rem;font-weight:600;color:var(--c-ink);font-variant-numeric:tabular-nums;line-height:1}
-.chat small{font-size:.8rem}
+.reloj__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
+.reloj__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width 1s linear}
+.chat-demo{position:sticky;top:7rem}
 .aviso-sala{background:var(--c-rubi);color:var(--c-white);border-radius:1rem;padding:.7rem 1rem}
 .aviso-sala strong{color:var(--c-white)}
-.burbujas{list-style:none;margin:.4rem 0 0;padding:0;display:grid;gap:.5rem}
-.burbujas li{justify-self:start;max-width:90%;background:var(--c-green-light);color:var(--c-ink);border-radius:1.1rem 1.1rem 1.1rem .3rem;padding:.7rem 1rem;font-size:.92rem}
 </style>

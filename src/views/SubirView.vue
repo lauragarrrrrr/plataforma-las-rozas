@@ -23,7 +23,6 @@ const dynamic = computed(() => {
 /** Las fichas individuales se suben varias seguidas */
 const multi = computed(() => dynamic.value.id === PREMORTEM.id)
 const sentCount = computed(() => store.photos(props.id).filter((p) => p.dynamicId === dynamic.value.id).length)
-const members = computed(() => store.setup(props.id)?.members.length ?? 0)
 
 const sentUrl = ref('')
 const failed = ref(false)
@@ -55,7 +54,7 @@ async function onPhoto(url: string) {
       <template v-else-if="sentUrl && !failed && multi">
         <span class="ok" aria-hidden="true">✓</span>
         <h1 class="titulo">Ficha subida</h1>
-        <p class="contador">Llevas <strong>{{ sentCount }}</strong><template v-if="members"> de {{ members }}</template> fichas.</p>
+        <p class="contador">Llevas <strong>{{ sentCount }}</strong> {{ sentCount === 1 ? 'ficha' : 'fichas' }}.</p>
         <img class="previa" :src="sentUrl" alt="Ficha individual" />
         <button class="boton grande-boton" type="button" @click="sentUrl = ''">Subir otra ficha</button>
         <p>Cuando estén todas, sigue en el ordenador del equipo.</p>
@@ -74,7 +73,7 @@ async function onPhoto(url: string) {
         <span class="kicker">{{ team.name }} · {{ dynamic.title }}</span>
         <h1 v-if="multi" class="titulo">Sube las fichas de «{{ PREMORTEM.title }}»</h1>
         <h1 v-else class="titulo">Haced la foto {{ photoOf(dynamic) }}</h1>
-        <p v-if="multi">Una foto por ficha. <template v-if="sentCount">Llevas {{ sentCount }}<template v-if="members"> de {{ members }}</template>.</template></p>
+        <p v-if="multi">Una foto por ficha. <template v-if="sentCount">Llevas {{ sentCount }}.</template></p>
         <p v-else>Que se vea entero y se pueda leer. Se sube sola al pulsar.</p>
         <p v-if="sending" class="enviando">Subiendo la foto… no cerréis esta pantalla.</p>
         <PhotoUpload v-else class="grande" :label="multi ? 'Hacer la foto de una ficha' : 'Hacer la foto'" @uploaded="onPhoto" />

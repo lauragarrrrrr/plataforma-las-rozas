@@ -2,14 +2,22 @@
 // Chat que les reta. Es UNO por equipo y sigue de una dinámica a la siguiente.
 // Hoy pregunta con las preguntas de la metodología, una cada vez.
 // Cuando haya IA conectada, este mismo chat responderá a lo que escriban.
+// Con `demo` (vista previa) funciona igual pero no guarda nada.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { TEAM_DYNAMICS, type TeamDynamic } from '../data/dynamics'
-import { addChat, useStore } from '../data/store'
+import { addChat as saveChat, useStore } from '../data/store'
+import type { ChatMessage } from '../data/types'
 
-const props = defineProps<{ teamId: string; dynamic: TeamDynamic }>()
+const props = defineProps<{ teamId: string; dynamic: TeamDynamic; demo?: boolean }>()
 const store = useStore()
 
-const messages = computed(() => store.chat(props.teamId))
+const demoMessages = ref<ChatMessage[]>([])
+const messages = computed(() => (props.demo ? demoMessages.value : store.chat(props.teamId)))
+
+function addChat(teamId: string, dynamicId: string, from: 'team' | 'coach', text: string) {
+  if (!props.demo) return saveChat(teamId, dynamicId, from, text)
+  demoMessages.value.push({ id: String(demoMessages.value.length), teamId, dynamicId, from, text, createdAt: '' })
+}
 const inThisDynamic = computed(() => messages.value.filter((m) => m.dynamicId === props.dynamic.id))
 const text = ref('')
 const list = ref<HTMLElement>()
