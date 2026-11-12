@@ -27,7 +27,12 @@ const connError = ref('')
 let saveError = false
 
 const uid = () => Math.random().toString(36).slice(2, 10)
-const now = () => new Date().toISOString()
+// Hora siempre creciente: dos mensajes seguidos nunca tienen la misma, así no se desordenan al recargar
+let lastTs = 0
+const now = () => {
+  lastTs = Math.max(Date.now(), lastTs + 1)
+  return new Date(lastTs).toISOString()
+}
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x))
 
 function replaceState(next: Database) {
