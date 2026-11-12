@@ -106,7 +106,7 @@ Los nombres de rama empiezan por **mayúscula** (`Lau`, `Marina`). Git distingue
 | Framework | Vue 3 + Vite + TypeScript + Vue Router |
 | Estilos | CSS propio con las variables de `tokens.css`. Sin frameworks de CSS |
 | Datos, fase 1 | `localStorage` + `BroadcastChannel` para sincronizar pestañas. Sirve para probar todo sin servidor |
-| Datos, fase 2 | Supabase gratis: base de datos, almacenamiento de fotos y tiempo real |
+| Datos, fase 2 | Supabase gratis: base de datos, almacenamiento de fotos y tiempo real. **Conectado el 12/11/2026** (proyecto `plataforma-las-rozas`, región UE). Tabla única `registros` y carpeta `fotos`; se prepara con `supabase/schema.sql`. Las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` van en `.env.local` (no se sube) y en Vercel. Sin ellas, la plataforma funciona solo en el navegador |
 | Despliegue | Vercel, conectado a `main` |
 | IA | **Sin API.** Ver apartado 7 |
 
@@ -511,4 +511,4 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Votación: código o desplegable | El brief pide código de un solo uso; el prototipo de la metodología pide elegir «¿De qué equipo eres?». Decidir antes del hito 6 |
 | IA conectada al chat | Para que el chat responda de verdad, lea las fotos y proponga la portada hace falta una cuenta de la API de Anthropic (unos 20-50 € la jornada). La cuenta Team no sirve para esto. Lo deciden Laura, Marina y Avantis, con la privacidad confirmada con Las Rozas Innova |
 | Nombres de los participantes | Se guarda el nombre de pila de cada persona y quién es el digital owner. Confirmar con el aviso de datos personales |
-| Fotos entre dispositivos | Hoy la foto se sube desde el ordenador del equipo. Subirla con el móvil por QR necesita Supabase (hito 8) |
+| Seguridad de Supabase | Hoy cualquiera con la dirección de la web puede leer y escribir los datos (permisos provisionales en `supabase/schema.sql`). Cerrarlo antes del evento, junto con la contraseña del panel |
