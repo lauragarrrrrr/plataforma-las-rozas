@@ -21,7 +21,6 @@ const now = useNow()
 const team = computed(() => store.team(props.id))
 const setup = computed(() => store.setup(props.id))
 const progress = computed(() => store.progress(props.id))
-const revealed = computed(() => store.db.event.areasRevealed)
 const roomStep = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 
 // --- 1. Quiénes sois ----------------------------------------------------------
@@ -47,7 +46,10 @@ const dynamic = computed(() => TEAM_DYNAMICS[Math.min(index.value, TEAM_DYNAMICS
 const nextOne = computed(() => TEAM_DYNAMICS[index.value + 1])
 const photo = computed(() => store.photoFor(props.id, dynamic.value.id))
 
-const startedAt = computed(() => progress.value?.started[dynamic.value.id])
+/** Hasta qué dinámica nos deja llegar el equipo facilitador */
+const allowed = computed(() => store.allowed(props.id))
+const waitingNext = computed(() => !!photo.value && index.value >= allowed.value)
+const startedAt = computed(() => store.openedAt(props.id, dynamic.value.id))
 const remaining = computed(() => {
   if (!startedAt.value) return dynamic.value.minutes * 60_000
   return new Date(startedAt.value).getTime() + dynamic.value.minutes * 60_000 - now.value
@@ -55,11 +57,20 @@ const remaining = computed(() => {
 const timeUp = computed(() => remaining.value <= 0)
 const elapsedPct = computed(() => Math.min(100, 100 - (remaining.value / (dynamic.value.minutes * 60_000)) * 100))
 
-// El cronómetro arranca cuando el equipo llega a la dinámica
+// Apuntamos cuándo llega el equipo a cada dinámica (el cronómetro cuenta desde que se abrió)
 watch(
-  () => [revealed.value, setup.value?.teamId, dynamic.value.id, finished.value] as const,
-  ([isRevealed, hasSetup, dynId, isFinished]) => {
-    if (isRevealed && hasSetup && !isFinished) startDynamic(props.id, dynId)
+  () => [allowed.value, setup.value?.teamId, dynamic.value.id, finished.value] as const,
+  ([open, hasSetup, dynId, isFinished]) => {
+    if (open >= 0 && hasSetup && !isFinished) startDynamic(props.id, dynId)
+  },
+  { immediate: true },
+)
+
+// Con la foto subida, el equipo pasa solo en cuanto el equipo facilitador abre la siguiente
+watch(
+  () => [!!photo.value, allowed.value, index.value] as const,
+  ([hasPhoto, open, i]) => {
+    if (hasPhoto && i < open) nextDynamic(props.id)
   },
   { immediate: true },
 )
@@ -119,7 +130,7 @@ const expediente = computed(() =>
   </main>
 
   <!-- 2 · Esperando: la sala está en la parte de facilitación -->
-  <main v-else-if="!revealed" class="espera">
+  <main v-else-if="allowed < 0" class="espera">
     <div class="wrap espera__in">
       <span class="kicker">{{ team.name }} · Digital owner: {{ setup.digitalOwner }}</span>
       <h1 class="titular">Atentos a la sala</h1>
@@ -182,10 +193,13 @@ const expediente = computed(() =>
 
         <div class="card foto">
           <template v-if="photo">
-            <span class="kicker">Foto registrada</span>
+            <span class="kicker">Foto registrada ✓</span>
             <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
-            <button v-if="nextOne" class="boton" type="button" @click="nextDynamic(id)">Siguiente: {{ nextOne.title }} →</button>
-            <button v-else class="boton" type="button" @click="nextDynamic(id)">Terminar →</button>
+            <p v-if="waitingNext" class="esperando">
+              <span class="punto" aria-hidden="true"></span>
+              <span v-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
+              <span v-else>¡Hecho! Esperad indicaciones del equipo facilitador.</span>
+            </p>
           </template>
           <template v-else>
             <span class="kicker">Al terminar</span>
@@ -277,6 +291,9 @@ const expediente = computed(() =>
 .reloj--fin .reloj__cifra{color:var(--c-rubi)}
 
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}
+.esperando{display:flex;gap:.6rem;align-items:flex-start;background:var(--c-green-light);border-radius:1rem;padding:.8rem 1rem;color:var(--c-ink)}
+.esperando .punto{flex:none;margin-top:.45rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--c-innova);animation:latir 1.2s ease-in-out infinite}
+@keyframes latir{50%{opacity:.3;transform:scale(.8)}}
 
 .bloqueo{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--c-green-deep) 80%,transparent);backdrop-filter:blur(4px)}
 .bloqueo__caja{background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.5rem,4vw,2.5rem);max-width:40rem;display:grid;gap:.8rem}

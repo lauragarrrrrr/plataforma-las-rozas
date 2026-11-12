@@ -11,8 +11,10 @@ import type { Database } from './types'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+/** VITE_SUPABASE_OFF=1 obliga a trabajar solo en el navegador (para probar sin tocar los datos compartidos) */
+const off = import.meta.env.VITE_SUPABASE_OFF === '1'
 
-export const sb: SupabaseClient | null = url && key ? createClient(url, key) : null
+export const sb: SupabaseClient | null = url && key && !off ? createClient(url, key) : null
 
 /** Colecciones con un solo elemento */
 export const SINGLETONS = ['meta', 'event', 'room'] as const

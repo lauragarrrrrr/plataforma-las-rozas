@@ -29,8 +29,15 @@ export interface RoomState {
   resultsApproved: boolean
 }
 
-/** Los ámbitos se revelan a todos los equipos a la vez (10:20). */
-export interface EventState { areasRevealed: boolean }
+/** Estado general de la jornada, que controla el equipo facilitador. */
+export interface EventState {
+  /** Los ámbitos se revelan a todos los equipos a la vez (10:20) */
+  areasRevealed: boolean
+  /** Hasta qué dinámica (índice en TEAM_DYNAMICS) pueden llegar los equipos. -1: ninguna */
+  openDynamic?: number
+  /** Cuándo se abrió cada dinámica para todos: de aquí sale el cronómetro */
+  openedAt?: Record<string, string>
+}
 
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */
 export interface TeamSetup { teamId: string; members: string[]; digitalOwner: string }
@@ -45,6 +52,13 @@ export interface TeamProgress {
   /** Índice en TEAM_DYNAMICS de la dinámica actual */
   current: number
   started: Record<string, string>
+  /**
+   * Excepción para este equipo, puesta desde el panel: hasta qué dinámica puede llegar.
+   * Sin valor, sigue al grupo (EventState.openDynamic).
+   */
+  limit?: number
+  /** Cuándo se le abrió cada dinámica a este equipo por excepción */
+  openedAt?: Record<string, string>
 }
 
 /** Mensaje del chat que les reta. `from: 'coach'` son las preguntas de la plataforma. */

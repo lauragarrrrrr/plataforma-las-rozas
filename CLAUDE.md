@@ -43,6 +43,8 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 5. **Entrada con dos puertas** (`/`): «Equipo facilitador» (`/facilitacion` → presentación de la sala o panel) y «Participante» (`/participa` → «¿A qué equipo pertenecéis?»).
 6. **Al entrar, el equipo dice quiénes son** (solo nombre de pila) **y quién es el digital owner.** Mientras la sala está en la parte de facilitación, el equipo ve «Atentos a la sala» con lo que se proyecta. Cuando el panel revela los ámbitos, empiezan las dinámicas.
 7. **Cronómetro y foto obligatoria:** cada dinámica tiene su cronómetro; al acabar el tiempo la pantalla se bloquea hasta que suben la foto, y sin foto no pasan a la siguiente.
+8. **El equipo facilitador marca el ritmo:** los equipos **no avanzan solos**. Desde el panel se abre la siguiente dinámica para todos (su cronómetro empieza en ese momento) y el equipo que ya tiene la foto pasa solo. Por equipo se puede «Retener», «Dejar pasar» o volver «Con el grupo». Revelar los ámbitos abre la primera dinámica.
+9. **Escaleta en el panel:** línea de tiempo con toda la jornada, lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos. Pulsar un momento lleva ahí la presentación de la sala.
 4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): las subirán Laura y Marina cuando las tengan. **No las inventes.** Hasta entonces, deja el hueco preparado.
 
 **Patrón de cada dinámica en la app del equipo:**

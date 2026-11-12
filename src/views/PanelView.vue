@@ -6,8 +6,9 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { TEAM_DYNAMICS } from '../data/dynamics'
-import { attendHelp, clearAll, resetToSeed, useStore } from '../data/store'
-import { useNow } from '../composables/useNow'
+import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, setTeamPace, useStore } from '../data/store'
+import { formatClock, useNow } from '../composables/useNow'
+import EscaletaTimeline from '../components/EscaletaTimeline.vue'
 
 const store = useStore()
 const now = useNow()
@@ -20,17 +21,44 @@ const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attende
 const atendidas = computed(() => store.db.helpRequests.filter((h) => h.attendedAt).slice(-8).reverse())
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 
+// --- Ritmo: qué dinámica está abierta para todos ---
+const abierta = computed(() => store.openDynamic())
+const dinAbierta = computed(() => TEAM_DYNAMICS[abierta.value])
+const dinSiguiente = computed(() => TEAM_DYNAMICS[abierta.value + 1])
+const restante = computed(() => {
+  const d = dinAbierta.value
+  const at = d && store.db.event.openedAt?.[d.id]
+  return d && at ? new Date(at).getTime() + d.minutes * 60_000 - now.value : null
+})
+const conFoto = computed(() =>
+  dinAbierta.value ? store.db.teams.filter((t) => store.photoFor(t.id, dinAbierta.value!.id)).length : 0,
+)
+
+function abrirSiguiente() {
+  const r = restante.value
+  const texto = dinSiguiente.value ? `«${dinSiguiente.value.title}»` : 'el final de las dinámicas de equipo'
+  const aviso = r !== null && r > 0 ? `Todavía quedan ${formatClock(r)} de la dinámica actual. ` : ''
+  if (confirm(`${aviso}¿Abrir ${texto} para todos los equipos?`)) openNextDynamic()
+}
+function volver() {
+  if (confirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()
+}
+
 const filas = computed(() =>
   store.db.teams.map((t) => {
     const p = store.progress(t.id)
     const s = store.setup(t.id)
     const i = p?.current ?? 0
+    const din = TEAM_DYNAMICS[i]
     return {
       team: t,
       owner: s?.digitalOwner,
-      paso: !s ? 'Sin empezar' : i >= TEAM_DYNAMICS.length ? 'Terminado' : `${i + 1}/${TEAM_DYNAMICS.length} · ${TEAM_DYNAMICS[i].title}`,
+      paso: !s ? 'Sin empezar' : i >= TEAM_DYNAMICS.length ? 'Terminado' : `${i + 1}/${TEAM_DYNAMICS.length} · ${din.title}`,
+      foto: !!(din && store.photoFor(t.id, din.id)),
       fotos: store.photos(t.id).length,
       ayuda: !!store.pendingHelp(t.id),
+      // Excepción respecto al grupo: va por delante o se ha quedado retenido
+      excepcion: p?.limit === undefined ? '' : p.limit > abierta.value ? 'Adelantado' : 'Retenido',
     }
   }),
 )
@@ -60,6 +88,31 @@ async function restaurar() {
         </p>
       </div>
 
+      <EscaletaTimeline />
+
+      <section class="card ritmo">
+        <span class="kicker">Dinámica abierta para todos los equipos</span>
+        <template v-if="abierta < 0">
+          <p>Todavía ninguna. La primera («{{ TEAM_DYNAMICS[0].title }}») se abre al <strong>revelar los ámbitos</strong> en la presentación, o con este botón.</p>
+        </template>
+        <template v-else-if="dinAbierta">
+          <div class="ritmo__actual">
+            <strong>{{ abierta + 1 }}/{{ TEAM_DYNAMICS.length }} · {{ dinAbierta.title }}</strong>
+            <span v-if="restante !== null" class="ritmo__reloj" :class="{ 'ritmo__reloj--fin': restante <= 0 }">
+              {{ restante > 0 ? formatClock(restante) : 'Tiempo terminado' }}
+            </span>
+          </div>
+          <p>Han subido su foto <strong>{{ conFoto }} de {{ store.db.teams.length }}</strong> equipos. Los equipos no pasan a la siguiente hasta que la abráis.</p>
+        </template>
+        <p v-else>Todas las dinámicas de equipo están cerradas.</p>
+        <div class="botones">
+          <button v-if="abierta < TEAM_DYNAMICS.length" class="boton" type="button" @click="abrirSiguiente">
+            {{ dinSiguiente ? `Abrir para todos: ${dinSiguiente.title} →` : 'Terminar las dinámicas de equipo' }}
+          </button>
+          <button v-if="abierta > 0" class="boton boton--sec" type="button" @click="volver">← Volver a la anterior</button>
+        </div>
+      </section>
+
       <section class="card ayudas" :class="{ 'ayudas--activa': pendientes.length }">
         <span class="kicker">Peticiones de ayuda</span>
         <p v-if="!pendientes.length" class="vacio">Ningún equipo pide ayuda ahora mismo.</p>
@@ -83,7 +136,7 @@ async function restaurar() {
       <div class="tabla-scroll">
         <table>
           <thead>
-            <tr><th>Equipo</th><th>Ámbito</th><th>Digital owner</th><th>Dinámica</th><th>Fotos</th><th></th></tr>
+            <tr><th>Equipo</th><th>Ámbito</th><th>Digital owner</th><th>Dinámica</th><th>Foto</th><th>Ritmo</th><th></th></tr>
           </thead>
           <tbody>
             <tr v-for="f in filas" :key="f.team.id" :class="{ 'fila--ayuda': f.ayuda }">
@@ -91,7 +144,13 @@ async function restaurar() {
               <td>{{ store.areaName(f.team.area) }}</td>
               <td>{{ f.owner ?? '—' }}</td>
               <td>{{ f.paso }}</td>
-              <td>{{ f.fotos }}</td>
+              <td><span :class="f.foto ? 'si' : 'no'">{{ f.foto ? '✓' : '—' }}</span> <small>({{ f.fotos }})</small></td>
+              <td class="ritmo-equipo">
+                <span v-if="f.excepcion" class="excepcion">{{ f.excepcion }}</span>
+                <button class="mini" type="button" title="Se queda en su dinámica aunque el grupo avance" @click="setTeamPace(f.team.id, 'hold')">Retener</button>
+                <button class="mini" type="button" title="Puede pasar ya a la siguiente dinámica" @click="setTeamPace(f.team.id, 'pass')">Dejar pasar</button>
+                <button v-if="f.excepcion" class="mini" type="button" title="Vuelve a ir al ritmo del grupo" @click="setTeamPace(f.team.id, 'group')">Con el grupo</button>
+              </td>
               <td><span v-if="f.ayuda" class="pide">Pide ayuda</span></td>
             </tr>
           </tbody>
@@ -128,5 +187,16 @@ td{padding:.55rem .5rem;border-bottom:1px solid var(--c-gris-10);color:var(--c-i
 .pide{background:var(--c-rubi);color:var(--c-white);border-radius:99px;padding:.15em .7em;font-size:.72rem;font-weight:700}
 .demo{font-size:.75rem;color:var(--c-green-dark)}
 .botones{display:flex;flex-wrap:wrap;gap:.6rem}
+.ritmo{box-shadow:inset 0 0 0 3px var(--c-innova)}
+.ritmo__actual{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1.2rem}
+.ritmo__actual strong{font-size:clamp(1.2rem,2.2vw,1.6rem);font-weight:500;color:var(--c-ink);letter-spacing:-.02em}
+.ritmo__reloj{font-size:1.4rem;font-weight:600;color:var(--c-innova-dark);font-variant-numeric:tabular-nums}
+.ritmo__reloj--fin{color:var(--c-rubi);font-size:1rem}
+.si{color:var(--c-green-deep);font-weight:700}
+.no{color:var(--c-gris-10)}
+.ritmo-equipo{display:flex;gap:.3rem;align-items:center}
+.mini{border:0;border-radius:99px;padding:.25em .7em;background:var(--c-green-light);color:var(--c-ink);font:inherit;font-size:.75rem;cursor:pointer}
+.mini:hover{background:var(--c-innova)}
+.excepcion{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c-innova-dark);margin-right:.2rem}
 .boton--sec{background:var(--c-white);box-shadow:inset 0 0 0 1.5px var(--c-ink)}
 </style>

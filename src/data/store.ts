@@ -164,6 +164,24 @@ function save(coll: Collection, item?: Record<string, unknown> | object): Promis
 const saveQuiet = (coll: Collection, item?: object) => { save(coll, item).catch(() => {}) }
 
 // ---------------------------------------------------------------------------
+// Ritmo de la jornada: qué dinámica está abierta
+// ---------------------------------------------------------------------------
+/** Dinámica abierta para todos. Si nunca se ha tocado, la primera se abre al revelar los ámbitos. */
+function groupOpen(): number {
+  return state.event.openDynamic ?? (state.event.areasRevealed ? 0 : -1)
+}
+
+function allowedFor(teamId: string): number {
+  const p = state.progress.find((x) => x.teamId === teamId)
+  return p?.limit ?? groupOpen()
+}
+
+function openedAtFor(teamId: string, dynamicId: string): string | undefined {
+  const p = state.progress.find((x) => x.teamId === teamId)
+  return p?.openedAt?.[dynamicId] ?? state.event.openedAt?.[dynamicId] ?? p?.started[dynamicId]
+}
+
+// ---------------------------------------------------------------------------
 // Lectura
 // ---------------------------------------------------------------------------
 const db = readonly(state)
@@ -185,6 +203,12 @@ export function useStore() {
     pendingHelp: (teamId: string) => db.helpRequests.find((h) => h.teamId === teamId && !h.attendedAt),
     initiative: (teamId: string) => db.initiatives.find((i) => i.teamId === teamId),
     isDemo: (teamId: string) => db.demoTeamIds.includes(teamId),
+    /** Dinámica abierta para todos (-1 si todavía ninguna) */
+    openDynamic: () => groupOpen(),
+    /** Hasta qué dinámica puede llegar este equipo: la del grupo o su excepción */
+    allowed: (teamId: string) => allowedFor(teamId),
+    /** Cuándo empezó a contar el tiempo de una dinámica para este equipo */
+    openedAt: (teamId: string, dynamicId: string) => openedAtFor(teamId, dynamicId),
     lastSaveFailed: () => saveError,
   }
 }
@@ -249,11 +273,15 @@ export async function addPhoto(teamId: string, dynamicId: string, kind: PhotoKin
   return id
 }
 
-/** Pasa a la siguiente dinámica. Solo si la actual tiene su foto. */
+/**
+ * Pasa a la siguiente dinámica. Solo si la actual tiene su foto
+ * y el equipo facilitador ya ha abierto la siguiente.
+ */
 export function nextDynamic(teamId: string) {
   const p = progressOf(teamId)
   const current = TEAM_DYNAMICS[p.current]
   if (!current || !state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id)) return
+  if (p.current >= allowedFor(teamId)) return
   p.current += 1
   saveQuiet('progress', p)
   syncPhases(teamId)
@@ -305,9 +333,54 @@ export function setPhase(teamId: string, phase: PhaseId, value: PhaseState) {
   saveQuiet('teams', team)
 }
 
+/** Revelar los ámbitos abre también la primera dinámica (titular) y arranca su cronómetro */
 export function revealAreas(revealed: boolean) {
+  const firstTime = revealed && state.event.openDynamic === undefined
   state.event.areasRevealed = revealed
+  if (firstTime) {
+    state.event.openDynamic = 0
+    state.event.openedAt = { ...(state.event.openedAt ?? {}), [TEAM_DYNAMICS[0].id]: now() }
+  }
   saveQuiet('event')
+}
+
+/**
+ * Abre la siguiente dinámica para TODOS los equipos y arranca su cronómetro.
+ * Abrir más allá de la última da la jornada de equipo por terminada.
+ */
+export function openNextDynamic() {
+  const next = Math.min(groupOpen() + 1, TEAM_DYNAMICS.length)
+  state.event.openDynamic = next
+  if (next === 0) state.event.areasRevealed = true
+  const dyn = TEAM_DYNAMICS[next]
+  if (dyn) state.event.openedAt = { ...(state.event.openedAt ?? {}), [dyn.id]: now() }
+  saveQuiet('event')
+}
+
+/** Vuelve a la dinámica anterior para todos (por si se abre una por error) */
+export function closeLastDynamic() {
+  state.event.openDynamic = Math.max(groupOpen() - 1, 0)
+  saveQuiet('event')
+}
+
+/**
+ * Excepción para un equipo:
+ * · 'hold'   → se queda donde está aunque el grupo avance
+ * · 'pass'   → puede pasar ya a la siguiente, aunque el grupo no
+ * · 'group'  → vuelve a seguir al grupo
+ */
+export function setTeamPace(teamId: string, mode: 'hold' | 'pass' | 'group') {
+  const p = progressOf(teamId)
+  if (mode === 'group') {
+    p.limit = undefined
+  } else if (mode === 'hold') {
+    p.limit = p.current
+  } else {
+    p.limit = Math.min(p.current + 1, TEAM_DYNAMICS.length)
+    const dyn = TEAM_DYNAMICS[p.limit]
+    if (dyn) p.openedAt = { ...(p.openedAt ?? {}), [dyn.id]: now() }
+  }
+  saveQuiet('progress', p)
 }
 
 async function replaceEverything(next: Database) {
