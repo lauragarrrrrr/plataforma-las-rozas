@@ -20,6 +20,7 @@ export const router = createRouter({
     { path: '/equipo/:id', name: 'equipo', component: () => import('./views/EquipoView.vue'), props: true, meta: { title: 'App del equipo' } },
     // Parte del equipo facilitador
     { path: '/facilitacion', name: 'facilitacion', component: () => import('./views/FacilitacionView.vue'), meta: { title: 'Equipo facilitador' } },
+    { path: '/vista-previa', name: 'vista-previa', component: () => import('./views/VistaPreviaView.vue'), meta: { title: 'Vista previa de las dinámicas' } },
     { path: '/subir/:id', name: 'subir', component: () => import('./views/SubirView.vue'), props: true, meta: { title: 'Subir una foto' } },
     { path: '/votar', name: 'votar', component: () => import('./views/VotarView.vue'), meta: { title: 'Votación' } },
     { path: '/sala', name: 'sala', component: () => import('./views/SalaView.vue'), meta: { title: 'Sala', fullscreen: true } },

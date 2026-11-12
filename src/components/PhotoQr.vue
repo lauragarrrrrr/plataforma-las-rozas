@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // QR para subir la foto con el móvil. Lleva a /subir/:equipo?d=:dinámica.
-// El ordenador se desbloquea solo cuando la foto ha llegado.
+// · Normal: el ordenador avanza solo cuando la foto ha llegado.
+// · multi: se pueden subir varias fotos seguidas (las fichas individuales).
 import { computed, ref, watchEffect } from 'vue'
 import QRCode from 'qrcode'
 import PhotoUpload from './PhotoUpload.vue'
 
-const props = defineProps<{ teamId: string; dynamicId: string }>()
+const props = defineProps<{ teamId: string; dynamicId: string; multi?: boolean }>()
 const emit = defineEmits<{ uploaded: [dataUrl: string] }>()
 
 const link = computed(() => `${location.origin}/subir/${props.teamId}?d=${props.dynamicId}`)
@@ -13,7 +14,6 @@ const qr = ref('')
 const showBackup = ref(false)
 
 watchEffect(async () => {
-  // Colores de tokens.css: tinta sobre blanco para que lo lea cualquier móvil
   qr.value = await QRCode.toDataURL(link.value, { margin: 1, width: 320, color: { dark: '#000000', light: '#ffffff' } })
 })
 </script>
@@ -22,12 +22,17 @@ watchEffect(async () => {
   <div class="qr">
     <img v-if="qr" :src="qr" width="200" height="200" alt="Código QR para subir la foto con el móvil" />
     <div class="qr__pasos">
-      <ol>
+      <ol v-if="multi">
+        <li>Abre la cámara del móvil y apunta al código.</li>
+        <li>Haz la foto de una ficha y pulsa «Subir otra» para la siguiente.</li>
+        <li>Las fichas aparecen aquí según llegan.</li>
+      </ol>
+      <ol v-else>
         <li>Abrid la cámara del móvil y apuntad al código.</li>
         <li>Haced la foto.</li>
         <li>Esperad aquí: la pantalla avanza sola cuando llega.</li>
       </ol>
-      <p class="qr__espera"><span class="punto" aria-hidden="true"></span> Esperando la foto…</p>
+      <p class="qr__espera"><span class="punto" aria-hidden="true"></span> {{ multi ? 'Esperando las fichas…' : 'Esperando la foto…' }}</p>
       <button class="enlace" type="button" @click="showBackup = !showBackup">¿El QR no funciona?</button>
       <PhotoUpload v-if="showBackup" label="Subir desde este ordenador" @uploaded="(u) => emit('uploaded', u)" />
     </div>

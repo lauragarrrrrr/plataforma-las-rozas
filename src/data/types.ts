@@ -40,7 +40,13 @@ export interface EventState {
 }
 
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */
-export interface TeamSetup { teamId: string; members: string[]; digitalOwner: string }
+export interface TeamSetup {
+  teamId: string
+  members: string[]
+  digitalOwner: string
+  /** El digital owner ha terminado el reto de subir las fichas individuales */
+  premortemDone?: boolean
+}
 
 /**
  * En qué dinámica va el equipo y cuándo empezó cada una.

@@ -7,12 +7,13 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
-import { photoOf, TEAM_DYNAMICS } from '../data/dynamics'
-import { addPhoto, nextDynamic, saveSetup, startDynamic, useStore } from '../data/store'
+import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
+import { addPhoto, finishPremortem, nextDynamic, saveSetup, startDynamic, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
 import HelpButton from '../components/HelpButton.vue'
 import PhotoQr from '../components/PhotoQr.vue'
+import { SIMULATED_ROSTER } from '../data/roster'
 
 const props = defineProps<{ id: string }>()
 const store = useStore()
@@ -24,7 +25,9 @@ const progress = computed(() => store.progress(props.id))
 const roomStep = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 
 // --- 1. Quiénes sois ----------------------------------------------------------
-const form = reactive({ members: ['', '', '', '', ''], owner: '' })
+// Los nombres vienen ya puestos (lista prevista del equipo); se pueden corregir.
+const previstos = SIMULATED_ROSTER[props.id] ?? []
+const form = reactive({ members: [...previstos, '', '', '', '', ''].slice(0, 5), owner: '' })
 const named = computed(() => form.members.map((m) => m.trim()).filter(Boolean))
 const editing = ref(false)
 function startEditing() {
@@ -88,8 +91,23 @@ async function onPhoto(url: string) {
   }
 }
 
+// --- 1b. Reto de las fichas individuales ---------------------------------------
+const premortemPhotos = computed(() => store.photos(props.id).filter((p) => p.dynamicId === PREMORTEM.id))
+async function onPremortem(url: string) {
+  try {
+    await addPhoto(props.id, PREMORTEM.id, PREMORTEM.photo.kind, url)
+    saveFailed.value = store.lastSaveFailed()
+  } catch {
+    saveFailed.value = true
+  }
+}
+function seguirSinTodas() {
+  const faltan = (setup.value?.members.length ?? 0) - premortemPhotos.value.length
+  if (confirm(`Faltan ${faltan} ${faltan === 1 ? 'ficha' : 'fichas'}. ¿Seguir igualmente?`)) finishPremortem(props.id)
+}
+
 const expediente = computed(() =>
-  TEAM_DYNAMICS.map((d) => ({ d, photos: store.photos(props.id).filter((p) => p.dynamicId === d.id) })).filter((x) => x.photos.length),
+  ALL_DYNAMICS.map((d) => ({ d, photos: store.photos(props.id).filter((p) => p.dynamicId === d.id) })).filter((x) => x.photos.length),
 )
 </script>
 
@@ -107,7 +125,7 @@ const expediente = computed(() =>
     <div class="wrap estrecho">
       <span class="kicker">{{ team.name }}</span>
       <h1 class="titular">¿Quiénes sois?</h1>
-      <p class="intro">Escribid el nombre de pila de cada persona del equipo.</p>
+      <p class="intro">Comprobad que estáis todos. Si falta alguien o sobra, corregidlo.</p>
       <form class="card quienes" @submit.prevent="guardarEquipo">
         <label v-for="(_, i) in form.members" :key="i" class="campo">
           <span>Persona {{ i + 1 }}</span>
@@ -127,6 +145,45 @@ const expediente = computed(() =>
       </form>
       <p class="nota">Solo guardamos los nombres de pila, para saber a quién acudir si pedís ayuda.</p>
     </div>
+  </main>
+
+  <!-- 1b · Reto del digital owner: subir las fichas individuales -->
+  <main v-else-if="!setup.premortemDone" class="reto">
+    <div class="wrap reto__in">
+      <div class="reto__cab">
+        <span class="kicker">{{ team.name }} · Primer reto</span>
+        <h1 class="titular">¡{{ setup.digitalOwner }}, digital owner!</h1>
+        <p class="reto__lema">Te ponemos un reto:</p>
+        <p class="intro">
+          Sube las fichas individuales de <strong>«{{ PREMORTEM.title }}»</strong> que ha rellenado cada persona de tu equipo.
+          Una foto por ficha, una detrás de otra.
+        </p>
+      </div>
+
+      <div class="reto__grid">
+        <div class="card">
+          <span class="kicker">Con el móvil</span>
+          <PhotoQr :team-id="id" :dynamic-id="PREMORTEM.id" multi @uploaded="onPremortem" />
+        </div>
+
+        <div class="card reto__contador">
+          <span class="kicker">Fichas subidas</span>
+          <strong class="reto__cifra">{{ premortemPhotos.length }} <small>de {{ setup.members.length }}</small></strong>
+          <div class="reto__barra"><span :style="{ width: `${Math.min(100, (premortemPhotos.length / setup.members.length) * 100)}%` }"></span></div>
+          <div v-if="premortemPhotos.length" class="reto__fotos">
+            <img v-for="p in premortemPhotos" :key="p.id" :src="p.url" alt="Ficha individual" />
+          </div>
+          <button class="boton" type="button" :disabled="premortemPhotos.length < setup.members.length" @click="finishPremortem(id)">
+            ¡Reto superado! Seguir →
+          </button>
+          <button v-if="premortemPhotos.length < setup.members.length" class="enlace" type="button" @click="seguirSinTodas">
+            Falta la ficha de alguien: seguir igualmente
+          </button>
+          <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez.</p>
+        </div>
+      </div>
+    </div>
+    <HelpButton :team-id="id" :dynamic-id="PREMORTEM.id" />
   </main>
 
   <!-- 2 · Esperando: la sala está en la parte de facilitación -->
@@ -169,7 +226,7 @@ const expediente = computed(() =>
       </div>
     </section>
 
-    <section v-else class="wrap dinamica">
+    <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
         <div class="card explica">
           <span class="kicker">Dinámica {{ index + 1 }} de {{ TEAM_DYNAMICS.length }} · {{ dynamic.minutes }} min</span>
@@ -211,7 +268,7 @@ const expediente = computed(() =>
         </div>
       </div>
 
-      <CoachChat class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
+      <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
     </section>
 
     <!-- Se acabó el tiempo: hay que subir la foto para seguir -->
@@ -221,6 +278,16 @@ const expediente = computed(() =>
         <h2 id="bloqueo-titulo">Subid la foto para continuar</h2>
         <p>Fotografiad {{ dynamic.photo.label }} tal y como está ahora, aunque no esté terminado.</p>
         <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
+      </div>
+    </div>
+
+    <!-- Fin de fase: todos a la sala principal hasta que se abra la siguiente -->
+    <div v-if="!finished && waitingNext && backToRoomAfter(dynamic)" class="bloqueo sala-aviso" role="dialog" aria-modal="true" aria-labelledby="sala-titulo">
+      <div class="sala-aviso__caja">
+        <span class="sala-aviso__icono" aria-hidden="true">→</span>
+        <h2 id="sala-titulo">¡Volved a la sala principal!</h2>
+        <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
+        <p v-if="nextOne" class="nota">Cuando el equipo facilitador abra «{{ nextOne.title }}», esta pantalla seguirá sola.</p>
       </div>
     </div>
 
@@ -254,6 +321,19 @@ const expediente = computed(() =>
 .nota{font-size:.85rem;font-style:italic}
 .boton:disabled{opacity:.45;cursor:not-allowed;transform:none}
 
+.reto{background:var(--c-green-light);padding-bottom:6rem}
+.reto__in{display:grid;gap:1.5rem;padding-block:2.5rem}
+.reto__cab{display:grid;gap:.6rem}
+.reto__lema{font-size:clamp(1.3rem,2.6vw,2rem);font-weight:500;letter-spacing:-.02em;color:var(--c-innova-dark)}
+.reto__grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:1.25rem;align-items:start}
+@media(max-width:900px){.reto__grid{grid-template-columns:1fr}}
+.reto__contador{gap:.8rem}
+.reto__cifra{font-size:3rem;font-weight:600;letter-spacing:-.04em;line-height:1;color:var(--c-ink)}
+.reto__cifra small{font-size:1.2rem;font-weight:500;color:var(--c-green-dark)}
+.reto__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
+.reto__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width .4s var(--ease-out)}
+.reto__fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.4rem}
+.reto__fotos img{aspect-ratio:3/4;object-fit:cover;border-radius:.6rem;width:100%}
 .espera{min-height:70vh;display:grid;align-items:center;background:var(--c-green-light)}
 .espera__in{display:grid;gap:1.2rem;padding-block:3rem}
 .ahora{gap:.4rem;max-width:44rem}
@@ -272,6 +352,11 @@ const expediente = computed(() =>
 
 .dinamica{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:1.25rem;padding-block:1.5rem;align-items:start}
 @media(max-width:960px){.dinamica{grid-template-columns:1fr}}
+/* Sin chat: explicación a la izquierda y cronómetro + foto a la derecha */
+.dinamica--sin-chat{grid-template-columns:1fr}
+.dinamica--sin-chat .dinamica__izq{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:start}
+.dinamica--sin-chat .explica{grid-row:span 2}
+@media(max-width:960px){.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}.dinamica--sin-chat .explica{grid-row:auto}}
 .dinamica__izq{display:grid;gap:1.25rem}
 .dinamica__chat{position:sticky;top:1rem}
 .dinamica__titulo{font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
@@ -298,7 +383,13 @@ const expediente = computed(() =>
 .bloqueo{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--c-green-deep) 80%,transparent);backdrop-filter:blur(4px)}
 .bloqueo__caja{background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.5rem,4vw,2.5rem);max-width:40rem;display:grid;gap:.8rem}
 .bloqueo__caja h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1}
-
+.sala-aviso{background:color-mix(in srgb,var(--c-rubi) 88%,transparent)}
+.sala-aviso__caja{display:grid;justify-items:center;gap:.8rem;text-align:center;color:var(--c-white);max-width:40rem}
+.sala-aviso__icono{display:grid;place-items:center;width:5rem;height:5rem;border-radius:50%;background:var(--c-white);color:var(--c-rubi);font-size:2.6rem;font-weight:700;animation:empuja 1.4s ease-in-out infinite}
+@keyframes empuja{50%{transform:translateX(10px)}}
+.sala-aviso h2{color:var(--c-white);font-size:clamp(2.2rem,6vw,4rem);font-weight:600;letter-spacing:-.04em;line-height:1}
+.sala-aviso p{font-size:1.2rem}
+.sala-aviso .nota{font-size:.95rem;opacity:.9}
 .expediente{margin-top:1rem}
 .expediente summary{cursor:pointer;font-weight:600;color:var(--c-ink);padding:.8rem 0}
 .expediente__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr));gap:.75rem}

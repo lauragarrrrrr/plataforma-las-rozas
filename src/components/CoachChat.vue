@@ -29,11 +29,13 @@ function openDynamic() {
   if (inThisDynamic.value.length) return
   const first = props.dynamic.challenges[0]
   const isFirst = !messages.value.length
+  if (isFirst) {
+    addChat(props.teamId, props.dynamic.id, 'coach',
+      'Hola, equipo. Estaré con vosotros el resto de la jornada para retaros con preguntas, una cada vez. El trabajo lo hacéis vosotros, en el papel.')
+  }
   const intro = props.dynamic.research
     ? `Unidad de Investigación · ${props.dynamic.title}. No os daré soluciones: os haré preguntas para que afinéis.`
-    : isFirst
-      ? 'Hola, equipo. Estaré con vosotros toda la jornada para retaros con preguntas, una cada vez. El trabajo lo hacéis vosotros, en el papel.'
-      : `Seguimos con «${props.dynamic.title}».`
+    : `Seguimos con «${props.dynamic.title}».`
   addChat(props.teamId, props.dynamic.id, 'coach', intro)
   if (first) addChat(props.teamId, props.dynamic.id, 'coach', first)
 }

@@ -252,6 +252,14 @@ export function saveSetup(teamId: string, members: string[], digitalOwner: strin
   syncPhases(teamId)
 }
 
+/** El digital owner da por terminado el reto de las fichas individuales */
+export function finishPremortem(teamId: string) {
+  const s = state.setups.find((x) => x.teamId === teamId)
+  if (!s) return
+  s.premortemDone = true
+  saveQuiet('setups', s)
+}
+
 /** Arranca el cronómetro de una dinámica la primera vez que el equipo la abre */
 export function startDynamic(teamId: string, dynamicId: string) {
   const p = progressOf(teamId)

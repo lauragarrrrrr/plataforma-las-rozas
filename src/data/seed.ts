@@ -50,7 +50,7 @@ export function createSeed(): Database {
   db.event.areasRevealed = true
 
   // Nombres ficticios
-  db.setups.push({ teamId: id, members: ['Ana', 'Luis', 'Marta', 'Pablo'], digitalOwner: 'Ana' })
+  db.setups.push({ teamId: id, members: ['Ana', 'Luis', 'Marta', 'Pablo'], digitalOwner: 'Ana', premortemDone: true })
 
   // Texto del ejemplo de la metodología (para la portada y la votación más adelante)
   db.covers.push({

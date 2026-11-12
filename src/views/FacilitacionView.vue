@@ -29,6 +29,11 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
           <span>Por dónde va cada equipo, sus fotos y sus peticiones de ayuda.</span>
           <span v-if="pendientes" class="aviso">{{ pendientes }} {{ pendientes === 1 ? 'equipo pide' : 'equipos piden' }} ayuda</span>
         </RouterLink>
+        <RouterLink class="opcion opcion--previa" to="/vista-previa">
+          <span class="kicker">Para revisar</span>
+          <strong>Vista previa de las dinámicas</strong>
+          <span>Recorred todas las pantallas que verán los equipos, una a una, sin esperar cronómetros ni subir fotos. No se guarda nada.</span>
+        </RouterLink>
       </div>
     </div>
   </main>
@@ -43,6 +48,7 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 .opcion--sala{background:var(--gradient-dark);color:var(--c-green-light)}
 .opcion--sala strong{color:var(--c-white)}
 .opcion--sala .kicker{color:var(--c-green-mid)}
+.opcion--previa{grid-column:1/-1;background:var(--c-white);box-shadow:inset 0 0 0 2px var(--c-green-mid)}
 .ahora{margin-top:.5rem;font-weight:600;color:var(--c-green-mid)}
 .aviso{justify-self:start;margin-top:.5rem;background:var(--c-rubi);color:var(--c-white);border-radius:99px;padding:.3em .9em;font-size:.85rem;font-weight:600}
 </style>

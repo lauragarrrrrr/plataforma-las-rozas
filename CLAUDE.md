@@ -44,6 +44,11 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 6. **Al entrar, el equipo dice quiénes son** (solo nombre de pila) **y quién es el digital owner.** Mientras la sala está en la parte de facilitación, el equipo ve «Atentos a la sala» con lo que se proyecta. Cuando el panel revela los ámbitos, empiezan las dinámicas.
 7. **Cronómetro y foto obligatoria:** cada dinámica tiene su cronómetro; al acabar el tiempo la pantalla se bloquea hasta que suben la foto, y sin foto no pasan a la siguiente.
 8. **El equipo facilitador marca el ritmo:** los equipos **no avanzan solos**. Desde el panel se abre la siguiente dinámica para todos (su cronómetro empieza en ese momento) y el equipo que ya tiene la foto pasa solo. Por equipo se puede «Retener», «Dejar pasar» o volver «Con el grupo». Revelar los ámbitos abre la primera dinámica.
+10. **Primer reto del digital owner:** después de decir quiénes son, «¡[nombre], digital owner! Te ponemos un reto»: subir por QR las fichas individuales de «¿Cuál es la ciudad que no elegirías?», una por persona. Con todas, sigue.
+11. **Sin chat en el titular positivo.** El chat empieza en «Señales de cambio» (Unidad de Investigación).
+12. **«¡Volved a la sala principal!»** al subir la foto de la última dinámica de cada fase, hasta que se abra la siguiente.
+13. **«¿De qué equipo eres?»** muestra los nombres de cada equipo. Hoy son **inventados** (`src/data/roster.ts`). Los reales no van en el repositorio (es público): se cargarán en Supabase.
+14. **Vista previa** (`/vista-previa`, desde la entrada de facilitadores): recorrer todas las pantallas de los equipos sin cronómetros ni fotos; no guarda nada.
 9. **Escaleta en el panel:** línea de tiempo con toda la jornada, lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos. Pulsar un momento lleva ahí la presentación de la sala.
 4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): las subirán Laura y Marina cuando las tengan. **No las inventes.** Hasta entonces, deja el hueco preparado.
 

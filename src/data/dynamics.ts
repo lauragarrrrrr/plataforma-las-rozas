@@ -25,11 +25,13 @@ export interface TeamDynamic {
   challenges: string[]
   /** La dinámica forma parte de la Unidad de Investigación (fase 02) */
   research?: boolean
+  /** Sin chat que les reta en esta dinámica (decidido por Laura para el titular) */
+  noChat?: boolean
 }
 
 export const TEAM_DYNAMICS: TeamDynamic[] = [
   {
-    id: 'titular', phase: 'foresight', title: 'Titular positivo', minutes: 20,
+    id: 'titular', phase: 'foresight', title: 'Titular positivo', minutes: 20, noChat: true,
     what: 'Escribid vuestro primer titular positivo para Las Rozas Times 2040.',
     why: 'Pasar del futuro que queremos evitar al que sí queremos construir, con un punto de partida común.',
     how: [
@@ -172,6 +174,41 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
 ]
+
+/**
+ * Reto del digital owner, justo después de decir quiénes sois:
+ * subir las fichas individuales de la dinámica de sala de las 10:00.
+ * No tiene cronómetro ni chat: es una sola pantalla, antes de las dinámicas de equipo.
+ */
+export const PREMORTEM: TeamDynamic = {
+  id: 'ciudad',
+  phase: 'foresight',
+  title: '¿Cuál es la ciudad que no elegirías?',
+  minutes: 0,
+  what: 'Subid la ficha individual de cada persona del equipo.',
+  why: 'Para que vuestras ciudades de 2040 queden en el expediente del equipo.',
+  how: [
+    'Recoged la ficha de cada persona: el hecho de 2040 y sus causas inmediata, antecedente y fundamental.',
+    'Haced una foto por ficha con el móvil, una detrás de otra.',
+  ],
+  output: 'Las fichas individuales del equipo.',
+  photo: { kind: 'premortem', label: 'las fichas individuales' },
+  challenges: [],
+  noChat: true,
+}
+
+/** Todas las dinámicas a las que se puede subir foto, incluido el reto inicial */
+export const ALL_DYNAMICS: TeamDynamic[] = [PREMORTEM, ...TEAM_DYNAMICS]
+
+/**
+ * ¿Hay que volver a la sala principal al terminar esta dinámica?
+ * Sí cuando es la última de su fase: cada fase empieza todos juntos en la sala.
+ */
+export function backToRoomAfter(d: TeamDynamic): boolean {
+  const i = TEAM_DYNAMICS.findIndex((x) => x.id === d.id)
+  const next = TEAM_DYNAMICS[i + 1]
+  return i >= 0 && (!next || next.phase !== d.phase)
+}
 
 /** «de el periódico» → «del periódico» */
 export function photoOf(d: TeamDynamic): string {
