@@ -65,15 +65,31 @@ export async function deleteAll() {
   if (error) throw error
 }
 
-/** Escucha los cambios que hacen otros dispositivos */
-export function subscribe(onChange: (row: Row, deleted: boolean) => void) {
-  return sb!
-    .channel('registros')
-    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, (payload) => {
-      if (payload.eventType === 'DELETE') onChange(payload.old as Row, true)
-      else onChange(payload.new as Row, false)
-    })
-    .subscribe()
+/**
+ * Escucha los cambios que hacen otros dispositivos.
+ * Si la conexión se corta (pestaña en segundo plano, wifi…), avisa con `onLost`
+ * y se vuelve a conectar sola a los pocos segundos.
+ */
+export function subscribe(onChange: (row: Row, deleted: boolean) => void, onLost: () => void) {
+  let channel: ReturnType<SupabaseClient['channel']> | null = null
+  const connect = () => {
+    channel = sb!
+      .channel(`registros-${Date.now()}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, (payload) => {
+        if (payload.eventType === 'DELETE') onChange(payload.old as Row, true)
+        else onChange(payload.new as Row, false)
+      })
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          onLost()
+          const old = channel
+          channel = null
+          if (old) sb!.removeChannel(old)
+          window.setTimeout(connect, 3000)
+        }
+      })
+  }
+  connect()
 }
 
 /** Sube una foto (data URL) y devuelve su dirección pública */

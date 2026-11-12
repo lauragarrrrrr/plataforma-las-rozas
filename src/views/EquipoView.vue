@@ -8,7 +8,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
-import { addPhoto, finishPremortem, markIntroSeen, nextDynamic, saveSetup, startDynamic, useStore } from '../data/store'
+import { addPhoto, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
 import HelpButton from '../components/HelpButton.vue'
@@ -294,17 +294,25 @@ const expediente = computed(() =>
         <h2 id="sala-titulo">¡Volved a la sala principal!</h2>
         <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
         <p v-if="nextOne" class="nota">Cuando el equipo facilitador abra «{{ nextOne.title }}», esta pantalla seguirá sola.</p>
+        <!-- Por si algo falla: esta pantalla tapa el botón de «Pedir ayuda» -->
+        <p v-if="store.pendingHelp(id)" class="sala-aviso__enviado">Aviso enviado: el equipo facilitador viene a vuestra mesa.</p>
+        <button v-else class="sala-aviso__error" type="button" @click="requestHelp(id, dynamic.id)">
+          ¿Algo va mal? Avisar al equipo facilitador
+        </button>
       </div>
     </div>
 
     <details v-if="expediente.length" class="wrap expediente">
       <summary>Mi expediente · {{ store.photos(id).length }} {{ store.photos(id).length === 1 ? 'foto' : 'fotos' }}</summary>
-      <div class="expediente__grid">
-        <figure v-for="x in expediente" :key="x.d.id">
-          <img :src="x.photos[x.photos.length - 1].url" :alt="x.d.title" />
-          <figcaption>{{ x.d.title }}</figcaption>
-        </figure>
-      </div>
+      <!-- Todas las fotos, agrupadas por dinámica. Al pulsar una, se abre en grande -->
+      <section v-for="x in expediente" :key="x.d.id" class="expediente__bloque">
+        <h3>{{ x.d.title }} <small>· {{ x.photos.length }} {{ x.photos.length === 1 ? 'foto' : 'fotos' }}</small></h3>
+        <div class="expediente__grid">
+          <a v-for="(p, n) in x.photos" :key="p.id" :href="p.url" target="_blank" rel="noopener" class="expediente__foto">
+            <img :src="p.url" :alt="`${x.d.title} · foto ${n + 1}`" />
+          </a>
+        </div>
+      </section>
     </details>
 
     <HelpButton v-if="!finished" :team-id="id" :dynamic-id="dynamic.id" />
@@ -402,10 +410,16 @@ const expediente = computed(() =>
 .sala-aviso h2{color:var(--c-white);font-size:clamp(2.2rem,6vw,4rem);font-weight:600;letter-spacing:-.04em;line-height:1}
 .sala-aviso p{font-size:1.2rem}
 .sala-aviso .nota{font-size:.95rem;opacity:.9}
+.sala-aviso__error{margin-top:1rem;border:2px solid var(--c-white);border-radius:99px;padding:.6em 1.3em;background:transparent;color:var(--c-white);font:inherit;font-weight:600;cursor:pointer}
+.sala-aviso__error:hover{background:var(--c-white);color:var(--c-rubi)}
+.sala-aviso__enviado{margin-top:1rem;background:var(--c-white);color:var(--c-rubi);border-radius:1rem;padding:.6rem 1.2rem;font-weight:600}
 .expediente{margin-top:1rem}
 .expediente summary{cursor:pointer;font-weight:600;color:var(--c-ink);padding:.8rem 0}
-.expediente__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr));gap:.75rem}
-.expediente figure{margin:0;background:var(--c-white);border-radius:1rem;padding:.5rem;display:grid;gap:.3rem}
-.expediente img{border-radius:.7rem;aspect-ratio:4/3;object-fit:cover;width:100%}
-.expediente figcaption{font-size:.8rem;color:var(--c-ink)}
+.expediente__bloque{background:var(--c-white);border-radius:var(--radius-card);padding:1rem 1.2rem;margin-bottom:.8rem;display:grid;gap:.6rem}
+.expediente__bloque h3{font-size:1rem;font-weight:600;color:var(--c-ink)}
+.expediente__bloque small{font-weight:400;color:var(--c-green-dark)}
+.expediente__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.6rem}
+.expediente__foto{display:block;border-radius:.7rem;overflow:hidden;transition:transform .2s var(--ease-out)}
+.expediente__foto:hover{transform:scale(1.03)}
+.expediente img{aspect-ratio:4/3;object-fit:cover;width:100%;display:block}
 </style>

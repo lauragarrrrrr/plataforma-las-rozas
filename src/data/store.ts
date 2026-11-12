@@ -87,23 +87,26 @@ if (!isRemote) {
 // ---------------------------------------------------------------------------
 // Modo Supabase
 // ---------------------------------------------------------------------------
-function applyRow(row: Row, deleted: boolean) {
+/** Aplica una fila de Supabase a la base de datos indicada (la viva o una copia) */
+function applyRowTo(target: Database, row: Row, deleted: boolean) {
   const coll = row.coleccion as Collection
   if ((SINGLETONS as readonly string[]).includes(coll)) {
     if (deleted) return
     if (coll === 'meta') {
       const m = row.datos as { version: number; demoTeamIds: string[] }
-      state.version = m.version
-      state.demoTeamIds = m.demoTeamIds
+      target.version = m.version
+      target.demoTeamIds = m.demoTeamIds
+    } else if (coll === 'event') {
+      // Se sustituye entero: así un campo que desaparece (p. ej. openDynamic) también desaparece aquí
+      target.event = { ...(row.datos as Database['event']) }
     } else {
-      Object.assign(state[coll as 'event' | 'room'], row.datos)
-      if (coll === 'room' && !(row.datos as { timerEndsAt?: string }).timerEndsAt) state.room.timerEndsAt = undefined
+      target.room = { ...(row.datos as Database['room']) }
     }
     return
   }
   const field = LISTS[coll as ListName]
   if (!field) return
-  const list = state[coll as ListName] as unknown as Record<string, unknown>[]
+  const list = target[coll as ListName] as unknown as Record<string, unknown>[]
   const i = list.findIndex((x) => String(x[field]) === row.id)
   if (deleted) {
     if (i >= 0) list.splice(i, 1)
@@ -114,18 +117,38 @@ function applyRow(row: Row, deleted: boolean) {
   }
   // Supabase devuelve las filas en cualquier orden: equipos de la A a la L,
   // y chat, fotos y ayudas por orden de llegada
-  if (coll === 'teams') state.teams.sort((a, b) => a.number - b.number)
+  if (coll === 'teams') target.teams.sort((a, b) => a.number - b.number)
   if (coll === 'chat' || coll === 'photos' || coll === 'helpRequests') {
-    ;(state[coll] as { createdAt: string }[]).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    ;(target[coll] as { createdAt: string }[]).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   }
 }
 
-function fromRows(rows: Row[]): Database {
+const applyRow = (row: Row, deleted: boolean) => applyRowTo(state, row, deleted)
+
+/**
+ * Monta la base de datos completa a partir de las filas y la cambia de golpe,
+ * sin pasar por un momento «en blanco» que confundiría a las pantallas.
+ */
+function fromRows(rows: Row[]) {
   const db = createBlank()
   for (const name of Object.keys(LISTS) as ListName[]) (db[name] as unknown[]) = []
+  for (const r of rows) applyRowTo(db, r, false)
   replaceState(db)
-  for (const r of rows) applyRow(r, false)
-  return clone(state) as Database
+}
+
+/** Vuelve a leer todo de Supabase (al volver a la pestaña, tras un corte y cada 20 s) */
+let resyncing = false
+async function resync() {
+  if (!isRemote || !ready.value || resyncing) return
+  resyncing = true
+  try {
+    fromRows(await fetchAll())
+    connError.value = ''
+  } catch {
+    connError.value = 'Sin conexión con la base de datos. Reintentando…'
+  } finally {
+    resyncing = false
+  }
 }
 
 async function initRemote() {
@@ -139,8 +162,13 @@ async function initRemote() {
       await upsertRows(rows)
     }
     fromRows(rows)
-    subscribe(applyRow)
+    subscribe(applyRow, () => { window.setTimeout(resync, 3500) })
     ready.value = true
+    // Mantener todas las pestañas y dispositivos a la par
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') resync() })
+    window.addEventListener('focus', resync)
+    window.addEventListener('online', resync)
+    window.setInterval(resync, 20_000)
   } catch (e) {
     connError.value = 'No se ha podido conectar con la base de datos. Comprobad la conexión a internet y recargad la página.'
     console.error(e)
