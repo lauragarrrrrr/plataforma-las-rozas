@@ -11,7 +11,7 @@ import { AREAS } from './config'
 import { TEAM_DYNAMICS } from './dynamics'
 import { createBlank, createSeed, DB_VERSION } from './seed'
 import {
-  deleteAll, fetchAll, LISTS, sb, SINGLETONS, subscribe, toRows, upsertRows, uploadPhoto,
+  deleteAll, fetchAll, hasSession, LISTS, onAuthChange, sb, signIn, signOut, SINGLETONS, subscribe, toRows, upsertRows, uploadPhoto,
   type Collection, type ListName, type Row,
 } from './remote'
 import type { AreaId, Database, PhaseId, PhaseState, Photo, PhotoKind, TeamProgress } from './types'
@@ -153,14 +153,21 @@ async function resync() {
 
 async function initRemote() {
   try {
+    facilitator.value = await hasSession()
+    authReady.value = true
+    onAuthChange((logged) => (facilitator.value = logged))
+
     let rows = await fetchAll()
     const meta = rows.find((r) => r.coleccion === 'meta')?.datos as { version?: number } | undefined
-    // Base vacía o de una versión anterior de la plataforma: se rellena con los datos de ejemplo
-    if (!rows.some((r) => r.coleccion === 'teams') || meta?.version !== DB_VERSION) {
+    const outdated = !rows.some((r) => r.coleccion === 'teams') || meta?.version !== DB_VERSION
+    // Base vacía o de una versión anterior: SOLO una facilitadora con sesión la rellena con el ejemplo.
+    // Un participante nunca borra ni reescribe nada al abrir la página.
+    if (outdated && facilitator.value) {
       rows = toRows(createSeed())
       await deleteAll()
       await upsertRows(rows)
     }
+    if (!rows.some((r) => r.coleccion === 'teams')) rows = [...rows, ...toRows(createBlank()).filter((r) => r.coleccion === 'teams')]
     fromRows(rows)
     subscribe(applyRow, () => { window.setTimeout(resync, 3500) })
     ready.value = true
@@ -170,10 +177,40 @@ async function initRemote() {
     window.addEventListener('online', resync)
     window.setInterval(resync, 20_000)
   } catch (e) {
+    authReady.value = true
     connError.value = 'No se ha podido conectar con la base de datos. Comprobad la conexión a internet y recargad la página.'
     console.error(e)
   }
 }
+
+// ---------------------------------------------------------------------------
+// Acceso del equipo facilitador
+// ---------------------------------------------------------------------------
+/** Sin Supabase (pruebas en el navegador) no hay cuentas: se entra directamente */
+export const facilitator = ref(!isRemote)
+export const authReady = ref(!isRemote)
+
+/** Espera a saber si hay sesión (para el router) */
+export function whenAuthReady(): Promise<void> {
+  if (authReady.value) return Promise.resolve()
+  return new Promise((resolve) => {
+    const stop = watch(authReady, (v) => { if (v) { stop(); resolve() } })
+  })
+}
+
+export async function loginFacilitator(email: string, password: string) {
+  if (!isRemote) return
+  await signIn(email, password)
+  facilitator.value = true
+}
+
+export async function logoutFacilitator() {
+  if (!isRemote) return
+  await signOut()
+  facilitator.value = false
+}
+
+// Arranque: después de declarar todo lo que usa
 if (isRemote) initRemote()
 
 /** Guarda en Supabase un elemento que acaba de cambiar. En modo navegador no hace nada. */
