@@ -7,12 +7,12 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
-import { TEAM_DYNAMICS } from '../data/dynamics'
+import { photoOf, TEAM_DYNAMICS } from '../data/dynamics'
 import { addPhoto, nextDynamic, saveSetup, startDynamic, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
 import HelpButton from '../components/HelpButton.vue'
-import PhotoUpload from '../components/PhotoUpload.vue'
+import PhotoQr from '../components/PhotoQr.vue'
 
 const props = defineProps<{ id: string }>()
 const store = useStore()
@@ -64,6 +64,9 @@ watch(
   },
   { immediate: true },
 )
+
+const showQr = ref(false)
+watch(() => dynamic.value.id, () => (showQr.value = false))
 
 const saveFailed = ref(false)
 function onPhoto(url: string) {
@@ -183,8 +186,9 @@ const expediente = computed(() =>
           </template>
           <template v-else>
             <span class="kicker">Al terminar</span>
-            <p>Subid una foto de {{ dynamic.photo.label }}. Sin la foto no podéis pasar a la siguiente dinámica.</p>
-            <PhotoUpload label="Ya hemos terminado: subir foto" @uploaded="onPhoto" />
+            <p>Subid una foto {{ photoOf(dynamic) }}. Sin la foto no podéis pasar a la siguiente dinámica.</p>
+            <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir foto</button>
+            <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
           </template>
           <p v-if="saveFailed" class="alerta">La foto se ve, pero el navegador no tiene más espacio para guardarla. Avisad al equipo facilitador.</p>
         </div>
@@ -199,7 +203,7 @@ const expediente = computed(() =>
         <span class="kicker">Se acabó el tiempo</span>
         <h2 id="bloqueo-titulo">Subid la foto para continuar</h2>
         <p>Fotografiad {{ dynamic.photo.label }} tal y como está ahora, aunque no esté terminado.</p>
-        <PhotoUpload label="Hacer o elegir la foto" @uploaded="onPhoto" />
+        <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
       </div>
     </div>
 
@@ -272,7 +276,7 @@ const expediente = computed(() =>
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}
 
 .bloqueo{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--c-green-deep) 80%,transparent);backdrop-filter:blur(4px)}
-.bloqueo__caja{background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.5rem,4vw,2.5rem);max-width:32rem;display:grid;gap:.8rem}
+.bloqueo__caja{background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.5rem,4vw,2.5rem);max-width:40rem;display:grid;gap:.8rem}
 .bloqueo__caja h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1}
 
 .expediente{margin-top:1rem}

@@ -37,6 +37,7 @@ async function onChange(e: Event) {
 </template>
 
 <style scoped>
-.subida{display:grid;gap:.6rem;justify-items:start}
+.subida{display:grid;gap:.6rem;justify-items:stretch}
+.subida .boton{justify-self:start}
 .oculto{display:none}
 </style>

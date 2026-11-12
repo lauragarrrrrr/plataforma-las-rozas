@@ -173,4 +173,9 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
   },
 ]
 
+/** «de el periódico» → «del periódico» */
+export function photoOf(d: TeamDynamic): string {
+  return d.photo.label.startsWith('el ') ? `del ${d.photo.label.slice(3)}` : `de ${d.photo.label}`
+}
+
 export const PHASE_OF_DYNAMIC = Object.fromEntries(TEAM_DYNAMICS.map((d) => [d.id, d.phase]))
