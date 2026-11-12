@@ -49,6 +49,7 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 12. **«¡Volved a la sala principal!»** al subir la foto de la última dinámica de cada fase, hasta que se abra la siguiente.
 13. **«¿De qué equipo eres?»** muestra los nombres de cada equipo. Hoy son **inventados** (`src/data/roster.ts`). Los reales no van en el repositorio (es público): se cargarán en Supabase.
 15. **El sobre de la mesa:** antes de «Cartas de restricciones y de personajes», pantalla «¿Tenéis el sobre de la mesa? Es el momento de abrirlo. ¿Qué os encontráis?» con el botón «¡Sí, ya lo tenemos!», que lleva a la dinámica (campo `intro` en `src/data/dynamics.ts`).
+17. **Portada en papel:** cada equipo rellena su portada de Las Rozas Times 2040 en papel y sube la foto. En el speed pitch se proyecta **esa foto** en las pantallas como apoyo; el equipo puede subir al escenario con la portada en papel. Solo tienen **30 segundos**. La plataforma no genera la portada a partir de textos.
 16. **El reto de las fichas no es obligatorio** y no dice cuántas faltan: «Seguir» está siempre disponible.
 14. **Vista previa** (`/vista-previa`, desde la entrada de facilitadores): recorrer todas las pantallas de los equipos sin cronómetros ni fotos; no guarda nada.
 9. **Escaleta en el panel:** línea de tiempo con toda la jornada, lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos. Pulsar un momento lleva ahí la presentación de la sala.
@@ -518,7 +519,7 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Criterios de valoración | Los provisionales no coinciden con los del cliente |
 | Datos personales | Fichas y votos van sin nombre. Falta confirmar el aviso con Las Rozas Innova |
 | Conecta 2040 | Forma parte de la plataforma, pero tiene datos personales. No entra en esta base ni en un repositorio público |
-| Texto de la portada y la votación | Si la foto sustituye a las respuestas, ¿de dónde salen el titular y el nombre de la iniciativa para la portada del speed pitch y para votar? Opciones: el equipo escribe solo esos pocos datos, o se proyecta la foto de la ficha. Decidir antes del hito 5 |
+| Texto para la votación | La portada ya está decidida (foto de la portada en papel, decisión 17). Falta decidir cómo se ven las 12 iniciativas al votar: con la foto de su portada, o con su nombre escrito |
 | Diapositivas de la sala | Apertura institucional, recorrido de la jornada y foresight de Juanjo. Las suben Laura y Marina |
 | Votación: código o desplegable | El brief pide código de un solo uso; el prototipo de la metodología pide elegir «¿De qué equipo eres?». Decidir antes del hito 6 |
 | IA conectada al chat | Para que el chat responda de verdad, lea las fotos y proponga la portada hace falta una cuenta de la API de Anthropic (unos 20-50 € la jornada). La cuenta Team no sirve para esto. Lo deciden Laura, Marina y Avantis, con la privacidad confirmada con Las Rozas Innova |

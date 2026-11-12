@@ -164,14 +164,16 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
   },
   {
     id: 'portada', phase: 'pitch', title: 'Portada', minutes: 15,
-    what: 'Transformad vuestra iniciativa en la portada de Las Rozas Times 2040.',
+    what: 'Transformad vuestra iniciativa en la portada de Las Rozas Times 2040. Primero, en papel.',
     why: 'Que cualquier persona entienda la idea en segundos.',
     how: [
-      'La portada estará en pantalla detrás de vosotros en el speed pitch.',
-      'Preparad cómo contar vuestra idea en 30 segundos.',
+      'Rellenad la portada en papel.',
+      'Haced la foto y enviadla: la pondremos en las pantallas como apoyo mientras presentáis.',
+      'También podéis subir al escenario con vuestra portada en papel.',
+      'Tendréis solo 30 segundos para contar vuestra idea: preparadlos.',
     ],
-    output: 'Una portada por equipo, lista para presentar.',
-    photo: { kind: 'cover', label: 'vuestra portada' },
+    output: 'Una portada por equipo, lista para presentar en 30 segundos.',
+    photo: { kind: 'cover', label: 'vuestra portada en papel' },
     challenges: [
       '¿Qué titular tendrá vuestra portada en 2040?',
       '¿Qué cifra resume lo que habéis conseguido?',
