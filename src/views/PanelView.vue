@@ -35,11 +35,15 @@ const filas = computed(() =>
   }),
 )
 
-function vaciar() {
-  if (confirm('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo 07. ¿Seguro?')) clearAll()
+// Borrar afecta a TODOS los dispositivos: se pide escribir BORRAR para evitar sustos
+function confirmar(texto: string) {
+  return prompt(`${texto}\n\nAfecta a todos los equipos y dispositivos. Escribid BORRAR para confirmar.`)?.trim().toUpperCase() === 'BORRAR'
 }
-function restaurar() {
-  if (confirm('Se sustituirán los datos actuales por los datos de ejemplo. ¿Seguro?')) resetToSeed()
+async function vaciar() {
+  if (confirmar('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo 07.')) await clearAll()
+}
+async function restaurar() {
+  if (confirmar('Se sustituirán todos los datos por los datos de ejemplo.')) await resetToSeed()
 }
 </script>
 

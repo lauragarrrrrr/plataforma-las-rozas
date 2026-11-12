@@ -35,14 +35,16 @@ export interface EventState { areasRevealed: boolean }
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */
 export interface TeamSetup { teamId: string; members: string[]; digitalOwner: string }
 
-/** En qué dinámica va el equipo y cuándo empezó cada una. */
+/**
+ * En qué dinámica va el equipo y cuándo empezó cada una.
+ * Solo lo escribe el ordenador del equipo. Una dinámica está hecha cuando
+ * hay una foto con su `dynamicId` (la foto puede llegar desde el móvil).
+ */
 export interface TeamProgress {
   teamId: string
   /** Índice en TEAM_DYNAMICS de la dinámica actual */
   current: number
   started: Record<string, string>
-  /** Dinámicas terminadas con su foto subida */
-  done: Record<string, string>
 }
 
 /** Mensaje del chat que les reta. `from: 'coach'` son las preguntas de la plataforma. */

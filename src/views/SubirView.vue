@@ -22,11 +22,21 @@ const dynamic = computed(() => {
 
 const sentUrl = ref('')
 const failed = ref(false)
+const sending = ref(false)
 
-function onPhoto(url: string) {
-  addPhoto(props.id, dynamic.value.id, dynamic.value.photo.kind, url)
-  failed.value = store.lastSaveFailed()
-  sentUrl.value = url
+/** Solo dice «Foto subida» cuando la foto está guardada de verdad */
+async function onPhoto(url: string) {
+  sending.value = true
+  failed.value = false
+  try {
+    await addPhoto(props.id, dynamic.value.id, dynamic.value.photo.kind, url)
+    failed.value = store.lastSaveFailed()
+    if (!failed.value) sentUrl.value = url
+  } catch {
+    failed.value = true
+  } finally {
+    sending.value = false
+  }
 }
 </script>
 
@@ -49,8 +59,9 @@ function onPhoto(url: string) {
         <span class="kicker">{{ team.name }} · {{ dynamic.title }}</span>
         <h1 class="titulo">Haced la foto {{ photoOf(dynamic) }}</h1>
         <p>Que se vea entero y se pueda leer. Se sube sola al pulsar.</p>
-        <PhotoUpload class="grande" label="Hacer la foto" @uploaded="onPhoto" />
-        <p v-if="failed" class="alerta">No se ha podido guardar la foto. Probad otra vez o avisad al equipo facilitador.</p>
+        <p v-if="sending" class="enviando">Subiendo la foto… no cerréis esta pantalla.</p>
+        <PhotoUpload v-else class="grande" label="Hacer la foto" @uploaded="onPhoto" />
+        <p v-if="failed" class="alerta">No se ha podido subir la foto. Comprobad la conexión y probad otra vez.</p>
       </template>
     </div>
   </main>
@@ -63,5 +74,6 @@ function onPhoto(url: string) {
 .grande :deep(.boton){width:100%;justify-content:center;padding:1.1em;font-size:1.15rem}
 .ok{display:grid;place-items:center;width:4rem;height:4rem;border-radius:50%;background:var(--c-innova);color:var(--c-ink);font-size:2rem;font-weight:700}
 .previa{border-radius:1rem;max-height:50vh;object-fit:contain;background:var(--c-white)}
+.enviando{font-weight:600;color:var(--c-innova-dark)}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
 </style>

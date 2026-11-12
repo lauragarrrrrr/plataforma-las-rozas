@@ -45,8 +45,7 @@ const index = computed(() => progress.value?.current ?? 0)
 const finished = computed(() => index.value >= TEAM_DYNAMICS.length)
 const dynamic = computed(() => TEAM_DYNAMICS[Math.min(index.value, TEAM_DYNAMICS.length - 1)])
 const nextOne = computed(() => TEAM_DYNAMICS[index.value + 1])
-const photoId = computed(() => progress.value?.done[dynamic.value.id])
-const photo = computed(() => store.photos(props.id).find((p) => p.id === photoId.value))
+const photo = computed(() => store.photoFor(props.id, dynamic.value.id))
 
 const startedAt = computed(() => progress.value?.started[dynamic.value.id])
 const remaining = computed(() => {
@@ -69,9 +68,13 @@ const showQr = ref(false)
 watch(() => dynamic.value.id, () => (showQr.value = false))
 
 const saveFailed = ref(false)
-function onPhoto(url: string) {
-  addPhoto(props.id, dynamic.value.id, dynamic.value.photo.kind, url)
-  saveFailed.value = store.lastSaveFailed()
+async function onPhoto(url: string) {
+  try {
+    await addPhoto(props.id, dynamic.value.id, dynamic.value.photo.kind, url)
+    saveFailed.value = store.lastSaveFailed()
+  } catch {
+    saveFailed.value = true
+  }
 }
 
 const expediente = computed(() =>
@@ -190,7 +193,7 @@ const expediente = computed(() =>
             <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir foto</button>
             <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
           </template>
-          <p v-if="saveFailed" class="alerta">La foto se ve, pero el navegador no tiene más espacio para guardarla. Avisad al equipo facilitador.</p>
+          <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez o avisad al equipo facilitador.</p>
         </div>
       </div>
 
