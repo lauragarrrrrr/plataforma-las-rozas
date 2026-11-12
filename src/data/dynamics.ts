@@ -27,6 +27,8 @@ export interface TeamDynamic {
   research?: boolean
   /** Sin chat que les reta en esta dinámica (decidido por Laura para el titular) */
   noChat?: boolean
+  /** Pantalla previa a la dinámica (por ejemplo, abrir el sobre de la mesa) */
+  intro?: { title: string; text: string; button: string }
 }
 
 export const TEAM_DYNAMICS: TeamDynamic[] = [
@@ -106,6 +108,11 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
   },
   {
     id: 'cartas', phase: 'ideation', title: 'Cartas de restricciones y de personajes', minutes: 20,
+    intro: {
+      title: '¿Tenéis el sobre de la mesa?',
+      text: 'Es el momento de abrirlo. ¿Qué os encontráis?',
+      button: '¡Sí, ya lo tenemos!',
+    },
     what: 'Robad cartas que cambian las reglas de vuestro reto y mirad la idea con los ojos de otra persona.',
     why: 'Explorar soluciones diferentes antes de quedaros con una, y pensar en quien hoy queda fuera.',
     how: [

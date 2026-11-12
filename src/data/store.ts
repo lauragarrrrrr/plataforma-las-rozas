@@ -260,6 +260,13 @@ export function finishPremortem(teamId: string) {
   saveQuiet('setups', s)
 }
 
+/** El equipo ha pasado la pantalla previa de una dinámica (el sobre de las cartas) */
+export function markIntroSeen(teamId: string, dynamicId: string) {
+  const p = progressOf(teamId)
+  p.introSeen = { ...(p.introSeen ?? {}), [dynamicId]: true }
+  saveQuiet('progress', p)
+}
+
 /** Arranca el cronómetro de una dinámica la primera vez que el equipo la abre */
 export function startDynamic(teamId: string, dynamicId: string) {
   const p = progressOf(teamId)

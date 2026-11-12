@@ -65,6 +65,8 @@ export interface TeamProgress {
   limit?: number
   /** Cuándo se le abrió cada dinámica a este equipo por excepción */
   openedAt?: Record<string, string>
+  /** Pantallas previas ya vistas (por ejemplo, el sobre de las cartas) */
+  introSeen?: Record<string, boolean>
 }
 
 /** Mensaje del chat que les reta. `from: 'coach'` son las preguntas de la plataforma. */

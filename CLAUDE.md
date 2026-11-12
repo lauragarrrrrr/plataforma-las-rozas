@@ -48,6 +48,8 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 11. **Sin chat en el titular positivo.** El chat empieza en «Señales de cambio» (Unidad de Investigación).
 12. **«¡Volved a la sala principal!»** al subir la foto de la última dinámica de cada fase, hasta que se abra la siguiente.
 13. **«¿De qué equipo eres?»** muestra los nombres de cada equipo. Hoy son **inventados** (`src/data/roster.ts`). Los reales no van en el repositorio (es público): se cargarán en Supabase.
+15. **El sobre de la mesa:** antes de «Cartas de restricciones y de personajes», pantalla «¿Tenéis el sobre de la mesa? Es el momento de abrirlo. ¿Qué os encontráis?» con el botón «¡Sí, ya lo tenemos!», que lleva a la dinámica (campo `intro` en `src/data/dynamics.ts`).
+16. **El reto de las fichas no es obligatorio** y no dice cuántas faltan: «Seguir» está siempre disponible.
 14. **Vista previa** (`/vista-previa`, desde la entrada de facilitadores): recorrer todas las pantallas de los equipos sin cronómetros ni fotos; no guarda nada.
 9. **Escaleta en el panel:** línea de tiempo con toda la jornada, lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos. Pulsar un momento lleva ahí la presentación de la sala.
 4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): las subirán Laura y Marina cuando las tengan. **No las inventes.** Hasta entonces, deja el hueco preparado.

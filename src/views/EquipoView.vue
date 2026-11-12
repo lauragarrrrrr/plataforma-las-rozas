@@ -8,7 +8,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
-import { addPhoto, finishPremortem, nextDynamic, saveSetup, startDynamic, useStore } from '../data/store'
+import { addPhoto, finishPremortem, markIntroSeen, nextDynamic, saveSetup, startDynamic, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
 import HelpButton from '../components/HelpButton.vue'
@@ -223,6 +223,15 @@ const expediente = computed(() =>
       </div>
     </section>
 
+    <!-- Pantalla previa (por ejemplo, el sobre de las cartas) -->
+    <section v-else-if="dynamic.intro && !progress?.introSeen?.[dynamic.id]" class="wrap intro-din">
+      <span class="kicker">{{ dynamic.title }}</span>
+      <span class="intro-din__icono" aria-hidden="true">✉</span>
+      <h1 class="intro-din__titulo">{{ dynamic.intro.title }}</h1>
+      <p class="intro-din__texto">{{ dynamic.intro.text }}</p>
+      <button class="boton intro-din__boton" type="button" @click="markIntroSeen(id, dynamic.id)">{{ dynamic.intro.button }}</button>
+    </section>
+
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
         <div class="card explica">
@@ -380,6 +389,12 @@ const expediente = computed(() =>
 .bloqueo{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--c-green-deep) 80%,transparent);backdrop-filter:blur(4px)}
 .bloqueo__caja{background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.5rem,4vw,2.5rem);max-width:40rem;display:grid;gap:.8rem}
 .bloqueo__caja h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1}
+.intro-din{min-height:60vh;display:grid;justify-items:center;align-content:center;gap:1rem;text-align:center;padding-block:3rem}
+.intro-din__icono{display:grid;place-items:center;width:6rem;height:6rem;border-radius:50%;background:var(--c-white);color:var(--c-innova-dark);font-size:3rem;box-shadow:0 0 0 6px var(--c-green-mid);animation:latido 2s ease-in-out infinite}
+@keyframes latido{50%{transform:scale(1.06)}}
+.intro-din__titulo{font-size:clamp(2.2rem,6vw,4rem);font-weight:500;letter-spacing:-.04em;line-height:1}
+.intro-din__texto{font-size:clamp(1.2rem,2.4vw,1.7rem);color:var(--c-ink);max-width:30ch}
+.intro-din__boton{justify-self:center;font-size:1.1rem;padding:.9em 1.8em}
 .sala-aviso{background:color-mix(in srgb,var(--c-rubi) 88%,transparent)}
 .sala-aviso__caja{display:grid;justify-items:center;gap:.8rem;text-align:center;color:var(--c-white);max-width:40rem}
 .sala-aviso__icono{display:grid;place-items:center;width:5rem;height:5rem;border-radius:50%;background:var(--c-white);color:var(--c-rubi);font-size:2.6rem;font-weight:700;animation:empuja 1.4s ease-in-out infinite}
