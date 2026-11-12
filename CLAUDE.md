@@ -39,7 +39,10 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 
 1. **La foto sustituye a las respuestas escritas.** Los equipos trabajan en papel y en la plataforma solo **suben la foto** al final de cada dinámica. No hay formularios para escribir el titular, las señales, el expediente, el reto ni la ficha.
 2. **Botón «Pedir ayuda».** En la app del equipo, en todas las dinámicas. Al pulsarlo, al equipo facilitador le aparece un aviso en el panel con el equipo y la dinámica, y lo marca como atendido.
-3. **Unidad de Investigación con IA: solo en la fase 02**, como dice la metodología (apartado 7). No hay chat en el titular ni en otras fases.
+3. **Chat que les reta, dentro de la plataforma, en todas las dinámicas de equipo.** Es un solo chat por equipo que sigue de una dinámica a la siguiente. En la fase 02 actúa como Unidad de Investigación (apartado 7). Los equipos **no salen de la plataforma** ni usan otras IA. Hasta que se decida conectar una IA (pendiente, apartado 13), el chat hace las preguntas de la metodología, una cada vez (`src/data/dynamics.ts`).
+5. **Entrada con dos puertas** (`/`): «Equipo facilitador» (`/facilitacion` → presentación de la sala o panel) y «Participante» (`/participa` → «¿A qué equipo pertenecéis?»).
+6. **Al entrar, el equipo dice quiénes son** (solo nombre de pila) **y quién es el digital owner.** Mientras la sala está en la parte de facilitación, el equipo ve «Atentos a la sala» con lo que se proyecta. Cuando el panel revela los ámbitos, empiezan las dinámicas.
+7. **Cronómetro y foto obligatoria:** cada dinámica tiene su cronómetro; al acabar el tiempo la pantalla se bloquea hasta que suben la foto, y sin foto no pasan a la siguiente.
 4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): las subirán Laura y Marina cuando las tengan. **No las inventes.** Hasta entonces, deja el hueco preparado.
 
 **Patrón de cada dinámica en la app del equipo:**
@@ -506,3 +509,6 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Texto de la portada y la votación | Si la foto sustituye a las respuestas, ¿de dónde salen el titular y el nombre de la iniciativa para la portada del speed pitch y para votar? Opciones: el equipo escribe solo esos pocos datos, o se proyecta la foto de la ficha. Decidir antes del hito 5 |
 | Diapositivas de la sala | Apertura institucional, recorrido de la jornada y foresight de Juanjo. Las suben Laura y Marina |
 | Votación: código o desplegable | El brief pide código de un solo uso; el prototipo de la metodología pide elegir «¿De qué equipo eres?». Decidir antes del hito 6 |
+| IA conectada al chat | Para que el chat responda de verdad, lea las fotos y proponga la portada hace falta una cuenta de la API de Anthropic (unos 20-50 € la jornada). La cuenta Team no sirve para esto. Lo deciden Laura, Marina y Avantis, con la privacidad confirmada con Las Rozas Innova |
+| Nombres de los participantes | Se guarda el nombre de pila de cada persona y quién es el digital owner. Confirmar con el aviso de datos personales |
+| Fotos entre dispositivos | Hoy la foto se sube desde el ordenador del equipo. Subirla con el móvil por QR necesita Supabase (hito 8) |
