@@ -242,14 +242,28 @@ export function useStore() {
     votingOpen: () => !!db.event.votingOpen,
     /** ¿Ya ha votado esta persona? (se identifica por equipo y posición, sin guardar su nombre) */
     hasVoted: (teamId: string, memberIndex: number) => db.votes.some((v) => v.code === voterCode(teamId, memberIndex)),
-    /** Votos recibidos por cada equipo, de más a menos (solo para el equipo facilitador) */
+    /**
+     * Recuento para el equipo facilitador, de más a menos puntos.
+     * Favorita 1 = 3 puntos, favorita 2 = 2 y favorita 3 = 1. `votes`: en cuántos votos aparece.
+     */
     voteCounts: () => {
-      const counts: Record<string, number> = {}
-      for (const v of db.votes) for (const t of v.teamIds) counts[t] = (counts[t] ?? 0) + 1
-      return db.teams.map((t) => ({ teamId: t.id, votes: counts[t.id] ?? 0 })).sort((a, b) => b.votes - a.votes)
+      const points: Record<string, number> = {}
+      const votes: Record<string, number> = {}
+      for (const v of db.votes) {
+        v.teamIds.forEach((t, i) => {
+          points[t] = (points[t] ?? 0) + VOTE_POINTS[i]
+          votes[t] = (votes[t] ?? 0) + 1
+        })
+      }
+      return db.teams
+        .map((t) => ({ teamId: t.id, points: points[t.id] ?? 0, votes: votes[t.id] ?? 0 }))
+        .sort((a, b) => b.points - a.points || b.votes - a.votes)
     },
   }
 }
+
+/** Puntos de cada puesto: favorita 1, 2 y 3 (decidido por Laura) */
+export const VOTE_POINTS = [3, 2, 1] as const
 
 /** Identificador del voto: equipo y posición de la persona en su equipo. Nunca el nombre. */
 function voterCode(teamId: string, memberIndex: number) {
@@ -457,8 +471,8 @@ export async function castVote(teamId: string, memberIndex: number, choices: str
   if (!state.event.votingOpen) return 'La votación está cerrada.'
   const code = voterCode(teamId, memberIndex)
   if (state.votes.some((v) => v.code === code)) return 'Ya has votado.'
-  const unique = [...new Set(choices)]
-  if (unique.length !== 3) return 'Elige tres equipos.'
+  const unique = [...new Set(choices.filter(Boolean))]
+  if (unique.length !== 3) return 'Elige tres iniciativas distintas, una por puesto.'
   if (unique.includes(teamId)) return 'No puedes votar a tu propio equipo.'
   const vote = { code, teamIds: unique as [string, string, string], createdAt: now() }
   try {
