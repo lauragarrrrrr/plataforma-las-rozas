@@ -1,0 +1,24 @@
+/* ==========================================================
+   TOKENS · Identidad visual de Las Rozas 2040
+   Copiados tal cual de docs/metodologia.html (ver CLAUDE.md, apartado 4).
+
+   ⚠️ Archivo COMPARTIDO por las ramas Lau y Marina.
+   No inventéis colores ni tipografías: si falta algo, se habla antes
+   y se añade aquí. Reglas de uso en docs/IDENTIDAD.md
+   ========================================================== */
+
+:root{
+  --c-ink:#000;--c-white:#fff;
+  --c-innova:#00b5a8;--c-innova-dark:#17929e;--c-blue:#0a4780;
+  --c-green-dark:#307373;--c-green-deep:#1d5e5f;--c-green-mid:#8ce2d6;--c-green-light:#dff9f4;
+  --c-gris-10:#e6e6e6;--c-paper:#fffefa;--c-paper-line:#cfd8d4;
+  --c-rubi:#d81e5b;
+  --gradient-verde:linear-gradient(135deg,var(--c-green-mid),var(--c-innova));
+  --gradient-dark:linear-gradient(160deg,var(--c-green-dark) 0%,var(--c-green-deep) 100%);
+  --gradient-anio:linear-gradient(100deg,var(--c-innova),var(--c-innova-dark) 60%,var(--c-blue));
+  --font-sans:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-paper:Georgia,"Times New Roman",serif;
+  --radius-card:1.75rem;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+}
+body{font-family:var(--font-sans);color:var(--c-green-dark);background:var(--c-white);line-height:1.6}

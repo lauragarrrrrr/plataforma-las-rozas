@@ -1,0 +1,7 @@
+# Saltos de línea iguales en Windows y Mac, para evitar conflictos falsos
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary

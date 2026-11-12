@@ -1,41 +1,16 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Plataforma Las Rozas</title>
-  <meta name="description" content="Plataforma experiencial de Las Rozas — proyecto de hackathon.">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-  <header class="site-header">
-    <a class="logo" href="index.html">Las Rozas</a>
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="paginas/experiencias.html">Experiencias</a>
-      <a href="paginas/sobre.html">Sobre el proyecto</a>
-    </nav>
-  </header>
-
-  <main>
-    <section class="hero">
-      <h1>Vive Las Rozas</h1>
-      <p>Una plataforma experiencial para descubrir el municipio de otra manera.</p>
-      <a class="btn" href="paginas/experiencias.html">Empezar</a>
-    </section>
-
-    <section class="contenedor">
-      <h2>Experiencias destacadas</h2>
-      <div class="tarjetas" id="tarjetas">
-        <!-- Las tarjetas se generan desde js/main.js con los datos de data/experiencias.json -->
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>Proyecto de hackathon · Plataforma Las Rozas</p>
-  </footer>
-
-  <script src="js/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Las Rozas 2040 · Plataforma de la jornada</title>
+    <meta name="description" content="Plataforma de apoyo al hackathon Las Rozas 2040." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
