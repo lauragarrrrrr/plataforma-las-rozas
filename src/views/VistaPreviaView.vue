@@ -7,16 +7,19 @@ import { backToRoomAfter, PREMORTEM, TEAM_DYNAMICS, photoOf, type TeamDynamic } 
 import { formatClock, useNow } from '../composables/useNow'
 import PhotoQr from '../components/PhotoQr.vue'
 import CoachChat from '../components/CoachChat.vue'
+import VotacionEquipo from '../components/VotacionEquipo.vue'
 
 /** Pasos: el reto del digital owner, las pantallas previas (el sobre) y las 8 dinámicas */
-type Paso = { tipo: 'reto' | 'intro' | 'dinamica'; d: TeamDynamic; etiqueta: string }
+type Paso = { tipo: 'reto' | 'intro' | 'dinamica' | 'votacion'; d: TeamDynamic; etiqueta: string }
 const pasos: Paso[] = [
   { tipo: 'reto', d: PREMORTEM, etiqueta: '★' },
   ...TEAM_DYNAMICS.flatMap((d, n) => [
     ...(d.intro ? [{ tipo: 'intro' as const, d, etiqueta: '✉' }] : []),
     { tipo: 'dinamica' as const, d, etiqueta: String(n + 1) },
   ]),
+  { tipo: 'votacion', d: TEAM_DYNAMICS[TEAM_DYNAMICS.length - 1], etiqueta: '✓' },
 ]
+const votacionAbierta = ref(false)
 const numDinamica = computed(() => TEAM_DYNAMICS.findIndex((x) => x.id === d.value.id) + 1)
 const i = ref(0)
 const paso = computed(() => pasos[i.value])
@@ -80,6 +83,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <button class="boton" type="button">Seguir →</button>
         </div>
       </div>
+    </section>
+
+    <!-- Final: votación (bloqueada hasta que se abre desde el panel) -->
+    <section v-else-if="paso.tipo === 'votacion'" class="wrap pantalla">
+      <span class="kicker">Final de la app del equipo</span>
+      <h1 class="titular">Vuestro trabajo está en el expediente.</h1>
+      <VotacionEquipo team-id="vista-previa" :open="votacionAbierta" />
+      <button class="enlace-previa" type="button" @click="votacionAbierta = !votacionAbierta">
+        {{ votacionAbierta ? 'Ver cómo se ve cerrada' : 'Ver cómo se ve cuando la abrís desde el panel' }}
+      </button>
     </section>
 
     <!-- Pantalla previa (el sobre de las cartas) -->
@@ -159,6 +172,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .reloj__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
 .reloj__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width 1s linear}
 .chat-demo{position:sticky;top:7rem}
+.enlace-previa{justify-self:start;border:0;background:none;padding:0;font:inherit;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
 .intro-din{min-height:60vh;display:grid;justify-items:center;align-content:center;gap:1rem;text-align:center;padding-block:3rem}
 .intro-din__icono{display:grid;place-items:center;width:6rem;height:6rem;border-radius:50%;background:var(--c-white);color:var(--c-innova-dark);font-size:3rem;box-shadow:0 0 0 6px var(--c-green-mid);animation:latido 2s ease-in-out infinite}
 @keyframes latido{50%{transform:scale(1.06)}}

@@ -10,6 +10,7 @@ import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, u
 import { formatClock, useNow } from '../composables/useNow'
 import EscaletaTimeline from '../components/EscaletaTimeline.vue'
 import PanelEquipos from '../components/PanelEquipos.vue'
+import PanelVotacion from '../components/PanelVotacion.vue'
 
 const store = useStore()
 const now = useNow()
@@ -116,6 +117,8 @@ async function restaurar() {
       </section>
 
       <PanelEquipos />
+
+      <PanelVotacion />
 
       <section class="card">
         <span class="kicker">Datos</span>

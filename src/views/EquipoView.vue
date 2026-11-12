@@ -13,6 +13,7 @@ import { formatClock, useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
 import HelpButton from '../components/HelpButton.vue'
 import PhotoQr from '../components/PhotoQr.vue'
+import VotacionEquipo from '../components/VotacionEquipo.vue'
 import { SIMULATED_ROSTER } from '../data/roster'
 
 const props = defineProps<{ id: string }>()
@@ -215,13 +216,18 @@ const expediente = computed(() =>
     </header>
 
     <!-- Terminado -->
-    <section v-if="finished" class="section s-oscuro">
-      <div class="wrap">
-        <span class="kicker">Lo habéis conseguido</span>
-        <h1 class="titular">Vuestro trabajo está en el expediente.</h1>
-        <p>Volved a la sala principal para el speed pitch.</p>
+    <template v-if="finished">
+      <section class="section s-oscuro">
+        <div class="wrap">
+          <span class="kicker">Lo habéis conseguido</span>
+          <h1 class="titular">Vuestro trabajo está en el expediente.</h1>
+          <p>Volved a la sala principal para el speed pitch.</p>
+        </div>
+      </section>
+      <div class="wrap final-votacion">
+        <VotacionEquipo :team-id="id" :open="store.votingOpen()" />
       </div>
-    </section>
+    </template>
 
     <!-- Pantalla previa (por ejemplo, el sobre de las cartas) -->
     <section v-else-if="dynamic.intro && !progress?.introSeen?.[dynamic.id]" class="wrap intro-din">
@@ -397,6 +403,7 @@ const expediente = computed(() =>
 .bloqueo{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--c-green-deep) 80%,transparent);backdrop-filter:blur(4px)}
 .bloqueo__caja{background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.5rem,4vw,2.5rem);max-width:40rem;display:grid;gap:.8rem}
 .bloqueo__caja h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1}
+.final-votacion{padding-block:1.5rem}
 .intro-din{min-height:60vh;display:grid;justify-items:center;align-content:center;gap:1rem;text-align:center;padding-block:3rem}
 .intro-din__icono{display:grid;place-items:center;width:6rem;height:6rem;border-radius:50%;background:var(--c-white);color:var(--c-innova-dark);font-size:3rem;box-shadow:0 0 0 6px var(--c-green-mid);animation:latido 2s ease-in-out infinite}
 @keyframes latido{50%{transform:scale(1.06)}}

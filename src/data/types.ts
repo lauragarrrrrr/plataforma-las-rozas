@@ -37,6 +37,8 @@ export interface EventState {
   openDynamic?: number
   /** Cuándo se abrió cada dinámica para todos: de aquí sale el cronómetro */
   openedAt?: Record<string, string>
+  /** La votación está abierta (la abre el equipo facilitador al terminar el speed pitch) */
+  votingOpen?: boolean
 }
 
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */

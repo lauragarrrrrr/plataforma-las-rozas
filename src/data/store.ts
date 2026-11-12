@@ -238,7 +238,22 @@ export function useStore() {
     /** Cuándo empezó a contar el tiempo de una dinámica para este equipo */
     openedAt: (teamId: string, dynamicId: string) => openedAtFor(teamId, dynamicId),
     lastSaveFailed: () => saveError,
+    // --- Votación ---
+    votingOpen: () => !!db.event.votingOpen,
+    /** ¿Ya ha votado esta persona? (se identifica por equipo y posición, sin guardar su nombre) */
+    hasVoted: (teamId: string, memberIndex: number) => db.votes.some((v) => v.code === voterCode(teamId, memberIndex)),
+    /** Votos recibidos por cada equipo, de más a menos (solo para el equipo facilitador) */
+    voteCounts: () => {
+      const counts: Record<string, number> = {}
+      for (const v of db.votes) for (const t of v.teamIds) counts[t] = (counts[t] ?? 0) + 1
+      return db.teams.map((t) => ({ teamId: t.id, votes: counts[t.id] ?? 0 })).sort((a, b) => b.votes - a.votes)
+    },
   }
+}
+
+/** Identificador del voto: equipo y posición de la persona en su equipo. Nunca el nombre. */
+function voterCode(teamId: string, memberIndex: number) {
+  return `${teamId}-${memberIndex}`
 }
 
 // ---------------------------------------------------------------------------
@@ -424,6 +439,35 @@ export function setTeamPace(teamId: string, mode: 'hold' | 'pass' | 'group') {
     if (dyn) p.openedAt = { ...(p.openedAt ?? {}), [dyn.id]: now() }
   }
   saveQuiet('progress', p)
+}
+
+// ---------------------------------------------------------------------------
+// Votación
+// ---------------------------------------------------------------------------
+export function setVotingOpen(open: boolean) {
+  state.event.votingOpen = open
+  saveQuiet('event')
+}
+
+/**
+ * Guarda el voto de una persona: 3 equipos distintos, ninguno el suyo, una sola vez.
+ * Devuelve un mensaje de error para enseñar en pantalla, o '' si ha ido bien.
+ */
+export async function castVote(teamId: string, memberIndex: number, choices: string[]): Promise<string> {
+  if (!state.event.votingOpen) return 'La votación está cerrada.'
+  const code = voterCode(teamId, memberIndex)
+  if (state.votes.some((v) => v.code === code)) return 'Ya has votado.'
+  const unique = [...new Set(choices)]
+  if (unique.length !== 3) return 'Elige tres equipos.'
+  if (unique.includes(teamId)) return 'No puedes votar a tu propio equipo.'
+  const vote = { code, teamIds: unique as [string, string, string], createdAt: now() }
+  try {
+    await save('votes', vote)
+  } catch {
+    return 'No se ha podido guardar el voto. Comprueba la conexión y vuelve a intentarlo.'
+  }
+  if (!state.votes.some((v) => v.code === code)) state.votes.push(vote)
+  return ''
 }
 
 async function replaceEverything(next: Database) {
