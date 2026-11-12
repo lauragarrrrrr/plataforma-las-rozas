@@ -26,6 +26,46 @@ Una plataforma web que acompaña el hackathon **Las Rozas 2040**, organizado por
 
 La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más simple que cumpla la metodología.
 
+### Dos partes: facilitadores y participantes
+
+*Decidido por Laura el 12/11/2026. Manda sobre lo que diga el resto de este archivo.*
+
+| Parte | Quién | Pantallas | Qué hace |
+| --- | --- | --- | --- |
+| **Facilitadores** | Equipo facilitador | `/panel` y `/sala` | Lleva la jornada paso a paso: decide qué se proyecta en la sala, abre las fases, ve cómo va cada equipo y recibe sus peticiones de ayuda |
+| **Participantes** | Cada equipo y cada persona | `/equipo/:id`, `/subir/:id` y `/votar` | Ve las instrucciones de cada dinámica, pide ayuda, sube las fotos de su trabajo y vota |
+
+**Decisiones de Laura:**
+
+1. **La foto sustituye a las respuestas escritas.** Los equipos trabajan en papel y en la plataforma solo **suben la foto** al final de cada dinámica. No hay formularios para escribir el titular, las señales, el expediente, el reto ni la ficha.
+2. **Botón «Pedir ayuda».** En la app del equipo, en todas las dinámicas. Al pulsarlo, al equipo facilitador le aparece un aviso en el panel con el equipo y la dinámica, y lo marca como atendido.
+3. **Unidad de Investigación con IA: solo en la fase 02**, como dice la metodología (apartado 7). No hay chat en el titular ni en otras fases.
+4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): las subirán Laura y Marina cuando las tengan. **No las inventes.** Hasta entonces, deja el hueco preparado.
+
+**Patrón de cada dinámica en la app del equipo:**
+
+| Elemento | Cuándo |
+| --- | --- |
+| Explicación corta de qué hay que hacer | Siempre |
+| Cronómetro con el tiempo de la dinámica | Siempre que la dinámica tenga duración |
+| Botón «Pedir ayuda» | Siempre |
+| Botón «Abrir Unidad de Investigación» | Solo en las dinámicas de la fase 02 |
+| Botón «Registrar fotografía» | Al final de cada dinámica de equipo |
+
+**Secuencia de la sala** (lo que el panel va proyectando, en orden; boceto de Laura, completo hasta la mitad de la fase 02):
+
+| Paso | Qué se proyecta |
+| --- | --- |
+| Apertura institucional | Diapositiva fija (pendiente de subir) |
+| Recorrido de la jornada | Diapositiva fija (pendiente de subir) |
+| Explicación del foresight (Juanjo) | Diapositivas (pendientes de subir) |
+| Vídeo «Una simulación desde 2040» | El vídeo |
+| ¿Cuál es la ciudad que no elegirías? | Pantalla de la dinámica |
+| Escuchar los futuros | Pantalla de la dinámica |
+| Ámbitos de los equipos | Revelación de los ámbitos |
+| Titular positivo | Pantalla de la dinámica |
+| … | El resto sigue la escaleta de la metodología |
+
 ---
 
 ## 2. Cómo trabajamos en el repositorio
@@ -126,7 +166,9 @@ Crea también `docs/IDENTIDAD.md` con estas reglas, para que las dos ramas las s
 
 ## 5. La jornada: fases y dinámicas
 
-Cada fase de la app se corresponde con una fase de la metodología. Lo que el equipo registra en la app es **lo mismo** que escribe en papel. No añadas campos que no estén aquí.
+Cada fase de la app se corresponde con una fase de la metodología. No añadas campos que no estén aquí.
+
+> ⚠️ **Desde el 12/11/2026, lo que se registra es solo la foto** del material en papel (ver «Dos partes», apartado 1). Las columnas «Qué se registra» de abajo describen **qué contiene ese papel**, no formularios que haya que rellenar en la app.
 
 ### Fase 01 · Foresight (45 min de dinámicas + inspiración)
 
@@ -244,10 +286,11 @@ El resultado final combina votos y valoración. Solo lo ve facilitación hasta q
 - Las fases se abren desde el panel. Por defecto solo está abierta la actual.
 - Dentro de cada fase:
   - Instrucción corta («misión»).
-  - Lista de tareas que se marcan al completarse.
-  - Formularios con los campos del apartado 5.
-  - Botón «Registrar fotografía».
-- «Registrar fotografía» abre un QR que lleva a `/subir/:id`. Las fotos también se pueden subir desde el ordenador. Al guardar, se elige el tipo: expediente de investigación, periódico con el titular, ficha de iniciativa u otra.
+  - Las dinámicas de la fase, cada una con el patrón del apartado 1: explicación, cronómetro, «Pedir ayuda», «Abrir Unidad de Investigación» (solo en la fase 02) y «Registrar fotografía».
+  - Lista de tareas que se marcan al completarse: una por foto que hay que subir.
+  - **Sin formularios de texto:** lo que el equipo produce se registra como foto.
+- «Registrar fotografía» abre un QR que lleva a `/subir/:id`. Las fotos también se pueden subir desde el ordenador. Al guardar, se elige el tipo: titular, señales, expediente, reto, ideas, ficha de iniciativa u otra.
+- «Pedir ayuda» avisa al equipo facilitador en el panel. El equipo ve que su aviso se ha enviado y cuándo se atiende.
 - «Mi expediente»: todo lo registrado por el equipo, fase a fase.
 - Si llega una alerta del panel, aparece arriba en rubí.
 - El prototipo «App del equipo» de la metodología es la referencia visual y de textos.
@@ -266,7 +309,7 @@ El resultado final combina votos y valoración. Solo lo ve facilitación hasta q
 
 ### `/sala` · Proyector
 
-Tiene varios modos, que elige el panel:
+El panel la avanza paso a paso siguiendo la **secuencia de la sala** del apartado 1, como una presentación. Las diapositivas de apertura, recorrido y Juanjo se añadirán cuando estén. Además, tiene estos modos, que también elige el panel:
 
 | Modo | Qué muestra |
 | --- | --- |
@@ -284,8 +327,9 @@ Ejemplo de alerta: «Atención, equipo 07. Las empresas ya no pueden publicar of
 **Durante:**
 
 - Seguimiento de los 12 equipos: fase, tareas hechas y fotos subidas.
+- **Peticiones de ayuda** de los equipos, con el equipo, la dinámica y la hora, y botón «Atendida».
 - Abrir y cerrar fases.
-- Controlar la sala: modo y cronómetro.
+- Controlar la sala: avanzar y retroceder en la secuencia, modo y cronómetro.
 - Lanzar alertas preparadas antes, a todos o a un equipo. Las alertas se escriben antes y se lanzan **a mano**.
 - Orden del speed pitch.
 - Generar e imprimir los códigos de voto.
@@ -294,7 +338,7 @@ Ejemplo de alerta: «Atención, equipo 07. Las empresas ya no pueden publicar of
 **Después:**
 
 - Revisar todo el material por equipo.
-- Exportar a CSV: titulares, señales, expedientes, retos, fichas, votos y valoraciones.
+- Descargar las fotos por equipo y exportar a CSV lo que haya en texto: votos, valoraciones y lista de fotos.
 
 **Acceso:** el panel lleva una contraseña sencilla, definida en una variable de entorno. Cada equipo solo ve sus propios datos.
 
@@ -349,6 +393,21 @@ interface RoomState { mode: 'welcome' | 'phase' | 'alert' | 'pitch' | 'covers' |
 
 El `VoteCode` puede llevar el equipo de la persona para impedir que vote al suyo. **Nunca guarda nombres.**
 
+**Cambios del 12/11/2026** (ver «Dos partes», apartado 1):
+
+```ts
+// Tipos de foto: uno por cada material en papel
+type PhotoKind = 'premortem' | 'headline' | 'signals' | 'dossier' | 'challenge' | 'ideas' | 'initiative' | 'other'
+
+// El equipo pide ayuda; el panel la marca como atendida
+interface HelpRequest { id: string; teamId: string; dynamicId: string; createdAt: string; attendedAt?: string }
+
+// Los ámbitos se revelan a todos a la vez a las 10:20 (dinámica 4 de Foresight)
+interface EventState { areasRevealed: boolean }
+```
+
+`Headline`, `Signal`, `Dossier`, `Idea` e `Initiative` **no se rellenan desde la app**, porque la foto sustituye a las respuestas. Se mantienen en el modelo solo por si la portada o la votación necesitan algún texto (ver apartado 13).
+
 ---
 
 ## 9. Datos de ejemplo
@@ -396,12 +455,12 @@ Haz un hito cada vez. Al terminarlo, comprueba que funciona, enséñalo y espera
 | --- | --- | --- |
 | 0 | Proyecto Vue + Vite + TS, `tokens.css`, `docs/IDENTIDAD.md`, logos, pie «Powered by Avantis» y `/` | `npm run build` funciona y la portada se ve con la identidad |
 | 1 | Router, tipos, `store.ts` en modo local y datos de ejemplo | Todas las rutas abren y leen datos de ejemplo |
-| 2 | `/equipo/:id`: fases, tareas y formularios de las 4 fases | El equipo 07 se ve completo y los cambios se guardan al recargar |
-| 3 | Fotos: QR y `/subir/:id` | Una foto subida desde otra pestaña aparece en el expediente |
-| 4 | `/panel` (durante) y `/sala`: fases, cronómetro y alertas | Una alerta lanzada en el panel aparece en la sala y en la app del equipo |
-| 5 | Portada generada desde la ficha | La portada del 07 se parece a la Pieza 07 de la metodología |
+| 2 | `/equipo/:id`: fases y dinámicas con explicación, cronómetro, tareas, «Pedir ayuda» y Unidad de Investigación (fase 02) | El equipo ve cada dinámica de la metodología; las tareas marcadas y las peticiones de ayuda se guardan al recargar |
+| 3 | Fotos: QR y `/subir/:id` | Una foto subida desde otra pestaña aparece en el expediente y marca su tarea |
+| 4 | `/panel` (durante) y `/sala`: secuencia de la sala, fases, cronómetro, alertas y peticiones de ayuda | Una ayuda pedida por un equipo aparece en el panel; una alerta del panel aparece en la sala y en el equipo |
+| 5 | Portada de cada equipo | Pendiente de decidir de dónde sale su texto (apartado 13) |
 | 6 | Speed pitch, códigos, `/votar`, cuadro de mando y resultados | Votos válidos, sin votar al propio equipo ni dos veces; resultados solo tras aprobar |
-| 7 | Panel (después): revisión y exportación CSV | El CSV se abre bien en Excel, con tildes |
+| 7 | Panel (después): revisión de fotos, descarga y exportación CSV | El CSV se abre bien en Excel, con tildes |
 | 8 | Supabase: datos, fotos y tiempo real | Todo funciona entre dispositivos distintos |
 
 ---
@@ -444,3 +503,6 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Sexto ámbito | «Movilidad y sostenibilidad» o «Mirada abierta» |
 | Datos personales | Fichas y votos van sin nombre. Falta confirmar el aviso con Las Rozas Innova |
 | Conecta 2040 | Forma parte de la plataforma, pero tiene datos personales. No entra en esta base ni en un repositorio público |
+| Texto de la portada y la votación | Si la foto sustituye a las respuestas, ¿de dónde salen el titular y el nombre de la iniciativa para la portada del speed pitch y para votar? Opciones: el equipo escribe solo esos pocos datos, o se proyecta la foto de la ficha. Decidir antes del hito 5 |
+| Diapositivas de la sala | Apertura institucional, recorrido de la jornada y foresight de Juanjo. Las suben Laura y Marina |
+| Votación: código o desplegable | El brief pide código de un solo uso; el prototipo de la metodología pide elegir «¿De qué equipo eres?». Decidir antes del hito 6 |
