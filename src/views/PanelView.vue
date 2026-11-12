@@ -6,9 +6,10 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { TEAM_DYNAMICS } from '../data/dynamics'
-import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, setTeamPace, useStore } from '../data/store'
+import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import EscaletaTimeline from '../components/EscaletaTimeline.vue'
+import PanelEquipos from '../components/PanelEquipos.vue'
 
 const store = useStore()
 const now = useNow()
@@ -43,25 +44,6 @@ function abrirSiguiente() {
 function volver() {
   if (confirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()
 }
-
-const filas = computed(() =>
-  store.db.teams.map((t) => {
-    const p = store.progress(t.id)
-    const s = store.setup(t.id)
-    const i = p?.current ?? 0
-    const din = TEAM_DYNAMICS[i]
-    return {
-      team: t,
-      owner: s?.digitalOwner,
-      paso: !s ? 'Sin empezar' : i >= TEAM_DYNAMICS.length ? 'Terminado' : `${i + 1}/${TEAM_DYNAMICS.length} · ${din.title}`,
-      foto: !!(din && store.photoFor(t.id, din.id)),
-      fotos: store.photos(t.id).length,
-      ayuda: !!store.pendingHelp(t.id),
-      // Excepción respecto al grupo: va por delante o se ha quedado retenido
-      excepcion: p?.limit === undefined ? '' : p.limit > abierta.value ? 'Adelantado' : 'Retenido',
-    }
-  }),
-)
 
 // Borrar afecta a TODOS los dispositivos: se pide escribir BORRAR para evitar sustos
 function confirmar(texto: string) {
@@ -133,29 +115,7 @@ async function restaurar() {
         </details>
       </section>
 
-      <div class="tabla-scroll">
-        <table>
-          <thead>
-            <tr><th>Equipo</th><th>Ámbito</th><th>Digital owner</th><th>Dinámica</th><th>Foto</th><th>Ritmo</th><th></th></tr>
-          </thead>
-          <tbody>
-            <tr v-for="f in filas" :key="f.team.id" :class="{ 'fila--ayuda': f.ayuda }">
-              <td><RouterLink :to="`/equipo/${f.team.id}`">{{ f.team.name }}</RouterLink><span v-if="store.isDemo(f.team.id)" class="demo"> · ejemplo</span></td>
-              <td>{{ store.areaName(f.team.area) }}</td>
-              <td>{{ f.owner ?? '—' }}</td>
-              <td>{{ f.paso }}</td>
-              <td><span :class="f.foto ? 'si' : 'no'">{{ f.foto ? '✓' : '—' }}</span> <small>({{ f.fotos }})</small></td>
-              <td class="ritmo-equipo">
-                <span v-if="f.excepcion" class="excepcion">{{ f.excepcion }}</span>
-                <button class="mini" type="button" title="Se queda en su dinámica aunque el grupo avance" @click="setTeamPace(f.team.id, 'hold')">Retener</button>
-                <button class="mini" type="button" title="Puede pasar ya a la siguiente dinámica" @click="setTeamPace(f.team.id, 'pass')">Dejar pasar</button>
-                <button v-if="f.excepcion" class="mini" type="button" title="Vuelve a ir al ritmo del grupo" @click="setTeamPace(f.team.id, 'group')">Con el grupo</button>
-              </td>
-              <td><span v-if="f.ayuda" class="pide">Pide ayuda</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <PanelEquipos />
 
       <section class="card">
         <span class="kicker">Datos</span>
@@ -179,24 +139,11 @@ async function restaurar() {
 .ayuda span{font-size:.85rem}
 .vacio{font-style:italic}
 .atendidas{margin:.4rem 0 0;padding-left:1.1rem;font-size:.85rem}
-.tabla-scroll{overflow-x:auto;background:var(--c-white);border-radius:var(--radius-card);padding:1rem}
-table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:48rem}
-th{text-align:left;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c-innova-dark);padding:.5rem;border-bottom:1px solid var(--c-gris-10)}
-td{padding:.55rem .5rem;border-bottom:1px solid var(--c-gris-10);color:var(--c-ink);white-space:nowrap}
-.fila--ayuda td{background:color-mix(in srgb,var(--c-rubi) 8%,var(--c-white))}
-.pide{background:var(--c-rubi);color:var(--c-white);border-radius:99px;padding:.15em .7em;font-size:.72rem;font-weight:700}
-.demo{font-size:.75rem;color:var(--c-green-dark)}
 .botones{display:flex;flex-wrap:wrap;gap:.6rem}
 .ritmo{box-shadow:inset 0 0 0 3px var(--c-innova)}
 .ritmo__actual{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1.2rem}
 .ritmo__actual strong{font-size:clamp(1.2rem,2.2vw,1.6rem);font-weight:500;color:var(--c-ink);letter-spacing:-.02em}
 .ritmo__reloj{font-size:1.4rem;font-weight:600;color:var(--c-innova-dark);font-variant-numeric:tabular-nums}
 .ritmo__reloj--fin{color:var(--c-rubi);font-size:1rem}
-.si{color:var(--c-green-deep);font-weight:700}
-.no{color:var(--c-gris-10)}
-.ritmo-equipo{display:flex;gap:.3rem;align-items:center}
-.mini{border:0;border-radius:99px;padding:.25em .7em;background:var(--c-green-light);color:var(--c-ink);font:inherit;font-size:.75rem;cursor:pointer}
-.mini:hover{background:var(--c-innova)}
-.excepcion{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c-innova-dark);margin-right:.2rem}
 .boton--sec{background:var(--c-white);box-shadow:inset 0 0 0 1.5px var(--c-ink)}
 </style>
