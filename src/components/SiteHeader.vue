@@ -1,12 +1,13 @@
 <script setup lang="ts">
 // Banda superior con los logos, común a todas las pantallas
+import { RouterLink } from 'vue-router'
 </script>
 
 <template>
   <header class="banda">
     <div class="wrap banda__in">
       <img src="/logos/ayuntamiento-las-rozas.png" alt="Ayuntamiento de Las Rozas" />
-      <a class="banda__nombre" href="/">Las Rozas 2040</a>
+      <RouterLink class="banda__nombre" to="/">Las Rozas 2040</RouterLink>
       <img src="/logos/las-rozas-innova.png" alt="Las Rozas Innova" />
     </div>
   </header>

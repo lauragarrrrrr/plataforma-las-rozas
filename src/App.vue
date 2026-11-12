@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { RouterView, useRoute } from 'vue-router'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
-// En el hito 1 la portada pasa a ser la ruta «/» del router
-import PortadaView from './views/PortadaView.vue'
+
+const route = useRoute()
 </script>
 
 <template>
-  <SiteHeader />
-  <PortadaView />
-  <SiteFooter />
+  <SiteHeader v-if="!route.meta.fullscreen" />
+  <RouterView />
+  <SiteFooter v-if="!route.meta.fullscreen" />
 </template>

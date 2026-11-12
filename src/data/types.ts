@@ -1,0 +1,48 @@
+// Modelo de datos de la plataforma (CLAUDE.md, apartado 8).
+// Nombres en inglés en el código; los textos de pantalla van en español.
+
+export type AreaId = 'city' | 'business' | 'education' | 'talent' | 'public' | 'mobility'
+
+export type PhaseId = 'foresight' | 'research' | 'ideation' | 'pitch'
+export type PhaseState = 'locked' | 'active' | 'done'
+
+export interface Team { id: string; number: number; name: string; area: AreaId; phases: Record<PhaseId, PhaseState> }
+export interface Headline { teamId: string; headline: string; lead?: string; said: string; changed: string; measure: string }
+export interface Signal { id: string; teamId: string; title: string; description: string; source?: string; kind: 'fact' | 'hypothesis' }
+export interface Dossier { teamId: string; who: string; when: string; goal: string; barrier: string; currentWorkaround: string; challenge: string }
+export interface Idea { id: string; teamId: string; text: string; card?: string }
+export interface Initiative { teamId: string; name: string; whoWeHelp: string; problem: string; benefit: string; solution: string; levers: [string, string, string] }
+export interface Cover { teamId: string; headline: string; keyFigure?: string; keyFigureLabel?: string; whatChanged: string; howItStarted: string }
+export interface Photo { id: string; teamId: string; kind: 'dossier' | 'headline' | 'initiative' | 'premortem' | 'other'; url: string; createdAt: string }
+export interface Alert { id: string; target: 'all' | string; title: string; body: string; minutes?: number; launchedAt?: string }
+export interface VoteCode { code: string; used: boolean; teamId?: string }
+export interface Vote { code: string; teamIds: [string, string, string]; createdAt: string }
+export interface Assessment { teamId: string; scores: Record<string, number>; notes?: string }
+export interface RoomState { mode: 'welcome' | 'phase' | 'alert' | 'pitch' | 'covers' | 'results'; timerEndsAt?: string; currentTeamId?: string; alertId?: string; resultsApproved: boolean }
+
+/**
+ * Estado de la jornada que no está en el brief pero hace falta según la metodología:
+ * los ámbitos se revelan a todos los equipos a la vez en la dinámica 4 de Foresight (10:20).
+ */
+export interface EventState { areasRevealed: boolean }
+
+/** Todo lo que guarda la plataforma. */
+export interface Database {
+  version: number
+  /** Equipos que llevan datos de ejemplo. Se vacían antes del evento. */
+  demoTeamIds: string[]
+  event: EventState
+  room: RoomState
+  teams: Team[]
+  headlines: Headline[]
+  signals: Signal[]
+  dossiers: Dossier[]
+  ideas: Idea[]
+  initiatives: Initiative[]
+  covers: Cover[]
+  photos: Photo[]
+  alerts: Alert[]
+  voteCodes: VoteCode[]
+  votes: Vote[]
+  assessments: Assessment[]
+}

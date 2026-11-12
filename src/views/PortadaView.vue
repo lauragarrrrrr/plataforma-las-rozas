@@ -1,6 +1,11 @@
 <script setup lang="ts">
 // Portada «/»: presenta la jornada y da acceso a cada pantalla.
-// Sin datos sensibles. Los enlaces se activan en el hito 1, con el router.
+// Sin datos sensibles: solo los números de equipo, sin nada de lo que registran.
+import { RouterLink } from 'vue-router'
+import { PHASES } from '../data/config'
+import { useStore } from '../data/store'
+
+const store = useStore()
 
 interface Pantalla {
   ruta: string
@@ -10,18 +15,9 @@ interface Pantalla {
 }
 
 const pantallas: Pantalla[] = [
-  { ruta: '/equipo', nombre: 'App del equipo', quien: 'Ordenador del equipo', descripcion: 'Vuestro espacio de trabajo, fase a fase: misión, tareas y lo que registráis.' },
-  { ruta: '/subir', nombre: 'Subir una foto', quien: 'Móvil, con el QR', descripcion: 'Haced la foto de vuestras fichas y enviadla al expediente del equipo.' },
   { ruta: '/votar', nombre: 'Votación', quien: 'Móvil', descripcion: 'Con vuestro código, elegid las tres iniciativas que más os convencen.' },
   { ruta: '/sala', nombre: 'Pantalla de sala', quien: 'Proyector', descripcion: 'Fase actual, cronómetro, alertas, speed pitch y resultados.' },
   { ruta: '/panel', nombre: 'Panel', quien: 'Equipo facilitador', descripcion: 'Control de la jornada y cuadro de mando.' },
-]
-
-const fases = [
-  { num: '01', nombre: 'Foresight', min: 55 },
-  { num: '02', nombre: 'Investigación', min: 50 },
-  { num: '03', nombre: 'Ideación', min: 60 },
-  { num: '04', nombre: 'Pitch y cierre', min: 100 },
 ]
 </script>
 
@@ -53,12 +49,25 @@ const fases = [
           <h2 class="titular">¿Desde dónde entras?</h2>
           <p class="intro">Primero se conversa; después se contrasta; finalmente el equipo decide qué registrar. Las pantallas solo acompañan.</p>
         </div>
+        <div class="card equipos">
+          <span class="kicker">Ordenador del equipo</span>
+          <h3>App del equipo</h3>
+          <p>Vuestro espacio de trabajo, fase a fase. Elegid vuestro número de equipo.</p>
+          <ul class="equipos__lista">
+            <li v-for="t in store.db.teams" :key="t.id">
+              <RouterLink class="equipo" :to="`/equipo/${t.id}`" :aria-label="t.name">{{ t.id }}</RouterLink>
+            </li>
+          </ul>
+          <p class="nota">Para subir fotos desde el móvil, usad el QR de la app de vuestro equipo.</p>
+        </div>
         <ul class="pantallas">
-          <li v-for="p in pantallas" :key="p.ruta" class="card pantalla">
-            <span class="kicker">{{ p.quien }}</span>
-            <h3>{{ p.nombre }}</h3>
-            <p>{{ p.descripcion }}</p>
-            <span class="pantalla__estado">En construcción</span>
+          <li v-for="p in pantallas" :key="p.ruta">
+            <RouterLink class="card pantalla" :to="p.ruta">
+              <span class="kicker">{{ p.quien }}</span>
+              <h3>{{ p.nombre }}</h3>
+              <p>{{ p.descripcion }}</p>
+              <span class="pantalla__ir">Entrar →</span>
+            </RouterLink>
           </li>
         </ul>
       </div>
@@ -71,10 +80,10 @@ const fases = [
           <h2 class="titular">Del futuro que no queremos al que podemos hacer posible.</h2>
         </div>
         <ol class="fases">
-          <li v-for="f in fases" :key="f.num" class="fase">
-            <span class="fase__num">{{ f.num }}</span>
-            <strong>{{ f.nombre }}</strong>
-            <span class="fase__min">{{ f.min }} min</span>
+          <li v-for="f in PHASES" :key="f.id" class="fase">
+            <span class="fase__num">{{ f.number }}</span>
+            <strong>{{ f.name }}</strong>
+            <span class="fase__min">{{ f.minutes }} min</span>
           </li>
         </ol>
       </div>
@@ -98,8 +107,14 @@ h1{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.25em;font-size:c
 
 .cabeza{display:grid;gap:1rem}
 .pantallas{list-style:none;margin:0;padding:0;display:grid;gap:clamp(.9rem,2vw,1.25rem);grid-template-columns:repeat(auto-fill,minmax(min(100%,15rem),1fr))}
+.pantalla{height:100%;text-decoration:none;color:inherit;transition:transform .2s var(--ease-out)}
+.pantalla:hover{transform:translateY(-3px)}
 .pantalla p{font-size:.92rem}
-.pantalla__estado{justify-self:start;margin-top:.3rem;border:1.5px dashed var(--c-innova);border-radius:99px;padding:.2em .8em;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c-green-deep)}
+.pantalla__ir{margin-top:.3rem;font-size:.8rem;font-weight:600;color:var(--c-innova-dark)}
+.equipos__lista{list-style:none;margin:.4rem 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(3.4rem,1fr));gap:.5rem}
+.equipo{display:grid;place-items:center;aspect-ratio:1;border-radius:1rem;background:var(--c-green-light);color:var(--c-ink);font-size:1.25rem;font-weight:600;text-decoration:none;transition:background .2s}
+.equipo:hover{background:var(--c-innova)}
+.nota{font-size:.85rem;font-style:italic}
 
 .fases{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
 .fase{display:grid;gap:.2rem;border:1px solid color-mix(in srgb,var(--c-white) 20%,transparent);border-radius:var(--radius-card);padding:1.3rem}
