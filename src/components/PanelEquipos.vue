@@ -8,6 +8,7 @@ import { RouterLink } from 'vue-router'
 import { ALL_DYNAMICS, TEAM_DYNAMICS } from '../data/dynamics'
 import { setTeamPace, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
+import { openPhoto } from '../composables/usePhotoViewer'
 import type { Team } from '../data/types'
 
 const store = useStore()
@@ -70,7 +71,7 @@ function verFotos(t: Team) {
     <p v-if="!recientes.length" class="vacio">Todavía no ha llegado ninguna foto.</p>
     <ol v-else class="tira">
       <li v-for="p in recientes" :key="p.id">
-        <a :href="p.url" target="_blank" rel="noopener">
+        <a :href="p.url" @click.prevent="openPhoto(p.url, `${store.team(p.teamId)?.name} · ${titleOf(p.dynamicId)}`)">
           <img :src="p.url" :alt="`${store.team(p.teamId)?.name} · ${titleOf(p.dynamicId)}`" loading="lazy" />
           <span class="tira__txt"><strong>{{ store.team(p.teamId)?.name }}</strong> {{ titleOf(p.dynamicId) }}</span>
           <span class="tira__hora">{{ hace(p.createdAt) }}</span>
@@ -140,7 +141,7 @@ function verFotos(t: Team) {
       <section v-for="x in fotosDe" :key="x.d.id" class="visor__bloque">
         <h3>{{ x.d.title }} <small>· {{ x.fotos.length }} {{ x.fotos.length === 1 ? 'foto' : 'fotos' }}</small></h3>
         <div class="visor__grid">
-          <a v-for="p in x.fotos" :key="p.id" :href="p.url" target="_blank" rel="noopener">
+          <a v-for="p in x.fotos" :key="p.id" :href="p.url" @click.prevent="openPhoto(p.url, `${viendo?.name ?? ''} · ${x.d.title}`)">
             <img :src="p.url" :alt="x.d.title" loading="lazy" />
             <span>{{ new Date(p.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }}</span>
           </a>

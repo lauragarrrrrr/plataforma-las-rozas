@@ -3,6 +3,7 @@ import { RouterView, useRoute } from 'vue-router'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
+import PhotoViewer from './components/PhotoViewer.vue'
 import { useStore } from './data/store'
 
 const route = useRoute()
@@ -16,6 +17,7 @@ const { ready, connError } = useStore()
   <main v-else-if="!connError" class="cargando" aria-live="polite">Conectando…</main>
   <SiteFooter v-if="!route.meta.fullscreen" />
   <ConfirmDialog />
+  <PhotoViewer />
 </template>
 
 <style scoped>

@@ -11,6 +11,7 @@ import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
 import { addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
+import { openPhoto } from '../composables/usePhotoViewer'
 import CoachChat from '../components/CoachChat.vue'
 import DynamicTimer from '../components/DynamicTimer.vue'
 import HelpButton from '../components/HelpButton.vue'
@@ -321,7 +322,7 @@ const expediente = computed(() =>
       <section v-for="x in expediente" :key="x.d.id" class="expediente__bloque">
         <h3>{{ x.d.title }} <small>· {{ x.photos.length }} {{ x.photos.length === 1 ? 'foto' : 'fotos' }}</small></h3>
         <div class="expediente__grid">
-          <a v-for="(p, n) in x.photos" :key="p.id" :href="p.url" target="_blank" rel="noopener" class="expediente__foto">
+          <a v-for="(p, n) in x.photos" :key="p.id" :href="p.url" class="expediente__foto" @click.prevent="openPhoto(p.url, `${x.d.title} · foto ${n + 1}`)">
             <img :src="p.url" :alt="`${x.d.title} · foto ${n + 1}`" />
           </a>
         </div>
