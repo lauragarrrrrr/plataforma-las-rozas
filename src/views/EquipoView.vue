@@ -8,7 +8,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
-import { addPhoto, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
+import { addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
 import DynamicTimer from '../components/DynamicTimer.vue'
@@ -75,6 +75,16 @@ watch(
   () => [!!photo.value, allowed.value, index.value] as const,
   ([hasPhoto, open, i]) => {
     if (hasPhoto && i < open) nextDynamic(props.id)
+  },
+  { immediate: true },
+)
+
+// …y también pasa solo cuando se acaba el tiempo y ya tiene la foto (salvo al final de una fase)
+const autoNext = computed(() => !finished.value && canAutoAdvance(props.id))
+watch(
+  () => [!!photo.value, timeUp.value, index.value] as const,
+  ([hasPhoto, up]) => {
+    if (hasPhoto && up && autoNext.value) autoAdvance(props.id)
   },
   { immediate: true },
 )
@@ -239,7 +249,7 @@ const expediente = computed(() =>
 
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
-        <DynamicTimer :remaining="remaining" :minutes="dynamic.minutes" />
+        <DynamicTimer :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" />
 
         <div class="card explica">
           <span class="kicker">Dinámica {{ index + 1 }} de {{ TEAM_DYNAMICS.length }} · {{ dynamic.minutes }} min</span>
@@ -261,7 +271,8 @@ const expediente = computed(() =>
             <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
             <p v-if="waitingNext" class="esperando">
               <span class="punto" aria-hidden="true"></span>
-              <span v-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
+              <span v-if="nextOne && autoNext">¡Foto subida! Cuando acabe el tiempo pasaréis solos a <strong>«{{ nextOne.title }}»</strong>. Aprovechadlo para repasar.</span>
+              <span v-else-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
               <span v-else>¡Hecho! Esperad indicaciones del equipo facilitador.</span>
             </p>
           </template>

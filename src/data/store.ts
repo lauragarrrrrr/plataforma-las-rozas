@@ -9,7 +9,7 @@
 import { reactive, readonly, ref, watch } from 'vue'
 import { AGENDA } from './agenda'
 import { AREAS } from './config'
-import { TEAM_DYNAMICS } from './dynamics'
+import { backToRoomAfter, TEAM_DYNAMICS } from './dynamics'
 import { createBlank, createSeed, DB_VERSION } from './seed'
 import {
   deleteAll, fetchAll, LISTS, sb, SINGLETONS, subscribe, toRows, upsertRows, uploadPhoto,
@@ -369,6 +369,35 @@ export function nextDynamic(teamId: string) {
   if (!current || !state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id)) return
   if (p.current >= allowedFor(teamId)) return
   p.current += 1
+  saveQuiet('progress', p)
+  syncPhases(teamId)
+}
+
+/**
+ * ¿Puede el equipo pasar solo a la siguiente dinámica cuando se le acabe el tiempo?
+ * Sí, salvo al final de una fase (vuelven a la sala principal) o si el equipo
+ * facilitador lo ha retenido (en el panel sale «Retenido»). Decidido por Laura el 16/11/2026.
+ */
+export function canAutoAdvance(teamId: string): boolean {
+  const p = state.progress.find((x) => x.teamId === teamId)
+  const current = TEAM_DYNAMICS[p?.current ?? 0]
+  const held = p?.limit !== undefined && p.limit <= groupOpen()
+  return !!current && !backToRoomAfter(current) && !held
+}
+
+/** Tiempo terminado y foto subida: pasa solo a la siguiente, con su cronómetro empezando ahora */
+export function autoAdvance(teamId: string) {
+  if (!canAutoAdvance(teamId)) return
+  const p = progressOf(teamId)
+  const current = TEAM_DYNAMICS[p.current]
+  const next = TEAM_DYNAMICS[p.current + 1]
+  if (!current || !next) return
+  if (!state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id)) return
+  const opened = openedAtFor(teamId, current.id)
+  if (!opened || new Date(opened).getTime() + current.minutes * 60_000 > Date.now()) return
+  p.current += 1
+  // Si el grupo aún no la ha abierto, su cronómetro empieza ahora para este equipo
+  if (!state.event.openedAt?.[next.id]) p.openedAt = { ...(p.openedAt ?? {}), [next.id]: now() }
   saveQuiet('progress', p)
   syncPhases(teamId)
 }

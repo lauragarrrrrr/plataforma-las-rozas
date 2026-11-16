@@ -5,19 +5,24 @@
 import { computed } from 'vue'
 import { formatClock } from '../composables/useNow'
 
-const props = defineProps<{ remaining: number; minutes: number }>()
+const props = defineProps<{ remaining: number; minutes: number; photoDone?: boolean }>()
 
 const total = computed(() => props.minutes * 60_000)
 const left = computed(() => Math.min(total.value, Math.max(0, props.remaining)))
 const pct = computed(() => Math.max(0, Math.min(100, (left.value / total.value) * 100)))
 const ended = computed(() => props.remaining <= 0)
 const hurry = computed(() => !ended.value && props.remaining <= 2 * 60_000)
+const label = computed(() => {
+  if (ended.value) return props.photoDone ? '¡Tiempo terminado, esperad!' : 'Tiempo terminado'
+  if (props.photoDone) return 'Foto subida ✓ · Quedan'
+  return hurry.value ? '¡Último esfuerzo! Quedan' : 'Quedan'
+})
 </script>
 
 <template>
-  <div class="card reloj" :class="{ 'reloj--prisa': hurry, 'reloj--fin': ended }" role="timer" aria-live="off">
+  <div class="card reloj" :class="{ 'reloj--prisa': hurry && !photoDone, 'reloj--fin': ended }" role="timer" aria-live="off">
     <div class="reloj__cabecera">
-      <span class="kicker">{{ ended ? 'Tiempo terminado' : hurry ? '¡Último esfuerzo! Quedan' : 'Quedan' }}</span>
+      <span class="kicker">{{ label }}</span>
       <span class="reloj__total">de {{ minutes }} min</span>
     </div>
     <strong class="reloj__cifra">{{ formatClock(left) }}</strong>
