@@ -144,7 +144,6 @@ const expediente = computed(() =>
 
         <button class="boton" type="submit" :disabled="!named.includes(form.owner)">Empezar</button>
       </form>
-      <p class="nota">Solo guardamos los nombres de pila, para saber a quién acudir si pedís ayuda.</p>
     </div>
   </main>
 
