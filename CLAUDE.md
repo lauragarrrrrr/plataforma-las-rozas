@@ -54,7 +54,7 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 16. **El reto de las fichas no es obligatorio** y no dice cuántas faltan: «Seguir» está siempre disponible.
 14. **Vista previa** (`/vista-previa`, desde la entrada de facilitadores): recorrer todas las pantallas de los equipos sin cronómetros ni fotos; no guarda nada.
 9. **Escaleta en el panel:** línea de tiempo con toda la jornada, lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos. Pulsar un momento lleva ahí la presentación de la sala.
-4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): las subirán Laura y Marina cuando las tengan. **No las inventes.** Hasta entonces, deja el hueco preparado.
+4. **Diapositivas de la sala** (apertura institucional, recorrido de la jornada y explicación del foresight de Juanjo): *decidido por Laura el 16/11/2026*, van en una **presentación aparte**, fuera de la plataforma. La sala solo muestra el título, la hora y la descripción de esos pasos. **No las inventes.**
 
 **Patrón de cada dinámica en la app del equipo:**
 
@@ -70,9 +70,9 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 
 | Paso | Qué se proyecta |
 | --- | --- |
-| Apertura institucional | Diapositiva fija (pendiente de subir) |
-| Recorrido de la jornada | Diapositiva fija (pendiente de subir) |
-| Explicación del foresight (Juanjo) | Diapositivas (pendientes de subir) |
+| Apertura institucional | Título del paso (las diapositivas van en una presentación aparte) |
+| Recorrido de la jornada | Título del paso (las diapositivas van en una presentación aparte) |
+| Explicación del foresight (Juanjo) | Título del paso (las diapositivas van en una presentación aparte) |
 | Vídeo «Una simulación desde 2040» | El vídeo |
 | ¿Cuál es la ciudad que no elegirías? | Pantalla de la dinámica |
 | Escuchar los futuros | Pantalla de la dinámica |
@@ -323,7 +323,7 @@ El resultado final combina votos y valoración. Solo lo ve facilitación hasta q
 
 ### `/sala` · Proyector
 
-El panel la avanza paso a paso siguiendo la **secuencia de la sala** del apartado 1, como una presentación. Las diapositivas de apertura, recorrido y Juanjo se añadirán cuando estén. Además, tiene estos modos, que también elige el panel:
+El panel la avanza paso a paso siguiendo la **secuencia de la sala** del apartado 1, como una presentación. Las diapositivas de apertura, recorrido y Juanjo van en una presentación aparte. Además, tiene estos modos, que también elige el panel:
 
 | Modo | Qué muestra |
 | --- | --- |
@@ -520,7 +520,6 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Criterios de valoración | Los provisionales no coinciden con los del cliente |
 | Datos personales | Fichas y votos van sin nombre. Falta confirmar el aviso con Las Rozas Innova |
 | Conecta 2040 | Forma parte de la plataforma, pero tiene datos personales. No entra en esta base ni en un repositorio público |
-| Diapositivas de la sala | Apertura institucional, recorrido de la jornada y foresight de Juanjo. Las suben Laura y Marina |
 | IA conectada al chat | Para que el chat responda de verdad, lea las fotos y proponga la portada hace falta una cuenta de la API de Anthropic (unos 20-50 € la jornada). La cuenta Team no sirve para esto. Lo deciden Laura, Marina y Avantis, con la privacidad confirmada con Las Rozas Innova |
 | Nombres de los participantes | Se guarda el nombre de pila de cada persona y quién es el digital owner. Confirmar con el aviso de datos personales |
 | Seguridad de Supabase | Hoy cualquiera con la dirección de la web puede leer y escribir los datos (permisos provisionales en `supabase/schema.sql`). Cerrarlo antes del evento, junto con la contraseña del panel |

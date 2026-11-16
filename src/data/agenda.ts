@@ -2,13 +2,13 @@
 // PRESENTACIÓN DE LA SALA · la escaleta de la metodología, paso a paso.
 // El equipo facilitador la va pasando como una presentación.
 // Textos y horas copiados de docs/metodologia.html (escaleta).
-// ⚠️ Las diapositivas de apertura, recorrido y Juanjo las suben Laura y Marina:
-//    aquí solo se deja el hueco (`pending`). No inventar su contenido.
+// Las diapositivas de apertura, recorrido y Juanjo van en una presentación aparte:
+//    aquí la sala solo muestra el título, la hora y la descripción de esos pasos.
 // ==========================================================
 
 export type SlideKind =
   | 'welcome'   // primera pantalla, dinámica, con Las Rozas 2040
-  | 'deck'      // diapositivas (PPT) que se subirán
+  | 'deck'      // momento con diapositivas propias, en una presentación aparte
   | 'video'     // el vídeo inmersivo
   | 'dynamic'   // una dinámica: título, explicación y cronómetro grande
   | 'reveal'    // revelación de los ámbitos
@@ -23,7 +23,7 @@ export interface AgendaStep {
   who: 'Toda la sala' | 'Individual' | 'Equipo' | 'Equipo facilitador' | 'Libre'
   kind: SlideKind
   description: string
-  /** Hueco para lo que subiréis (diapositivas, foto, vídeo) */
+  /** Hueco para lo que subiréis (el vídeo) */
   pending?: string
 }
 
@@ -31,14 +31,11 @@ export const AGENDA: AgendaStep[] = [
   { id: 'bienvenida', time: '09:00', minutes: 30, title: 'Bienvenida', who: 'Toda la sala', kind: 'welcome',
     description: 'Acreditación, café y picoteo de bienvenida.' },
   { id: 'apertura', time: '09:30', minutes: 10, title: 'Apertura institucional', who: 'Toda la sala', kind: 'deck',
-    description: 'Bienvenida del alcalde y de Las Rozas Innova: por qué Las Rozas 2040 y qué se espera del día.',
-    pending: 'Diapositivas de la apertura institucional y foto del alcalde' },
+    description: 'Bienvenida del alcalde y de Las Rozas Innova: por qué Las Rozas 2040 y qué se espera del día.' },
   { id: 'recorrido', time: '09:40', minutes: 5, title: 'El recorrido de la jornada', who: 'Toda la sala', kind: 'deck',
-    description: 'Cómo será el día: las cuatro fases, los tiempos y lo que se llevará cada equipo al final.',
-    pending: 'Diapositivas del recorrido de la jornada' },
+    description: 'Cómo será el día: las cuatro fases, los tiempos y lo que se llevará cada equipo al final.' },
   { id: 'foresight', time: '09:45', minutes: 10, title: 'Inspiración: qué es el foresight', who: 'Toda la sala', kind: 'deck',
-    description: 'Qué es el foresight, por qué miramos al futuro desde hoy y qué son los futuros plausibles, posibles y deseables.',
-    pending: 'Diapositivas de Juanjo' },
+    description: 'Qué es el foresight, por qué miramos al futuro desde hoy y qué son los futuros plausibles, posibles y deseables.' },
   { id: 'video', time: '09:55', minutes: 5, title: 'Una simulación desde 2040', who: 'Toda la sala', kind: 'video',
     description: 'Se apagan las luces y se proyecta el vídeo inmersivo. Termina con la pregunta que abre la primera dinámica.',
     pending: 'Vídeo inmersivo' },

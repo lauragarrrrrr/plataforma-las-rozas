@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // /sala · Presentación de la sala (parte del equipo facilitador)
 // Se pasa como una presentación: flechas del teclado o botones de abajo.
-// Las diapositivas de apertura, recorrido y Juanjo, y el vídeo, se añadirán cuando los subáis.
+// Las diapositivas de apertura, recorrido y Juanjo van en una presentación aparte. El vídeo se añadirá cuando lo subáis.
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
@@ -85,7 +85,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <p class="desc">{{ step.description }}</p>
 
       <div v-if="step.pending" class="hueco">
-        <strong>{{ step.kind === 'video' ? 'Vídeo' : 'Diapositivas' }} pendientes de subir</strong>
+        <strong>Vídeo pendiente de subir</strong>
         <span>{{ step.pending }}</span>
       </div>
 
