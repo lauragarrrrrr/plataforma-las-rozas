@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Votación en el panel: abrirla o cerrarla y ver el recuento.
 // El recuento solo lo ve el equipo facilitador.
+import { askConfirm } from '../composables/useConfirm'
 import { computed } from 'vue'
 import { setVotingOpen, useStore } from '../data/store'
 
@@ -10,11 +11,11 @@ const recuento = computed(() => store.voteCounts())
 const maximo = computed(() => Math.max(1, ...recuento.value.map((r) => r.points)))
 const personas = computed(() => store.db.votes.length)
 
-function alternar() {
+async function alternar() {
   const texto = abierta.value
     ? '¿Cerrar la votación? Nadie más podrá votar.'
     : '¿Abrir la votación? A los equipos les aparecerá el QR para votar desde el móvil.'
-  if (confirm(texto)) setVotingOpen(!abierta.value)
+  if (await askConfirm(texto)) setVotingOpen(!abierta.value)
 }
 </script>
 

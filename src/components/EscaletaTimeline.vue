@@ -2,6 +2,7 @@
 // Escaleta de la jornada en forma de línea de tiempo, para el panel.
 // Marca lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos.
 // Al pulsar un momento, la presentación de la sala salta ahí.
+import { askConfirm } from '../composables/useConfirm'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { AGENDA } from '../data/agenda'
 import { TEAM_DYNAMICS } from '../data/dynamics'
@@ -19,9 +20,9 @@ function abiertaEnEquipos(stepId: string) {
   return !!abierta.value && ids.includes(abierta.value)
 }
 
-function ir(i: number) {
+async function ir(i: number) {
   if (i === actual.value) return
-  if (confirm(`¿Llevar la presentación de la sala a «${AGENDA[i].title}» (${AGENDA[i].time})?`)) setRoomStep(i)
+  if (await askConfirm(`¿Llevar la presentación de la sala a «${AGENDA[i].title}» (${AGENDA[i].time})?`)) setRoomStep(i)
 }
 
 // Mantiene a la vista el momento actual (centrado en la línea, sin mover la página)

@@ -4,6 +4,7 @@
 // 2. Mientras la sala está en la parte de facilitación: pantalla de espera.
 // 3. Cuando se revelan los ámbitos: las dinámicas, una a una, con explicación,
 //    chat que os reta, cronómetro, «Pedir ayuda» y foto obligatoria para seguir.
+import { askConfirm } from '../composables/useConfirm'
 import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
@@ -113,8 +114,8 @@ async function onPremortem(url: string) {
   }
 }
 /** El reto no es obligatorio: si no hay fichas, solo se confirma */
-function seguirReto() {
-  if (premortemPhotos.value.length || confirm('No has subido ninguna ficha. ¿Seguir sin subirlas?')) finishPremortem(props.id)
+async function seguirReto() {
+  if (premortemPhotos.value.length || (await askConfirm('No has subido ninguna ficha. ¿Seguir sin subirlas?'))) finishPremortem(props.id)
 }
 
 const expediente = computed(() =>

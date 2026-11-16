@@ -2,6 +2,7 @@
 // /panel · Seguimiento del equipo facilitador
 // Peticiones de ayuda arriba; debajo, por dónde va cada equipo.
 // ⚠️ La contraseña del panel llega más adelante.
+import { askConfirm } from '../composables/useConfirm'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
@@ -36,25 +37,25 @@ const conFoto = computed(() =>
   dinAbierta.value ? store.db.teams.filter((t) => store.photoFor(t.id, dinAbierta.value!.id)).length : 0,
 )
 
-function abrirSiguiente() {
+async function abrirSiguiente() {
   const r = restante.value
   const texto = dinSiguiente.value ? `«${dinSiguiente.value.title}»` : 'el final de las dinámicas de equipo'
   const aviso = r !== null && r > 0 ? `Todavía quedan ${formatClock(r)} de la dinámica actual. ` : ''
-  if (confirm(`${aviso}¿Abrir ${texto} para todos los equipos?`)) openNextDynamic()
+  if (await askConfirm(`${aviso}¿Abrir ${texto} para todos los equipos?`, '', 'Sí, abrir')) openNextDynamic()
 }
-function volver() {
-  if (confirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()
+async function volver() {
+  if (await askConfirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()
 }
 
 // Borrar afecta a TODOS los dispositivos: se pide escribir BORRAR para evitar sustos
 function confirmar(texto: string) {
-  return prompt(`${texto}\n\nAfecta a todos los equipos y dispositivos. Escribid BORRAR para confirmar.`)?.trim().toUpperCase() === 'BORRAR'
+  return askConfirm(`${texto}\n\nAfecta a todos los equipos y dispositivos.`, 'BORRAR', 'Borrar')
 }
 async function vaciar() {
-  if (confirmar('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo E.')) await clearAll()
+  if (await confirmar('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo E.')) await clearAll()
 }
 async function restaurar() {
-  if (confirmar('Se sustituirán todos los datos por los datos de ejemplo.')) await resetToSeed()
+  if (await confirmar('Se sustituirán todos los datos por los datos de ejemplo.')) await resetToSeed()
 }
 </script>
 
