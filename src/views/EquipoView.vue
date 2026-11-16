@@ -135,7 +135,7 @@ const expediente = computed(() =>
 
         <fieldset v-if="named.length" class="owner">
           <legend>¿Quién será el digital owner?</legend>
-          <p class="nota">La persona que lleva el ordenador del equipo, registra las fotos y abre el chat.</p>
+          <p class="nota">Quien llevará el ordenador y centralizará toda la experiencia digital del equipo.</p>
           <label v-for="n in named" :key="n" class="opcion" :class="{ 'opcion--on': form.owner === n }">
             <input v-model="form.owner" type="radio" name="owner" :value="n" />
             {{ n }}

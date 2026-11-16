@@ -1,22 +1,23 @@
 // ==========================================================
 // PERSONAS DE CADA EQUIPO · ⚠️ SIMULACIÓN CON NOMBRES INVENTADOS
 //
-// Sirve para ver cómo queda «¿De qué equipo eres?» con nombres.
+// Sirve para probar «¿Quién eres?» (/participa) y la votación.
+// Nombre de pila + inicial del apellido, para distinguir a quienes se llaman igual.
 // Los nombres REALES no van aquí: el repositorio es público.
 // Cuando lleguen, se cargarán en Supabase (como los equipos) y sustituirán a estos.
 // ==========================================================
 
 export const SIMULATED_ROSTER: Record<string, string[]> = {
-  A: ['Lucía', 'Marcos', 'Irene', 'Hugo', 'Carmen'],
-  B: ['Sergio', 'Elena', 'Álvaro', 'Paula'],
-  C: ['Javier', 'Nuria', 'Diego', 'Sara', 'Raúl'],
-  D: ['Clara', 'Óscar', 'Laia', 'Mateo'],
-  E: ['Andrea', 'Iván', 'Noelia', 'Pedro', 'Rocío'],
-  F: ['Daniel', 'Alba', 'Gonzalo', 'Inés'],
-  G: ['Ana', 'Luis', 'Marta', 'Pablo'],
-  H: ['Eva', 'Rubén', 'Celia', 'Tomás', 'Julia'],
-  I: ['Adrián', 'Beatriz', 'Samuel', 'Olga'],
-  J: ['Carla', 'Víctor', 'Lorena', 'Mario', 'Nerea'],
-  K: ['Héctor', 'Silvia', 'Jaime', 'Patricia'],
-  L: ['Alicia', 'Rodrigo', 'Miriam', 'Emilio', 'Teresa'],
+  A: ['Lucía M.', 'Marcos R.', 'Irene T.', 'Hugo S.', 'Carmen V.'],
+  B: ['Sergio L.', 'Elena P.', 'Álvaro G.', 'Paula N.'],
+  C: ['Javier D.', 'Nuria B.', 'Diego F.', 'Sara C.', 'Raúl M.'],
+  D: ['Clara O.', 'Óscar P.', 'Laia R.', 'Mateo G.'],
+  E: ['Andrea S.', 'Iván T.', 'Noelia C.', 'Pedro A.', 'Rocío L.'],
+  F: ['Daniel V.', 'Alba M.', 'Gonzalo H.', 'Inés R.'],
+  G: ['Ana B.', 'Luis C.', 'Marta D.', 'Pablo E.'],
+  H: ['Eva F.', 'Rubén G.', 'Celia H.', 'Tomás I.', 'Lucía S.'],
+  I: ['Adrián J.', 'Beatriz K.', 'Samuel L.', 'Olga M.'],
+  J: ['Carla N.', 'Víctor O.', 'Lorena P.', 'Mario Q.', 'Nerea R.'],
+  K: ['Héctor S.', 'Silvia T.', 'Jaime U.', 'Patricia V.'],
+  L: ['Alicia Z.', 'Rodrigo A.', 'Miriam B.', 'Emilio C.', 'Teresa D.'],
 }
