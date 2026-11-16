@@ -5,6 +5,7 @@
 // Con `demo` (vista previa) funciona igual pero no guarda nada.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { TEAM_DYNAMICS, type TeamDynamic } from '../data/dynamics'
+import { advances, coachReply } from '../data/coachRules'
 import { addChat as saveChat, useStore } from '../data/store'
 import type { ChatMessage } from '../data/types'
 
@@ -22,11 +23,6 @@ const inThisDynamic = computed(() => messages.value.filter((m) => m.dynamicId ==
 const text = ref('')
 const list = ref<HTMLElement>()
 const typing = ref(false)
-
-/** El equipo pide ayuda o dice que no entiende (en vez de responder) */
-function isStuck(text: string) {
-  return /ayud|no entiendo|no (lo )?s[eé]\b|perdid|qu[eé] (tengo|tenemos|hay) que hacer|no me sirve/i.test(text)
-}
 
 function titleOf(dynamicId: string) {
   return TEAM_DYNAMICS.find((d) => d.id === dynamicId)?.title ?? ''
@@ -53,14 +49,10 @@ function send() {
   if (!value) return
   addChat(props.teamId, props.dynamic.id, 'team', value)
   text.value = ''
-  // Las preguntas avanzan solo con respuestas, no con peticiones de ayuda
-  const answered = inThisDynamic.value.filter((m) => m.from === 'team' && !isStuck(m.text)).length
-  const next = props.dynamic.challenges[answered]
-  // Sin IA conectada el chat no entiende lo que escriben: si piden ayuda, se lo decimos claro
-  const stuck = isStuck(value)
-  const reply = stuck
-    ? 'Si estáis atascados, pulsad «Pedir ayuda» (abajo a la derecha) y vendrá alguien del equipo facilitador. Mientras, releed la explicación de la izquierda.'
-    : next ?? 'Apuntado. Seguid trabajando en el papel y, cuando acabe el tiempo, subid la foto. Si os atascáis, pulsad «Pedir ayuda».'
+  // Sin IA: reglas sencillas (src/data/coachRules.ts). Solo las respuestas de verdad avanzan.
+  const fromTeam = inThisDynamic.value.filter((m) => m.from === 'team')
+  const answered = fromTeam.filter((m) => advances(m.text)).length
+  const reply = coachReply(props.dynamic, value, answered, fromTeam.length - 1)
   typing.value = true
   window.setTimeout(() => {
     typing.value = false
