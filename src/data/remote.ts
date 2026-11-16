@@ -92,29 +92,6 @@ export function subscribe(onChange: (row: Row, deleted: boolean) => void, onLost
   connect()
 }
 
-// --- Acceso del equipo facilitador (cuentas creadas en Supabase → Authentication) ---
-
-/** ¿Hay una facilitadora con la sesión iniciada en este dispositivo? */
-export async function hasSession(): Promise<boolean> {
-  const { data } = await sb!.auth.getSession()
-  return !!data.session
-}
-
-/** Inicia sesión. Lanza un error si el correo o la contraseña no son correctos. */
-export async function signIn(email: string, password: string) {
-  const { error } = await sb!.auth.signInWithPassword({ email, password })
-  if (error) throw error
-}
-
-export async function signOut() {
-  await sb!.auth.signOut()
-}
-
-/** Avisa cuando se inicia o se cierra sesión */
-export function onAuthChange(cb: (loggedIn: boolean) => void) {
-  sb!.auth.onAuthStateChange((_event, session) => cb(!!session))
-}
-
 /** Sube una foto (data URL) y devuelve su dirección pública */
 export async function uploadPhoto(path: string, dataUrl: string): Promise<string> {
   const blob = await (await fetch(dataUrl)).blob()

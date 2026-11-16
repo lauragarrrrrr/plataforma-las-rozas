@@ -1,5 +1,9 @@
 -- ==========================================================
 -- Plataforma Las Rozas 2040 · SEGURIDAD
+-- ⛔ NO EJECUTAR. El 16/11/2026 Laura decidió quitar la contraseña del equipo facilitador.
+--    Sin sesión, con estos permisos el panel y la sala dejarían de funcionar.
+--    Se guarda solo por si en otro evento se vuelve a poner contraseña.
+--
 -- Sustituye los permisos provisionales de schema.sql.
 -- Pegar entero en Supabase → SQL Editor → Run. Se puede ejecutar más de una vez.
 --

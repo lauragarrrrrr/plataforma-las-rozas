@@ -43,6 +43,7 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 5. **Entrada con dos puertas** (`/`): «Equipo facilitador» (`/facilitacion` → presentación de la sala o panel) y «Participante» (`/participa` → «¿A qué equipo pertenecéis?»).
 6. **Al entrar, el equipo dice quiénes son** (solo nombre de pila) **y quién es el digital owner.** Mientras la sala está en la parte de facilitación, el equipo ve «Atentos a la sala» con lo que se proyecta. Cuando el panel revela los ámbitos, empiezan las dinámicas.
 7. **Cronómetro y foto obligatoria:** cada dinámica tiene su cronómetro; al acabar el tiempo la pantalla se bloquea hasta que suben la foto, y sin foto no pasan a la siguiente.
+19. **Sin contraseñas** (16/11/2026): ni el panel ni la sala piden iniciar sesión. Los participantes entran por QR directamente a su pantalla.
 8. **El equipo facilitador marca el ritmo:** los equipos **no avanzan solos**. Desde el panel se abre la siguiente dinámica para todos (su cronómetro empieza en ese momento) y el equipo que ya tiene la foto pasa solo. Por equipo se puede «Retener», «Dejar pasar» o volver «Con el grupo». Revelar los ámbitos abre la primera dinámica.
 10. **Primer reto del digital owner:** después de decir quiénes son, «¡[nombre], digital owner! Te ponemos un reto»: subir por QR las fichas individuales de «¿Cuál es la ciudad que no elegirías?», una por persona. Con todas, sigue.
 11. **Sin chat en el titular positivo.** El chat empieza en «Señales de cambio» (Unidad de Investigación).
@@ -354,7 +355,7 @@ Ejemplo de alerta: «Atención, equipo G. Las empresas ya no pueden publicar ofe
 - Revisar todo el material por equipo.
 - Descargar las fotos por equipo y exportar a CSV lo que haya en texto: votos, valoraciones y lista de fotos.
 
-**Acceso:** el panel lleva una contraseña sencilla, definida en una variable de entorno. Cada equipo solo ve sus propios datos.
+**Acceso:** sin contraseña (decidido por Laura el 16/11/2026: el evento es pequeño y tiene que ser ágil). Las pantallas de facilitación se abren directamente y los participantes entran por QR. Las pantallas de participantes no enlazan a la parte de facilitación, y la dirección del panel no se imprime. **No ejecutes `supabase/seguridad.sql`**: sin sesión, el panel dejaría de funcionar.
 
 ---
 
@@ -522,4 +523,4 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | Conecta 2040 | Forma parte de la plataforma, pero tiene datos personales. No entra en esta base ni en un repositorio público |
 | IA conectada al chat | Para que el chat responda de verdad, lea las fotos y proponga la portada hace falta una cuenta de la API de Anthropic (unos 20-50 € la jornada). La cuenta Team no sirve para esto. Lo deciden Laura, Marina y Avantis, con la privacidad confirmada con Las Rozas Innova |
 | Nombres de los participantes | Se guarda el nombre de pila de cada persona y quién es el digital owner. Confirmar con el aviso de datos personales |
-| Seguridad de Supabase | Hoy cualquiera con la dirección de la web puede leer y escribir los datos (permisos provisionales en `supabase/schema.sql`). Cerrarlo antes del evento, junto con la contraseña del panel |
+| Seguridad de Supabase | Sin contraseña (decidido el 16/11/2026). Cualquiera con la dirección de la web puede leer y escribir los datos (permisos de `supabase/schema.sql`). Aceptado para un evento pequeño de un día |

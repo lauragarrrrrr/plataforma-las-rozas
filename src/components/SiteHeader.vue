@@ -4,11 +4,9 @@
 // por accidente a la entrada del equipo facilitador.
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { facilitator, logoutFacilitator, isRemote } from '../data/store'
 
 const route = useRoute()
 const destino = computed(() => (route.meta.facilitator ? '/facilitacion' : '/'))
-const mostrarSalir = computed(() => isRemote && facilitator.value && route.meta.facilitator)
 </script>
 
 <template>
@@ -17,10 +15,7 @@ const mostrarSalir = computed(() => isRemote && facilitator.value && route.meta.
       <img src="/logos/ayuntamiento-las-rozas.png" alt="Ayuntamiento de Las Rozas" />
       <span v-if="route.meta.participant" class="banda__nombre">Las Rozas 2040</span>
       <RouterLink v-else class="banda__nombre" :to="destino">Las Rozas 2040</RouterLink>
-      <div class="banda__der">
-        <button v-if="mostrarSalir" class="banda__salir" type="button" @click="logoutFacilitator().then(() => $router.push('/acceso'))">Cerrar sesión</button>
-        <img src="/logos/las-rozas-innova.png" alt="Las Rozas Innova" />
-      </div>
+      <img src="/logos/las-rozas-innova.png" alt="Las Rozas Innova" />
     </div>
   </header>
 </template>
@@ -30,6 +25,4 @@ const mostrarSalir = computed(() => isRemote && facilitator.value && route.meta.
 .banda__in{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding-block:.9rem}
 .banda img{height:clamp(1.6rem,5vw,2.3rem);width:auto}
 .banda__nombre{font-size:clamp(.95rem,3.6vw,1.5rem);letter-spacing:-.02em;white-space:nowrap;color:var(--c-white);text-decoration:none}
-.banda__der{display:flex;align-items:center;gap:1rem}
-.banda__salir{border:0;border-radius:99px;padding:.35em .9em;background:color-mix(in srgb,var(--c-white) 18%,transparent);color:var(--c-white);font:inherit;font-size:.8rem;cursor:pointer}
 </style>
