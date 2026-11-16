@@ -4,9 +4,10 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { backToRoomAfter, PREMORTEM, TEAM_DYNAMICS, photoOf, type TeamDynamic } from '../data/dynamics'
-import { formatClock, useNow } from '../composables/useNow'
+import { useNow } from '../composables/useNow'
 import PhotoQr from '../components/PhotoQr.vue'
 import CoachChat from '../components/CoachChat.vue'
+import DynamicTimer from '../components/DynamicTimer.vue'
 import VotacionEquipo from '../components/VotacionEquipo.vue'
 
 /** Pasos: el reto del digital owner, las pantallas previas (el sobre) y las 8 dinámicas */
@@ -29,7 +30,6 @@ const d = computed(() => paso.value.d)
 const ahora = useNow()
 const inicio = ref(Date.now())
 const restante = computed(() => inicio.value + d.value.minutes * 60_000 - ahora.value)
-const transcurrido = computed(() => Math.min(100, 100 - (restante.value / (d.value.minutes * 60_000)) * 100))
 
 function ir(n: number) {
   if (n < 0 || n >= pasos.length) return
@@ -107,6 +107,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     <!-- Dinámica -->
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': d.noChat }">
       <div class="izq">
+        <DynamicTimer :remaining="restante" :minutes="d.minutes" />
         <div class="card">
           <span class="kicker">Dinámica {{ numDinamica }} de {{ TEAM_DYNAMICS.length }} · {{ d.minutes }} min</span>
           <h1 class="titulo">{{ d.title }}</h1>
@@ -116,11 +117,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
             <div><dt>Cómo</dt><dd><ol class="como"><li v-for="h in d.how" :key="h">{{ h }}</li></ol></dd></div>
             <div><dt>¿Qué tendríais que obtener?</dt><dd>{{ d.output }}</dd></div>
           </dl>
-        </div>
-        <div class="card reloj">
-          <span class="kicker">Tiempo</span>
-          <strong class="reloj__cifra">{{ formatClock(restante) }}</strong>
-          <div class="reloj__barra"><span :style="{ width: `${transcurrido}%` }"></span></div>
         </div>
         <div class="card">
           <span class="kicker">Al terminar</span>
@@ -168,9 +164,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .qpco dt{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);padding-top:.2rem}
 .qpco dd{margin:0}
 .como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
-.reloj__cifra{font-size:3rem;font-weight:600;color:var(--c-ink);font-variant-numeric:tabular-nums;line-height:1}
-.reloj__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
-.reloj__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width 1s linear}
 .chat-demo{position:sticky;top:7rem}
 .enlace-previa{justify-self:start;border:0;background:none;padding:0;font:inherit;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
 .intro-din{min-height:60vh;display:grid;justify-items:center;align-content:center;gap:1rem;text-align:center;padding-block:3rem}

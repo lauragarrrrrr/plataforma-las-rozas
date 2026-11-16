@@ -9,8 +9,9 @@ import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
 import { addPhoto, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
-import { formatClock, useNow } from '../composables/useNow'
+import { useNow } from '../composables/useNow'
 import CoachChat from '../components/CoachChat.vue'
+import DynamicTimer from '../components/DynamicTimer.vue'
 import HelpButton from '../components/HelpButton.vue'
 import PhotoQr from '../components/PhotoQr.vue'
 import VotacionEquipo from '../components/VotacionEquipo.vue'
@@ -59,7 +60,6 @@ const remaining = computed(() => {
   return new Date(startedAt.value).getTime() + dynamic.value.minutes * 60_000 - now.value
 })
 const timeUp = computed(() => remaining.value <= 0)
-const elapsedPct = computed(() => Math.min(100, 100 - (remaining.value / (dynamic.value.minutes * 60_000)) * 100))
 
 // Apuntamos cuándo llega el equipo a cada dinámica (el cronómetro cuenta desde que se abrió)
 watch(
@@ -239,6 +239,8 @@ const expediente = computed(() =>
 
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
+        <DynamicTimer :remaining="remaining" :minutes="dynamic.minutes" />
+
         <div class="card explica">
           <span class="kicker">Dinámica {{ index + 1 }} de {{ TEAM_DYNAMICS.length }} · {{ dynamic.minutes }} min</span>
           <h1 class="dinamica__titulo">{{ dynamic.title }}</h1>
@@ -251,12 +253,6 @@ const expediente = computed(() =>
             </div>
             <div><dt>¿Qué tendríais que obtener?</dt><dd>{{ dynamic.output }}</dd></div>
           </dl>
-        </div>
-
-        <div class="card reloj" :class="{ 'reloj--fin': timeUp }">
-          <span class="kicker">Tiempo</span>
-          <strong class="reloj__cifra">{{ formatClock(remaining) }}</strong>
-          <div class="reloj__barra"><span :style="{ width: `${elapsedPct}%` }"></span></div>
         </div>
 
         <div class="card foto">
@@ -387,12 +383,6 @@ const expediente = computed(() =>
 .como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
 @media(max-width:520px){.qpco > div{grid-template-columns:1fr;gap:.15rem}}
 
-.reloj{grid-template-columns:auto 1fr;align-items:center;column-gap:1.2rem}
-.reloj .kicker{grid-column:1/-1}
-.reloj__cifra{font-size:clamp(2.6rem,6vw,3.6rem);font-weight:600;letter-spacing:-.04em;color:var(--c-ink);font-variant-numeric:tabular-nums;line-height:1}
-.reloj__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
-.reloj__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width 1s linear}
-.reloj--fin .reloj__cifra{color:var(--c-rubi)}
 
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}
 .esperando{display:flex;gap:.6rem;align-items:flex-start;background:var(--c-green-light);border-radius:1rem;padding:.8rem 1rem;color:var(--c-ink)}
