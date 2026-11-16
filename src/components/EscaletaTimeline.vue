@@ -30,7 +30,10 @@ async function centrar(smooth = true) {
   const el = pista.value?.querySelector<HTMLElement>('.actual')
   if (!pista.value || !el) return
   const left = el.offsetLeft - pista.value.clientWidth / 2 + el.clientWidth / 2
-  pista.value.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' })
+  const p = pista.value
+  p.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' })
+  // Algunos navegadores no animan el desplazamiento: si no se ha movido, salta directamente
+  if (smooth) window.setTimeout(() => { if (Math.abs(p.scrollLeft - Math.max(0, left)) > 40) p.scrollLeft = left }, 700)
 }
 onMounted(() => centrar(false))
 watch(actual, () => centrar())

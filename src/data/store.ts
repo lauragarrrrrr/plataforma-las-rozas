@@ -7,6 +7,7 @@
 // · Sin configurar: datos en el navegador (localStorage), sincronizados entre pestañas.
 // ==========================================================
 import { reactive, readonly, ref, watch } from 'vue'
+import { AGENDA } from './agenda'
 import { AREAS } from './config'
 import { TEAM_DYNAMICS } from './dynamics'
 import { createBlank, createSeed, DB_VERSION } from './seed'
@@ -440,6 +441,17 @@ export function openNextDynamic() {
   const dyn = TEAM_DYNAMICS[next]
   if (dyn) state.event.openedAt = { ...(state.event.openedAt ?? {}), [dyn.id]: now() }
   saveQuiet('event')
+  // La sala acompaña: salta al momento de la escaleta de esa dinámica (solo hacia delante).
+  // La primera dinámica lleva a la revelación de los ámbitos, que va justo antes.
+  if (dyn) advanceRoomTo(next === 0 ? 'ambitos' : ROOM_STEP_OF_DYNAMIC[dyn.id] ?? dyn.id)
+}
+
+/** Momento de la escaleta (AGENDA) de cada dinámica de equipo, cuando no se llama igual */
+const ROOM_STEP_OF_DYNAMIC: Record<string, string> = { 'como-podriamos': 'a-quien' }
+
+function advanceRoomTo(stepId: string) {
+  const i = AGENDA.findIndex((s) => s.id === stepId)
+  if (i > state.room.step) setRoomStep(i)
 }
 
 /** Vuelve a la dinámica anterior para todos (por si se abre una por error) */
