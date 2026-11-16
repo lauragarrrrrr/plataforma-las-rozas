@@ -1,7 +1,7 @@
 // Datos iniciales (CLAUDE.md, apartado 9).
 //
 // · Los 12 equipos (A a L) empiezan EN BLANCO: solo letra y ámbito. El reto lo construyen durante la jornada.
-// · El equipo G (Atracción de talento) lleva datos de EJEMPLO para poder probar las pantallas:
+// · El equipo E (Atracción de talento, como en la metodología v3) lleva datos de EJEMPLO para poder probar las pantallas:
 //   nombres ficticios y el ejemplo de la metodología («Primer Paso»). Se vacía antes del evento desde el panel.
 // · Todo es ficticio: ni nombres reales, ni partidos, ni cargos.
 //
@@ -11,7 +11,7 @@ import { TEAM_AREAS } from './config'
 import type { Database, Team } from './types'
 
 export const DB_VERSION = 3
-export const DEMO_TEAM_ID = 'G'
+export const DEMO_TEAM_ID = 'E'
 
 /** Letra del equipo: 1 → «A», 12 → «L» */
 export function teamId(n: number): string {
@@ -42,7 +42,7 @@ export function createBlank(): Database {
   }
 }
 
-/** Base de datos para probar: en blanco, con los ámbitos ya revelados y el equipo G de ejemplo. */
+/** Base de datos para probar: en blanco, con los ámbitos ya revelados y el equipo E de ejemplo. */
 export function createSeed(): Database {
   const db = createBlank()
   const id = DEMO_TEAM_ID
@@ -50,7 +50,7 @@ export function createSeed(): Database {
   db.event.areasRevealed = true
 
   // Nombres ficticios
-  db.setups.push({ teamId: id, members: ['Ana', 'Luis', 'Marta', 'Pablo'], digitalOwner: 'Ana', premortemDone: true })
+  db.setups.push({ teamId: id, members: ['Andrea S.', 'Iván T.', 'Noelia C.', 'Pedro A.', 'Rocío L.'], digitalOwner: 'Andrea S.', premortemDone: true })
 
   // Texto del ejemplo de la metodología (para la portada y la votación más adelante)
   db.covers.push({

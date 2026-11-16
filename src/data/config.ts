@@ -1,24 +1,27 @@
 // Configuración de la jornada. Cambiar aquí, no en las pantallas.
 import type { AreaId, PhaseId } from './types'
 
-/** Los 6 ámbitos, en el orden de los equipos (decidido por Laura y Marina el 12/11/2026). */
+/** Los 6 ámbitos, en el orden de los equipos (metodología v3 y presentación, 16/11/2026). */
 export const AREAS: Record<AreaId, string> = {
-  open: 'Mirada abierta',
-  city: 'Ciudad y calidad de vida',
+  city: 'Ciudad + calidad de vida',
   business: 'Desarrollo empresarial',
   talent: 'Atracción de talento',
-  education: 'Educación y futuro',
-  public: 'Administración pública',
+  education: 'Educación + futuro',
+  public: 'Administración Pública',
+  open: 'Mirada abierta',
 }
 
-/** Ámbito de cada equipo, de la A a la L: dos equipos por ámbito. Se revela a las 10:20. */
+/**
+ * Ámbito de cada equipo, de la A a la L: dos equipos por ámbito (metodología v3).
+ * Manda sobre lo guardado: al cargar los datos, cada equipo toma su ámbito de aquí.
+ */
 export const TEAM_AREAS: AreaId[] = [
-  'open', 'open',           // A, B
-  'city', 'city',           // C, D
-  'business', 'business',   // E, F
-  'talent', 'talent',       // G, H
-  'education', 'education', // I, J
-  'public', 'public',       // K, L
+  'city', 'city',           // A, B
+  'business', 'business',   // C, D
+  'talent', 'talent',       // E, F
+  'education', 'education', // G, H
+  'public', 'public',       // I, J
+  'open', 'open',           // K, L
 ]
 
 export const PHASES: { id: PhaseId; number: string; name: string; minutes: number }[] = [

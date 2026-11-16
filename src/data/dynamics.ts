@@ -33,7 +33,7 @@ export interface TeamDynamic {
 
 export const TEAM_DYNAMICS: TeamDynamic[] = [
   {
-    id: 'titular', phase: 'foresight', title: 'Titular positivo', minutes: 20, noChat: true,
+    id: 'titular', phase: 'foresight', title: 'Titular positivo', minutes: 15, noChat: true,
     what: 'Escribid vuestro primer titular positivo para Las Rozas Times 2040.',
     why: 'Pasar del futuro que queremos evitar al que sí queremos construir, con un punto de partida común.',
     how: [
@@ -51,7 +51,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'senales', phase: 'research', title: 'Señales de cambio', minutes: 10, research: true,
+    id: 'senales', phase: 'research', title: 'Señales de cambio', minutes: 20, research: true,
     what: 'Buscad unas pocas señales de hoy relacionadas con vuestro titular.',
     why: 'Comprobar qué parte de ese 2040 ya está empezando a pasar.',
     how: [
@@ -69,7 +69,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'a-quien', phase: 'research', title: '¿A quién queremos ayudar?', minutes: 30, research: true,
+    id: 'a-quien', phase: 'research', title: '¿A quién queremos ayudar?', minutes: 20, research: true,
     what: 'Entended al colectivo al que queréis ayudar con cinco preguntas sencillas.',
     why: 'Que la idea responda a una necesidad real.',
     how: [
@@ -90,7 +90,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'como-podriamos', phase: 'research', title: '¿Cómo podríamos…?', minutes: 10, research: true,
+    id: 'como-podriamos', phase: 'research', title: '¿Cómo podríamos…?', minutes: 5, research: true,
     what: 'Convertid lo aprendido en una pregunta.',
     why: 'Que sea el punto de partida para idear.',
     how: [
@@ -107,7 +107,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'cartas', phase: 'ideation', title: 'Cartas de restricciones y de personajes', minutes: 20,
+    id: 'cartas', phase: 'ideation', title: 'Cartas de giros y de personajes', minutes: 15,
     intro: {
       title: '¿Tenéis el sobre de la mesa?',
       text: 'Es el momento de abrirlo. ¿Qué os encontráis?',
@@ -116,7 +116,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     what: 'Robad cartas que cambian las reglas de vuestro reto y mirad la idea con los ojos de otra persona.',
     why: 'Explorar soluciones diferentes antes de quedaros con una, y pensar en quien hoy queda fuera.',
     how: [
-      'Restricciones: sin pantallas, con un presupuesto mínimo, multiplicando su impacto o con una primera solución en 24 horas.',
+      'Giros: sin pantallas, con un presupuesto mínimo, multiplicando su impacto o con una primera solución en 24 horas.',
       'Personajes: una persona mayor, un adolescente, una persona emprendedora, alguien con movilidad reducida, alguien recién llegado…',
       'Generad varias ideas con cada carta.',
     ],
@@ -129,9 +129,9 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'ideacion', phase: 'ideation', title: 'Ideación libre', minutes: 10,
+    id: 'ideacion', phase: 'ideation', title: 'Ideación libre', minutes: 15,
     what: 'Seguid generando ideas libremente, a partir de lo que han abierto las cartas.',
-    why: 'Ampliar las posibilidades, sin las restricciones de las cartas.',
+    why: 'Ampliar las posibilidades, sin las reglas de las cartas.',
     how: [
       'Proponed, combinad y evolucionad ideas en equipo.',
       'Las cartas quedan como apoyo si necesitáis inspiración.',
@@ -144,7 +144,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'ficha', phase: 'ideation', title: 'Ficha de iniciativa', minutes: 30,
+    id: 'ficha', phase: 'ideation', title: 'Ficha de iniciativa', minutes: 25,
     what: 'Elegid una única propuesta y desarrolladla en la ficha.',
     why: 'Poder compartirla y compararla. No hace falta un modelo de negocio.',
     how: [

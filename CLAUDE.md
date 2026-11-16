@@ -2,7 +2,7 @@
 
 Este archivo es la referencia principal del proyecto. Léelo entero antes de escribir código y vuelve a él cuando tengas dudas.
 
-La metodología completa está en `docs/metodologia.html`. Es la **fuente de verdad** de dinámicas, textos, tiempos y estilo. Si este archivo y la metodología no coinciden, para y pregunta.
+La metodología completa está en `docs/metodologia.html` (**v3**, del 16/11/2026, con la escaleta definitiva). Es la **fuente de verdad** de dinámicas, textos, tiempos y estilo. Si este archivo y la metodología no coinciden, para y pregunta.
 
 ---
 
@@ -12,7 +12,7 @@ Una plataforma web que acompaña el hackathon **Las Rozas 2040**, organizado por
 
 | Dato | Valor |
 | --- | --- |
-| Fecha | Sábado 21/11/2026, de 9:30 a 14:30 |
+| Fecha | Sábado 21/11/2026, de 9:00 a 15:30 (trabajo de 9:30 a 14:40) |
 | Participantes | 60 personas en 12 equipos de hasta 5 |
 | Ámbitos | 6 (ver apartado 9) |
 | Dispositivos | 1 ordenador por equipo y el móvil de cada persona |
@@ -49,7 +49,7 @@ La plataforma tiene que ser **sencilla**. Ante la duda, haz la versión más sim
 11. **Sin chat en el titular positivo.** El chat empieza en «Señales de cambio» (Unidad de Investigación).
 12. **«¡Volved a la sala principal!»** al subir la foto de la última dinámica de cada fase, hasta que se abra la siguiente.
 13. **«¿De qué equipo eres?»** muestra los nombres de cada equipo. Hoy son **inventados** (`src/data/roster.ts`). Los reales no van en el repositorio (es público): se cargarán en Supabase.
-15. **El sobre de la mesa:** antes de «Cartas de restricciones y de personajes», pantalla «¿Tenéis el sobre de la mesa? Es el momento de abrirlo. ¿Qué os encontráis?» con el botón «¡Sí, ya lo tenemos!», que lleva a la dinámica (campo `intro` en `src/data/dynamics.ts`).
+15. **El sobre de la mesa:** antes de «Cartas de giros y de personajes», pantalla «¿Tenéis el sobre de la mesa? Es el momento de abrirlo. ¿Qué os encontráis?» con el botón «¡Sí, ya lo tenemos!», que lleva a la dinámica (campo `intro` en `src/data/dynamics.ts`).
 17. **Portada en papel:** cada equipo rellena su portada de Las Rozas Times 2040 en papel y sube la foto. En el speed pitch se proyecta **esa foto** en las pantallas como apoyo; el equipo puede subir al escenario con la portada en papel. Solo tienen **30 segundos**. La plataforma no genera la portada a partir de textos.
 18. **Votación** (como la «Pieza 08» de la metodología): al final de la app del equipo se ve el apartado «Votación», **bloqueado** hasta que el panel la abre (al terminar el speed pitch). Abierta, muestra un QR: **cada persona vota desde su móvil**. Elige su nombre (una sola vez por persona) → **Paso 1 de 2:** «Las 12 portadas de 2040» (fotos de las portadas) → **Paso 2 de 2:** ★ Favorita 1, 2 y 3, **3, 2 y 1 puntos**, nunca su propio equipo → «Enviar mis preferencias» → «¡Voto recibido!». El voto se guarda como equipo + posición de la persona, **sin el nombre**. El recuento por puntos solo se ve en el panel. En la votación se ven **las fotos de las portadas**, sin textos escritos.
 16. **El reto de las fichas no es obligatorio** y no dice cuántas faltan: «Seguir» está siempre disponible.
@@ -185,6 +185,8 @@ Cada fase de la app se corresponde con una fase de la metodología. No añadas c
 
 > ⚠️ **Desde el 12/11/2026, lo que se registra es solo la foto** del material en papel (ver «Dos partes», apartado 1). Las columnas «Qué se registra» de abajo describen **qué contiene ese papel**, no formularios que haya que rellenar en la app.
 
+> **Horas y minutos: manda la escaleta de la metodología v3** (`src/data/agenda.ts` y los minutos de `src/data/dynamics.ts`, actualizados el 16/11/2026). Las horas de las tablas de abajo son de antes.
+
 ### Fase 01 · Foresight (45 min de dinámicas + inspiración)
 
 | Hora | Dinámica | Quién | Qué se registra |
@@ -227,11 +229,11 @@ La **Unidad de Investigación con IA** acompaña toda esta fase (ver apartado 7)
 
 | Hora | Dinámica | Qué se registra |
 | --- | --- | --- |
-| 11:40 | Cartas de restricciones y de personajes (20 min) | Foto de las ideas. Opcional: lista corta de ideas |
+| 11:40 | Cartas de giros y de personajes (20 min) | Foto de las ideas. Opcional: lista corta de ideas |
 | 12:00 | Ideación libre (10 min) | Foto |
 | 12:10 | Ficha de iniciativa (30 min) | Los 6 campos |
 
-**Cartas de restricciones (ejemplos):** sin pantallas, presupuesto mínimo, multiplicar su impacto, una primera solución en 24 horas.
+**Cartas de giros (ejemplos):** sin pantallas, presupuesto mínimo, multiplicar su impacto, una primera solución en 24 horas.
 
 **Cartas de personajes (ejemplos):** una persona mayor, un adolescente, alguien recién llegado.
 
@@ -431,16 +433,16 @@ interface EventState { areasRevealed: boolean }
 
 | Equipos | Ámbito |
 | --- | --- |
-| A y B | Mirada abierta |
-| C y D | Ciudad y calidad de vida |
-| E y F | Desarrollo empresarial |
-| G y H | Atracción de talento |
-| I y J | Educación y futuro |
-| K y L | Administración pública |
+| A y B | Ciudad + calidad de vida |
+| C y D | Desarrollo empresarial |
+| E y F | Atracción de talento |
+| G y H | Educación + futuro |
+| I y J | Administración Pública |
+| K y L | Mirada abierta |
 
-Está en `src/data/config.ts`. Los equipos empiezan en blanco: el reto lo construyen durante la jornada. En la revelación de ámbitos (sala) aparecen los nombres de pila de cada equipo según los escriben al entrar.
+*Cambiado el 16/11/2026 para coincidir con la metodología v3 y la presentación.* Está en `src/data/config.ts` (`TEAM_AREAS`), que manda también sobre lo ya guardado en Supabase. Los equipos empiezan en blanco: el reto lo construyen durante la jornada. En la revelación de ámbitos (sala) aparecen los nombres de pila de cada equipo según los escriben al entrar.
 
-**El equipo G · Atracción de talento** lleva el ejemplo de la metodología (donde aparece como «equipo 07»), marcado como ejemplo y para borrar antes del evento:
+**El equipo E · Atracción de talento** lleva el ejemplo de la metodología (donde aparece como «Equipo E»), marcado como ejemplo y para borrar antes del evento:
 
 | Campo | Valor |
 | --- | --- |

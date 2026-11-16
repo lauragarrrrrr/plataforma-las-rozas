@@ -51,7 +51,7 @@ function confirmar(texto: string) {
   return prompt(`${texto}\n\nAfecta a todos los equipos y dispositivos. Escribid BORRAR para confirmar.`)?.trim().toUpperCase() === 'BORRAR'
 }
 async function vaciar() {
-  if (confirmar('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo G.')) await clearAll()
+  if (confirmar('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo E.')) await clearAll()
 }
 async function restaurar() {
   if (confirmar('Se sustituirán todos los datos por los datos de ejemplo.')) await resetToSeed()

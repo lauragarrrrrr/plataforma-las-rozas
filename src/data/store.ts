@@ -8,7 +8,7 @@
 // ==========================================================
 import { reactive, readonly, ref, watch } from 'vue'
 import { AGENDA } from './agenda'
-import { AREAS } from './config'
+import { AREAS, TEAM_AREAS } from './config'
 import { backToRoomAfter, TEAM_DYNAMICS } from './dynamics'
 import { createBlank, createSeed, DB_VERSION } from './seed'
 import {
@@ -22,7 +22,7 @@ export const isRemote = !!sb
 const STORAGE_KEY = 'lr2040:db'
 const CHANNEL_NAME = 'lr2040'
 
-const state = reactive<Database>(isRemote ? createBlank() : loadLocal())
+const state = reactive<Database>(withConfigAreas(isRemote ? createBlank() : loadLocal()))
 const ready = ref(!isRemote)
 const connError = ref('')
 let saveError = false
@@ -36,7 +36,14 @@ const now = () => {
 }
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x))
 
+/** El ámbito de cada equipo sale siempre de config.ts (así se cambia sin borrar datos) */
+function withConfigAreas<T extends { teams: Database['teams'] }>(db: T): T {
+  for (const t of db.teams) t.area = TEAM_AREAS[t.number - 1] ?? t.area
+  return db
+}
+
 function replaceState(next: Database) {
+  withConfigAreas(next)
   for (const key of Object.keys(state) as (keyof Database)[]) {
     if (!(key in next)) delete (state as Partial<Database>)[key]
   }
@@ -118,7 +125,7 @@ function applyRowTo(target: Database, row: Row, deleted: boolean) {
   }
   // Supabase devuelve las filas en cualquier orden: equipos de la A a la L,
   // y chat, fotos y ayudas por orden de llegada
-  if (coll === 'teams') target.teams.sort((a, b) => a.number - b.number)
+  if (coll === 'teams') withConfigAreas(target).teams.sort((a, b) => a.number - b.number)
   if (coll === 'chat' || coll === 'photos' || coll === 'helpRequests') {
     ;(target[coll] as { createdAt: string }[]).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   }
