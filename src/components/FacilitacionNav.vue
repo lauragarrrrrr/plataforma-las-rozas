@@ -9,7 +9,6 @@ const router = useRouter()
 const LINKS = [
   { to: '/facilitacion', label: 'Inicio' },
   { to: '/panel', label: 'Panel' },
-  { to: '/sala', label: 'Presentación de la sala' },
   { to: '/vista-previa', label: 'Vista previa' },
 ]
 
