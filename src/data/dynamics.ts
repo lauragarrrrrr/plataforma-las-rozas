@@ -168,8 +168,8 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     why: 'Que cualquier persona entienda la idea en segundos.',
     how: [
       'Rellenad la portada en papel.',
-      'Haced la foto y enviadla: la pondremos en las pantallas como apoyo mientras presentáis.',
-      'También podéis subir al escenario con vuestra portada en papel.',
+      'Haced la foto y subidla, para que quede en vuestro expediente.',
+      'Subiréis al escenario con vuestra portada en papel.',
       'Tendréis solo 30 segundos para contar vuestra idea: preparadlos.',
     ],
     output: 'Una portada por equipo, lista para presentar en 30 segundos.',

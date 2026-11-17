@@ -76,7 +76,7 @@ export const AGENDA: AgendaStep[] = [
   { id: 'traslado', time: '13:15', minutes: 5, title: 'Volvemos a la sala principal', who: 'Toda la sala', kind: 'info',
     description: 'Los equipos vuelven al escenario mientras se cargan las portadas en el orden del speed pitch.' },
   { id: 'pitch', time: '13:20', minutes: 50, title: 'Speed pitch', who: 'Toda la sala', kind: 'info',
-    description: 'Cada equipo: 30 s para contar su idea con la portada detrás, 1,5 min de preguntas del jurado y 2 min de cambio.' },
+    description: 'Cada equipo sube al escenario con su portada en papel: 30 s para contar su idea, 1,5 min de preguntas del jurado y 2 min de cambio.' },
   { id: 'votacion', time: '14:10', minutes: 5, title: 'Votación', who: 'Individual', kind: 'info',
     description: 'Primero, todas las portadas en pantalla; después, cada persona vota sus tres favoritas.' },
   { id: 'valoracion', time: '14:15', minutes: 10, title: 'Valoración y El Rey Mono', who: 'Toda la sala', kind: 'info',
