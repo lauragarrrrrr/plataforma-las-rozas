@@ -40,6 +40,8 @@ const tarjetas = computed(() =>
       terminado,
       din,
       fotoActual: !!(din && store.photoFor(t.id, din.id)),
+      // El grupo ya va por delante: solo le falta la foto para pasar
+      siguiente: !terminado && store.allowed(t.id) > i ? TEAM_DYNAMICS[i + 1] : undefined,
       fotos: store.photos(t.id).length,
       ayuda: !!store.pendingHelp(t.id),
       excepcion: p?.limit === undefined ? '' : p.limit > abierta.value ? 'Adelantado' : 'Retenido',
@@ -105,8 +107,10 @@ function verFotos(t: Team) {
           <template v-if="c.terminado">Ha terminado todas las dinámicas</template>
           <template v-else>{{ c.i + 1 }}/{{ TEAM_DYNAMICS.length }} · <strong>{{ c.din.title }}</strong></template>
         </p>
-        <p v-if="!c.terminado" class="estado" :class="c.fotoActual ? 'estado--si' : 'estado--no'">
-          {{ c.fotoActual ? '✓ Foto subida: esperando la siguiente' : 'Trabajando · sin foto todavía' }}
+        <p v-if="!c.terminado" class="estado" :class="c.fotoActual ? 'estado--si' : c.siguiente ? 'estado--falta' : 'estado--no'">
+          <template v-if="c.fotoActual">✓ Foto subida: esperando la siguiente</template>
+          <template v-else-if="c.siguiente">Falta la foto de «{{ c.din.title }}» para pasar a «{{ c.siguiente.title }}»</template>
+          <template v-else>Trabajando · sin foto todavía</template>
         </p>
       </template>
 
@@ -183,6 +187,7 @@ function verFotos(t: Team) {
 .estado{font-size:.8rem;font-weight:600;border-radius:.8rem;padding:.35rem .7rem}
 .estado--si{background:var(--c-green-light);color:var(--c-green-deep)}
 .estado--no{background:color-mix(in srgb,var(--c-gris-10) 50%,var(--c-white));color:var(--c-green-dark)}
+.estado--falta{background:color-mix(in srgb,var(--c-rubi) 12%,var(--c-white));color:var(--c-rubi)}
 .equipo__pie{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between}
 .ver{border:0;border-radius:99px;padding:.45em 1em;background:var(--c-innova);color:var(--c-ink);font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
 .ver:disabled{background:var(--c-green-light);color:var(--c-green-dark);cursor:default;font-weight:400}
