@@ -135,6 +135,7 @@ async function restaurar() {
             <span v-if="restante !== null" class="ritmo__reloj" :class="{ 'ritmo__reloj--fin': restante <= 0 }">
               {{ restante > 0 ? formatClock(restante) : 'Tiempo terminado' }}
             </span>
+            <span class="ritmo__total">de {{ dinAbierta.minutes }} min</span>
           </div>
           <p>Han subido su foto <strong>{{ conFoto }} de {{ store.db.teams.length }}</strong> equipos. Los equipos no pasan a la siguiente hasta que la abráis.</p>
         </template>
@@ -212,5 +213,6 @@ async function restaurar() {
 .ritmo__actual strong{font-size:clamp(1.2rem,2.2vw,1.6rem);font-weight:500;color:var(--c-ink);letter-spacing:-.02em}
 .ritmo__reloj{font-size:1.4rem;font-weight:600;color:var(--c-innova-dark);font-variant-numeric:tabular-nums}
 .ritmo__reloj--fin{color:var(--c-rubi);font-size:1rem}
+.ritmo__total{font-size:.9rem;color:var(--c-green-dark)}
 .boton--sec{background:var(--c-white);box-shadow:inset 0 0 0 1.5px var(--c-ink)}
 </style>
