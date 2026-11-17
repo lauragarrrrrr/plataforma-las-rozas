@@ -422,6 +422,14 @@ const expediente = computed(() =>
           <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
         </template>
         <p v-if="nextOne" class="nota">Cuando sea el momento, accederéis todos a la siguiente fase desde aquí.</p>
+        <!-- Antes de irse: fotos de más de esta fase (post-its, borradores…) -->
+        <button v-if="!showExtraQr" class="sala-aviso__mas" type="button" @click="showExtraQr = true">
+          ＋ Añadir más fotos de esta fase (post-its, borradores…){{ extras.length ? ` · lleváis ${extras.length}` : '' }}
+        </button>
+        <div v-else class="sala-aviso__fotos">
+          <PhotoQr :team-id="id" :dynamic-id="dynamic.id" extra @uploaded="(u) => onPhoto(u, true)" />
+          <button class="enlace" type="button" @click="showExtraQr = false">Listo, ya están todas</button>
+        </div>
         <!-- Por si algo falla: esta pantalla tapa el botón de «Pedir ayuda» -->
         <p v-if="store.pendingHelp(id)" class="sala-aviso__enviado">Aviso enviado: el equipo facilitador viene a vuestra mesa.</p>
         <button v-else class="sala-aviso__error" type="button" @click="requestHelp(id, dynamic.id)">
@@ -556,6 +564,8 @@ const expediente = computed(() =>
 .sala-aviso h2{color:var(--c-white);font-size:clamp(2.2rem,6vw,4rem);font-weight:600;letter-spacing:-.04em;line-height:1}
 .sala-aviso p{font-size:1.2rem}
 .sala-aviso .nota{font-size:.95rem;opacity:.9}
+.sala-aviso__mas{border:0;border-radius:99px;padding:.7em 1.4em;background:var(--c-white);color:var(--c-ink);font:inherit;font-weight:600;cursor:pointer}
+.sala-aviso__fotos{display:grid;gap:.6rem;justify-items:start;width:100%;box-sizing:border-box;background:var(--c-white);color:var(--c-green-dark);border-radius:var(--radius-card);padding:1.2rem;text-align:left}
 .sala-aviso__error{margin-top:1rem;border:2px solid var(--c-white);border-radius:99px;padding:.6em 1.3em;background:transparent;color:var(--c-white);font:inherit;font-weight:600;cursor:pointer}
 .sala-aviso__error:hover{background:var(--c-white);color:var(--c-rubi)}
 .sala-aviso__enviado{margin-top:1rem;background:var(--c-white);color:var(--c-rubi);border-radius:1rem;padding:.6rem 1.2rem;font-weight:600}
