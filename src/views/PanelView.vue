@@ -24,6 +24,9 @@ const hora = (iso: string) => new Date(iso).toLocaleTimeString('es-ES', { hour: 
 const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attendedAt).slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)))
 const atendidas = computed(() => store.db.helpRequests.filter((h) => h.attendedAt).slice(-8).reverse())
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
+/** Desde el momento de la votación, la votación sube arriba del todo (con su botón de abrirla) */
+const MOMENTOS_VOTACION = ['votacion', 'valoracion', 'resultados', 'cierre', 'comida']
+const votacionArriba = computed(() => MOMENTOS_VOTACION.includes(paso.value.id))
 
 // --- Descargar todas las fotos en un ZIP, por equipos (para guardarlas en un Drive) ---
 const zipProgreso = ref('')
@@ -125,6 +128,8 @@ async function restaurar() {
 
       <EscaletaTimeline />
 
+      <PanelVotacion v-if="votacionArriba" class="votacion-arriba" />
+
       <section class="card ritmo">
         <span class="kicker">Dinámica abierta para todos los equipos</span>
         <template v-if="abierta < 0">
@@ -173,7 +178,7 @@ async function restaurar() {
 
       <PanelEquipos />
 
-      <PanelVotacion />
+      <PanelVotacion v-if="!votacionArriba" />
 
       <section class="card">
         <span class="kicker">Copia de las fotos</span>
@@ -216,6 +221,7 @@ async function restaurar() {
 .ritmo__actual strong{font-size:clamp(1.2rem,2.2vw,1.6rem);font-weight:500;color:var(--c-ink);letter-spacing:-.02em}
 .ritmo__reloj{font-size:1.4rem;font-weight:600;color:var(--c-innova-dark);font-variant-numeric:tabular-nums}
 .ritmo__reloj--fin{color:var(--c-rubi);font-size:1rem}
+.votacion-arriba{box-shadow:inset 0 0 0 3px var(--c-innova)}
 .ritmo__total{font-size:.9rem;color:var(--c-green-dark)}
 .boton--sec{background:var(--c-white);box-shadow:inset 0 0 0 1.5px var(--c-ink)}
 </style>
