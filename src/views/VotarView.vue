@@ -133,12 +133,12 @@ async function enviar() {
         <span class="paso">Paso 1 de 2</span>
         <h1 class="titulo">Los 12 titulares de 2040</h1>
         <p>Repasa todos los titulares antes de votar.</p>
-        <div class="titulares">
-          <article v-for="t in store.db.teams" :key="t.id" class="titular" :class="{ 'titular--mio': t.id === equipo }">
-            <small class="titular__cab">Las Rozas Times · Eq. {{ t.id }} · {{ store.areaName(t.area) }}</small>
-            <p v-if="store.coverHeadline(t.id)" class="titular__texto">{{ store.coverHeadline(t.id) }}</p>
-            <p v-else class="titular__sin">Titular pendiente</p>
-            <em v-if="t.id === equipo" class="titular__mio">Tu equipo</em>
+        <div class="voto-titulares">
+          <article v-for="t in store.db.teams" :key="t.id" class="voto-tit" :class="{ 'voto-tit--mio': t.id === equipo }">
+            <small class="voto-tit__cab">Las Rozas Times · Eq. {{ t.id }} · {{ store.areaName(t.area) }}</small>
+            <p v-if="store.coverHeadline(t.id)" class="voto-tit__texto">{{ store.coverHeadline(t.id) }}</p>
+            <p v-else class="voto-tit__sin">Titular pendiente</p>
+            <em v-if="t.id === equipo" class="voto-tit__mio">Tu equipo</em>
           </article>
         </div>
         <div class="barra-inferior">
@@ -202,13 +202,13 @@ async function enviar() {
 .nombre:disabled{opacity:.5;cursor:default}
 .nombre small{font-size:.8rem;color:var(--c-green-dark)}
 
-.titulares{display:grid;gap:.6rem}
-.titular{display:grid;gap:.35rem;margin:0;padding:1rem 1.1rem;border-radius:1rem;background:var(--c-paper);box-shadow:0 0 0 1px var(--c-paper-line)}
-.titular__cab{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c-innova-dark);font-weight:600}
-.titular__texto{margin:0;font-family:var(--font-paper);font-size:1.2rem;font-weight:700;line-height:1.2;color:var(--c-ink)}
-.titular__sin{margin:0;font-family:var(--font-paper);font-style:italic;color:var(--c-green-dark)}
-.titular__mio{font-style:normal;font-size:.8rem;font-weight:700;color:var(--c-green-deep)}
-.titular--mio{opacity:.6}
+.voto-titulares{display:grid;gap:.6rem}
+.voto-tit{display:grid;gap:.35rem;margin:0;padding:1rem 1.1rem;border-radius:1rem;background:var(--c-paper);box-shadow:0 0 0 1px var(--c-paper-line)}
+.voto-tit__cab{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c-innova-dark);font-weight:600}
+.voto-tit__texto{margin:0;font-family:var(--font-paper);font-size:1.25rem;font-weight:700;line-height:1.3;letter-spacing:normal;color:var(--c-ink)}
+.voto-tit__sin{margin:0;font-family:var(--font-paper);font-style:italic;color:var(--c-green-dark)}
+.voto-tit__mio{font-style:normal;font-size:.8rem;font-weight:700;color:var(--c-green-deep)}
+.voto-tit--mio{opacity:.6}
 
 .favorita{display:grid;gap:.4rem;background:var(--c-white);border-radius:var(--radius-card);padding:1rem}
 .favorita label{font-weight:600;color:var(--c-ink)}
