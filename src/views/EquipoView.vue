@@ -461,8 +461,9 @@ const expediente = computed(() =>
 /* Sin chat: explicación a la izquierda y cronómetro + foto a la derecha */
 .dinamica--sin-chat{grid-template-columns:1fr}
 .dinamica--sin-chat .dinamica__izq{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:start}
-.dinamica--sin-chat .explica{grid-row:span 2}
-@media(max-width:960px){.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}.dinamica--sin-chat .explica{grid-row:auto}}
+/* Sin chat: cronómetro arriba a todo el ancho; debajo, la explicación y la foto, una al lado de la otra */
+.dinamica--sin-chat .reloj{grid-column:1/-1}
+@media(max-width:960px){.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}}
 .dinamica__izq{display:grid;gap:1.25rem}
 .dinamica__chat{position:sticky;top:1rem}
 .dinamica__titulo{font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
