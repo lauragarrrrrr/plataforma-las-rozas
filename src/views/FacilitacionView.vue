@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // /facilitacion · Entrada del equipo facilitador
-// ⚠️ La contraseña llega con el panel completo (hito 4).
+// La presentación de la sala va aparte (decidido por Laura el 17/11/2026): aquí solo panel y vista previa.
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
@@ -17,16 +17,11 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
       <span class="kicker">Equipo facilitador</span>
       <h1 class="titular">¿Qué queréis hacer?</h1>
       <div class="opciones">
-        <RouterLink class="opcion opcion--sala" to="/sala">
-          <span class="kicker">Proyector</span>
-          <strong>Presentación de la sala</strong>
-          <span>La jornada paso a paso, como una presentación: apertura, recorrido, foresight, vídeo y cada dinámica con su cronómetro.</span>
-          <span class="ahora">Ahora: {{ paso.title }}</span>
-        </RouterLink>
         <RouterLink class="opcion" to="/panel">
           <span class="kicker">Seguimiento</span>
           <strong>Panel de los equipos</strong>
           <span>Por dónde va cada equipo, sus fotos y sus peticiones de ayuda.</span>
+          <span class="ahora">Ahora en la jornada: {{ paso.title }}</span>
           <span v-if="pendientes" class="aviso">{{ pendientes }} {{ pendientes === 1 ? 'equipo pide' : 'equipos piden' }} ayuda</span>
         </RouterLink>
         <RouterLink class="opcion opcion--previa" to="/vista-previa">
@@ -45,10 +40,7 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 .opcion{display:grid;gap:.45rem;align-content:start;background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.4rem,3vw,2.2rem);text-decoration:none;color:var(--c-green-dark);transition:transform .2s var(--ease-out)}
 .opcion:hover{transform:translateY(-4px)}
 .opcion strong{font-size:clamp(1.4rem,2.6vw,2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1;color:var(--c-ink)}
-.opcion--sala{background:var(--gradient-dark);color:var(--c-green-light)}
-.opcion--sala strong{color:var(--c-white)}
-.opcion--sala .kicker{color:var(--c-green-mid)}
-.opcion--previa{grid-column:1/-1;background:var(--c-white);box-shadow:inset 0 0 0 2px var(--c-green-mid)}
-.ahora{margin-top:.5rem;font-weight:600;color:var(--c-green-mid)}
+.opcion--previa{background:var(--c-white);box-shadow:inset 0 0 0 2px var(--c-green-mid)}
+.ahora{margin-top:.5rem;font-weight:600;color:var(--c-innova-dark)}
 .aviso{justify-self:start;margin-top:.5rem;background:var(--c-rubi);color:var(--c-white);border-radius:99px;padding:.3em .9em;font-size:.85rem;font-weight:600}
 </style>

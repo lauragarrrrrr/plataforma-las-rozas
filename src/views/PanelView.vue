@@ -4,7 +4,6 @@
 import { askConfirm } from '../composables/useConfirm'
 import { computed, ref } from 'vue'
 import { photosZip, saveFile } from '../data/photoZip'
-import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { PHASES } from '../data/config'
 import { TEAM_DYNAMICS } from '../data/dynamics'
@@ -99,8 +98,7 @@ async function restaurar() {
         <span class="kicker">Equipo facilitador</span>
         <h1 class="titular">Panel</h1>
         <p>
-          Ahora en la sala: <strong>{{ paso.title }}</strong> ({{ paso.time }}) ·
-          <RouterLink to="/sala">Abrir la presentación</RouterLink> ·
+          Ahora en la jornada: <strong>{{ paso.title }}</strong> ({{ paso.time }}) ·
           Ámbitos {{ store.db.event.areasRevealed ? 'revelados' : 'sin revelar' }}
         </p>
       </div>
@@ -110,7 +108,7 @@ async function restaurar() {
       <section class="card ritmo">
         <span class="kicker">Dinámica abierta para todos los equipos</span>
         <template v-if="abierta < 0">
-          <p>Todavía ninguna. La primera («{{ TEAM_DYNAMICS[0].title }}») se abre al <strong>revelar los ámbitos</strong> en la presentación, o con este botón.</p>
+          <p>Todavía ninguna. La primera («{{ TEAM_DYNAMICS[0].title }}») se abre con este botón, que también <strong>revela los ámbitos</strong> a los participantes.</p>
         </template>
         <template v-else-if="dinAbierta">
           <div class="ritmo__actual">

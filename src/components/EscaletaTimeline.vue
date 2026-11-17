@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Escaleta de la jornada en forma de línea de tiempo, para el panel.
 // Marca lo hecho, dónde está la sala y qué dinámica tienen abierta los equipos.
-// Al pulsar un momento, la presentación de la sala salta ahí.
+// Al pulsar un momento, se marca como el momento actual de la jornada.
 import { askConfirm } from '../composables/useConfirm'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { AGENDA } from '../data/agenda'
@@ -22,7 +22,7 @@ function abiertaEnEquipos(stepId: string) {
 
 async function ir(i: number) {
   if (i === actual.value) return
-  if (await askConfirm(`¿Llevar la presentación de la sala a «${AGENDA[i].title}» (${AGENDA[i].time})?`)) setRoomStep(i)
+  if (await askConfirm(`¿Marcar «${AGENDA[i].title}» (${AGENDA[i].time}) como el momento actual de la jornada?`)) setRoomStep(i)
 }
 
 // Mantiene a la vista el momento actual (centrado en la línea, sin mover la página)
@@ -46,7 +46,7 @@ watch(actual, () => centrar())
       <span class="kicker">Escaleta de la jornada</span>
       <span class="leyenda">
         <span><i class="p p--hecho"></i> Hecho</span>
-        <span><i class="p p--actual"></i> En la sala</span>
+        <span><i class="p p--actual"></i> Ahora</span>
         <span><i class="p p--equipos"></i> Abierta para los equipos</span>
       </span>
     </div>
