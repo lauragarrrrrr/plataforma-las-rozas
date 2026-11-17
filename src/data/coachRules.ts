@@ -6,8 +6,12 @@
 // Para cambiar textos o añadir reglas, todo está aquí.
 // ==========================================================
 import type { TeamDynamic } from './dynamics'
+import { ejemploPara } from './examples'
 
-export type ReplyKind = 'help' | 'question' | 'short' | 'unsure' | 'answer'
+export type ReplyKind = 'help' | 'example' | 'question' | 'short' | 'unsure' | 'answer'
+
+// Piden un ejemplo («dame un ejemplo», «¿algún ejemplo?», «por ejemplo qué»…)
+const EXAMPLE = /\b(ejemplo|ejemplos|ejemplito|algun caso|un caso|otra carta|una carta|dame una idea|danos una idea)\b/
 
 /** Sin tildes y en minúsculas, para comparar */
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
@@ -25,6 +29,7 @@ export function classify(text: string): ReplyKind {
   const t = plain(text)
   const words = t.split(/\s+/).filter(Boolean)
   if (HELP.test(t)) return 'help'
+  if (EXAMPLE.test(t) && words.length <= 10) return 'example'
   if (UNSURE.test(t) && words.length <= 6) return 'unsure'
   if (t.endsWith('?') || t.startsWith('¿') || QUESTION_START.test(t) || QUESTION_ABOUT.test(t)) return 'question'
   if (words.length < 3) return 'short'
@@ -77,6 +82,13 @@ export function coachReply(dynamic: TeamDynamic, text: string, answered: number,
   const kind = classify(text)
   if (kind === 'help') {
     return 'Si estáis atascados, pulsad «Pedir ayuda» (abajo a la derecha) y vendrá alguien del equipo facilitador. Mientras, releed la explicación de la izquierda.'
+  }
+  if (kind === 'example') {
+    const ej = ejemploPara(dynamic.id, turn)
+    if (!ej) return `Aquí no tengo ejemplos: lo importante es lo que penséis vosotros. Una pista: ${dynamic.what.charAt(0).toLowerCase()}${dynamic.what.slice(1)}`
+    return dynamic.id === 'cartas'
+      ? `${ej} ¿Qué idea os sale con ella?`
+      : `Un ejemplo: ${ej} No lo copiéis: ¿cómo sería el vuestro?`
   }
   if (kind === 'unsure') {
     const tip = dynamic.how[turn % dynamic.how.length]
