@@ -148,6 +148,7 @@ async function enviar() {
         <button class="enlace" type="button" @click="paso = 1">← Ver las portadas</button>
         <span class="paso">Paso 2 de 2</span>
         <h1 class="titulo">¿Qué ideas te gustaría ver avanzar?</h1>
+        <p class="quien">Votas como <strong>{{ nombres[persona!] }}</strong>, del <strong>equipo {{ equipo }}</strong>.</p>
         <p>Selecciona tus tres iniciativas favoritas. No puedes votar a tu propio equipo.</p>
 
         <div v-for="k in [0, 1, 2]" :key="k" class="favorita">
@@ -155,6 +156,7 @@ async function enviar() {
           <select :id="`fav-${k}`" v-model="favoritas[k]" class="selector">
             <option value="">Seleccionar</option>
             <option v-for="t in opciones(k)" :key="t.id" :value="t.id">Equipo {{ t.id }} · {{ store.areaName(t.area) }}</option>
+            <option disabled :value="`propio-${equipo}`">Equipo {{ equipo }} · es tu equipo (no se puede)</option>
           </select>
           <div v-if="elegida(k)" class="favorita__info">
             <img v-if="portada(elegida(k)!)" :src="portada(elegida(k)!)" alt="" />
@@ -186,6 +188,7 @@ async function enviar() {
 .resumen li{background:var(--c-white);border-radius:1rem;padding:.7rem 1rem;color:var(--c-ink)}
 
 .selector{width:100%;font:inherit;font-size:1rem;padding:.8rem 1rem;border:1.5px solid var(--c-green-mid);border-radius:1rem;background:var(--c-white);color:var(--c-ink)}
+.quien{margin:0;padding:.6rem 1rem;border-radius:1rem;background:var(--c-white);color:var(--c-ink)}
 .nombres{display:grid;gap:.5rem}
 .nombre--yo{background:var(--c-innova);text-align:center}
 .equipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.5rem}
