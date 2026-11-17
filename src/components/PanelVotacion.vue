@@ -37,7 +37,7 @@ async function alternar() {
       <p class="nota">Favorita 1 = 3 puntos · favorita 2 = 2 · favorita 3 = 1.</p>
       <ol class="recuento">
         <li v-for="r in recuento" :key="r.teamId">
-          <span class="recuento__eq">Equipo {{ r.teamId }}</span>
+          <span class="recuento__eq">Equipo {{ r.teamId }}<em v-if="store.coverHeadline(r.teamId)">{{ store.coverHeadline(r.teamId) }}</em></span>
           <span class="recuento__barra"><i :style="{ width: `${(r.points / maximo) * 100}%` }"></i></span>
           <strong>{{ r.points }} <small>pts</small></strong>
           <small class="recuento__votos">{{ r.votes }} {{ r.votes === 1 ? 'voto' : 'votos' }}</small>
@@ -53,10 +53,11 @@ async function alternar() {
 .boton--sec{background:var(--c-white);box-shadow:inset 0 0 0 1.5px var(--c-ink)}
 details summary{cursor:pointer;font-weight:600;color:var(--c-ink);margin-top:.4rem}
 .recuento{list-style:none;margin:.6rem 0 0;padding:0;display:grid;gap:.35rem}
-.recuento li{display:grid;grid-template-columns:6rem 1fr 3.5rem 4rem;align-items:center;gap:.6rem;font-size:.9rem}
+.recuento li{display:grid;grid-template-columns:minmax(9rem,1.6fr) 1fr 3.5rem 4rem;align-items:center;gap:.6rem;font-size:.9rem}
 .recuento__votos{color:var(--c-green-dark)}
 .nota{font-size:.8rem;font-style:italic;margin:.3rem 0 0}
-.recuento__eq{color:var(--c-ink)}
+.recuento__eq{display:grid;color:var(--c-ink);font-weight:600}
+.recuento__eq em{font-family:var(--font-paper);font-style:normal;font-weight:400;font-size:.85rem;line-height:1.25;color:var(--c-green-dark)}
 .recuento__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
 .recuento__barra i{display:block;height:100%;background:var(--gradient-verde)}
 .recuento strong{text-align:right;color:var(--c-ink)}

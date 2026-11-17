@@ -12,6 +12,7 @@ import { formatClock, useNow } from '../composables/useNow'
 import EscaletaTimeline from '../components/EscaletaTimeline.vue'
 import PanelEquipos from '../components/PanelEquipos.vue'
 import PanelVotacion from '../components/PanelVotacion.vue'
+import PanelTitulares from '../components/PanelTitulares.vue'
 import PanelAvisos from '../components/PanelAvisos.vue'
 
 const store = useStore()
@@ -27,6 +28,8 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 /** Desde el momento de la votación, la votación sube arriba del todo (con su botón de abrirla) */
 const MOMENTOS_VOTACION = ['votacion', 'valoracion', 'resultados', 'cierre', 'comida']
 const votacionArriba = computed(() => MOMENTOS_VOTACION.includes(paso.value.id))
+/** Durante el traslado y el speed pitch se escriben los titulares: también suben arriba */
+const titularesArriba = computed(() => votacionArriba.value || ['traslado', 'pitch'].includes(paso.value.id))
 
 // --- Descargar todas las fotos en un ZIP, por equipos (para guardarlas en un Drive) ---
 const zipProgreso = ref('')
@@ -128,6 +131,7 @@ async function restaurar() {
 
       <EscaletaTimeline />
 
+      <PanelTitulares v-if="titularesArriba" class="votacion-arriba" />
       <PanelVotacion v-if="votacionArriba" class="votacion-arriba" />
 
       <section class="card ritmo">
@@ -178,6 +182,7 @@ async function restaurar() {
 
       <PanelEquipos />
 
+      <PanelTitulares v-if="!titularesArriba" />
       <PanelVotacion v-if="!votacionArriba" />
 
       <section class="card">

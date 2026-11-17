@@ -256,6 +256,8 @@ export function useStore() {
       db.photos.filter((p) => p.teamId === teamId && p.dynamicId === dynamicId).slice(-1)[0],
     chat: (teamId: string) => db.chat.filter((m) => m.teamId === teamId),
     pendingHelp: (teamId: string) => db.helpRequests.find((h) => h.teamId === teamId && !h.attendedAt),
+    /** Titular de la portada del equipo (lo escribe el equipo facilitador en el panel) */
+    coverHeadline: (teamId: string) => db.covers.find((c) => c.teamId === teamId)?.headline?.trim() ?? '',
     /** Avisos del panel para este equipo que todavía no ha leído (el más antiguo primero) */
     unseenAlerts: (teamId: string) => {
       const seen = db.progress.find((p) => p.teamId === teamId)?.alertsSeen ?? []
@@ -448,6 +450,17 @@ export function ackAlert(teamId: string, alertId: string) {
 
 // ---------------------------------------------------------------------------
 // Escritura · equipo facilitador
+
+/** Guarda el titular de la portada de un equipo (para la votación) */
+export function setCoverHeadline(teamId: string, headline: string) {
+  let c = state.covers.find((x) => x.teamId === teamId)
+  if (c) c.headline = headline.trim()
+  else {
+    state.covers.push({ teamId, headline: headline.trim(), whatChanged: '', howItStarted: '' })
+    c = state.covers[state.covers.length - 1]
+  }
+  saveQuiet('covers', c)
+}
 
 /** Lanza un aviso a todos los equipos o a uno (target = 'all' o la letra del equipo) */
 export function launchAlert(target: string, title: string, body = '') {

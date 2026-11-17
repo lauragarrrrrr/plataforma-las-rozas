@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // /votar?equipo=X · Votación desde el móvil, como la «Pieza 08 · Votación en sala» de la metodología.
 // 0. ¿Quién eres? (equipo del QR + nombre, para que cada persona vote una sola vez)
-// 1. Paso 1 de 2: las 12 portadas de 2040 → «Ir a votar»
+// 1. Paso 1 de 2: los 12 titulares de 2040 (los escribe el equipo facilitador) → «Ir a votar»
 // 2. Paso 2 de 2: ★ Favorita 1, 2 y 3 (3, 2 y 1 puntos), nunca su propio equipo
 // 3. «¡Voto recibido!»
 // El voto se guarda con el equipo y la posición de la persona, nunca con su nombre.
@@ -9,7 +9,6 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { castVote, useStore } from '../data/store'
 import { SIMULATED_ROSTER } from '../data/roster'
-import type { Team } from '../data/types'
 
 const route = useRoute()
 const store = useStore()
@@ -41,7 +40,6 @@ function soyYo() {
   persona.value = yoIndice.value
 }
 const nombres = computed(() => store.setup(equipo.value)?.members ?? SIMULATED_ROSTER[equipo.value] ?? [])
-const portada = (t: Team) => store.photoFor(t.id, 'portada')?.url
 
 /** Opciones de cada puesto: nunca su equipo ni las ya elegidas en otro puesto */
 function opciones(puesto: number) {
@@ -122,21 +120,18 @@ async function enviar() {
         <button class="enlace" type="button" @click="equipo = ''">No es mi equipo</button>
       </template>
 
-      <!-- Paso 1 de 2 · Las 12 portadas -->
+      <!-- Paso 1 de 2 · Los 12 titulares (los escribe el equipo facilitador en el panel) -->
       <template v-else-if="paso === 1">
         <span class="paso">Paso 1 de 2</span>
-        <h1 class="titulo">Las 12 portadas de 2040</h1>
-        <p>Repasa todas las iniciativas antes de votar.</p>
-        <div class="portadas">
-          <figure v-for="t in store.db.teams" :key="t.id" class="portada" :class="{ 'portada--mia': t.id === equipo }">
-            <img v-if="portada(t)" :src="portada(t)" :alt="`Portada del equipo ${t.id}`" loading="lazy" />
-            <span v-else class="portada__sin">Las Rozas Times 2040</span>
-            <figcaption>
-              <small>Las Rozas Times · Eq. {{ t.id }}</small>
-              <span>{{ store.areaName(t.area) }}</span>
-              <em v-if="t.id === equipo">Tu equipo</em>
-            </figcaption>
-          </figure>
+        <h1 class="titulo">Los 12 titulares de 2040</h1>
+        <p>Repasa todos los titulares antes de votar.</p>
+        <div class="titulares">
+          <article v-for="t in store.db.teams" :key="t.id" class="titular" :class="{ 'titular--mio': t.id === equipo }">
+            <small class="titular__cab">Las Rozas Times · Eq. {{ t.id }} · {{ store.areaName(t.area) }}</small>
+            <p v-if="store.coverHeadline(t.id)" class="titular__texto">{{ store.coverHeadline(t.id) }}</p>
+            <p v-else class="titular__sin">Titular pendiente</p>
+            <em v-if="t.id === equipo" class="titular__mio">Tu equipo</em>
+          </article>
         </div>
         <div class="barra-inferior">
           <button class="boton" type="button" @click="paso = 2">Ir a votar →</button>
@@ -145,7 +140,7 @@ async function enviar() {
 
       <!-- Paso 2 de 2 · Las tres favoritas -->
       <template v-else>
-        <button class="enlace" type="button" @click="paso = 1">← Ver las portadas</button>
+        <button class="enlace" type="button" @click="paso = 1">← Ver los titulares</button>
         <span class="paso">Paso 2 de 2</span>
         <h1 class="titulo">¿Qué ideas te gustaría ver avanzar?</h1>
         <p class="quien">Votas como <strong>{{ nombres[persona!] }}</strong>, del <strong>equipo {{ equipo }}</strong>.</p>
@@ -159,8 +154,7 @@ async function enviar() {
             <option disabled :value="`propio-${equipo}`">Equipo {{ equipo }} · es tu equipo (no se puede)</option>
           </select>
           <div v-if="elegida(k)" class="favorita__info">
-            <img v-if="portada(elegida(k)!)" :src="portada(elegida(k)!)" alt="" />
-            <span><b>Equipo {{ elegida(k)!.id }}</b> · {{ store.areaName(elegida(k)!.area) }}</span>
+            <span><b>Equipo {{ elegida(k)!.id }}</b> · {{ store.coverHeadline(elegida(k)!.id) || store.areaName(elegida(k)!.area) }}</span>
           </div>
         </div>
 
@@ -200,21 +194,18 @@ async function enviar() {
 .nombre:disabled{opacity:.5;cursor:default}
 .nombre small{font-size:.8rem;color:var(--c-green-dark)}
 
-.portadas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
-.portada{margin:0;display:grid;border-radius:1rem;overflow:hidden;background:var(--c-white)}
-.portada img,.portada__sin{aspect-ratio:3/4;width:100%;object-fit:cover}
-.portada__sin{display:grid;place-items:center;background:var(--c-paper);font-family:var(--font-paper);font-weight:700;color:var(--c-ink);text-align:center;padding:.5rem}
-.portada figcaption{display:grid;padding:.5rem .7rem;font-size:.78rem}
-.portada figcaption small{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c-innova-dark);font-weight:600}
-.portada figcaption span{color:var(--c-ink)}
-.portada figcaption em{font-style:normal;font-weight:700;color:var(--c-green-deep)}
-.portada--mia{opacity:.6}
+.titulares{display:grid;gap:.6rem}
+.titular{display:grid;gap:.35rem;margin:0;padding:1rem 1.1rem;border-radius:1rem;background:var(--c-paper);box-shadow:0 0 0 1px var(--c-paper-line)}
+.titular__cab{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c-innova-dark);font-weight:600}
+.titular__texto{margin:0;font-family:var(--font-paper);font-size:1.2rem;font-weight:700;line-height:1.2;color:var(--c-ink)}
+.titular__sin{margin:0;font-family:var(--font-paper);font-style:italic;color:var(--c-green-dark)}
+.titular__mio{font-style:normal;font-size:.8rem;font-weight:700;color:var(--c-green-deep)}
+.titular--mio{opacity:.6}
 
 .favorita{display:grid;gap:.4rem;background:var(--c-white);border-radius:var(--radius-card);padding:1rem}
 .favorita label{font-weight:600;color:var(--c-ink)}
 .favorita label small{font-weight:400;color:var(--c-green-dark)}
 .favorita__info{display:flex;gap:.7rem;align-items:center;font-size:.85rem}
-.favorita__info img{width:3.5rem;height:4.5rem;object-fit:cover;border-radius:.5rem}
 
 .barra-inferior{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1rem;padding:.9rem 16px;background:var(--c-white);box-shadow:0 -8px 24px -16px var(--c-green-deep);z-index:5}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;font-size:.85rem;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
