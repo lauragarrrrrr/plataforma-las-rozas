@@ -2,14 +2,15 @@
 // QR para subir la foto con el móvil. Lleva a /subir/:equipo?d=:dinámica.
 // · Normal: el ordenador avanza solo cuando la foto ha llegado.
 // · multi: se pueden subir varias fotos seguidas (las fichas individuales).
+// · extra: fotos de más de una dinámica ya registrada (post-its, borradores…), sin revisar.
 import { computed, ref, watchEffect } from 'vue'
 import QRCode from 'qrcode'
 import PhotoUpload from './PhotoUpload.vue'
 
-const props = defineProps<{ teamId: string; dynamicId: string; multi?: boolean }>()
+const props = defineProps<{ teamId: string; dynamicId: string; multi?: boolean; extra?: boolean }>()
 const emit = defineEmits<{ uploaded: [dataUrl: string] }>()
 
-const link = computed(() => `${location.origin}/subir/${props.teamId}?d=${props.dynamicId}`)
+const link = computed(() => `${location.origin}/subir/${props.teamId}?d=${props.dynamicId}${props.extra ? '&extra=1' : ''}`)
 const qr = ref('')
 const showBackup = ref(false)
 
@@ -27,14 +28,19 @@ watchEffect(async () => {
         <li>Haz la foto de una ficha y pulsa «Subir otra» para la siguiente.</li>
         <li>Las fichas aparecen aquí según llegan.</li>
       </ol>
+      <ol v-else-if="extra">
+        <li>Abrid la cámara del móvil y apuntad al código.</li>
+        <li>Haced las fotos que queráis: post-its, borradores, esquemas…</li>
+        <li>Van llegando a vuestro expediente.</li>
+      </ol>
       <ol v-else>
         <li>Abrid la cámara del móvil y apuntad al código.</li>
         <li>Haced la foto.</li>
         <li>Esperad aquí: la pantalla avanza sola cuando llega.</li>
       </ol>
-      <p class="qr__espera"><span class="punto" aria-hidden="true"></span> {{ multi ? 'Esperando las fichas…' : 'Esperando la foto…' }}</p>
+      <p class="qr__espera"><span class="punto" aria-hidden="true"></span> {{ multi ? 'Esperando las fichas…' : extra ? 'Esperando las fotos…' : 'Esperando la foto…' }}</p>
       <button class="enlace" type="button" @click="showBackup = !showBackup">¿El QR no funciona?</button>
-      <PhotoUpload v-if="showBackup" :no-review="multi" label="Subir desde este ordenador" @uploaded="(u) => emit('uploaded', u)" />
+      <PhotoUpload v-if="showBackup" :no-review="multi || extra" label="Subir desde este ordenador" @uploaded="(u) => emit('uploaded', u)" />
     </div>
   </div>
 </template>

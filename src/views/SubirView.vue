@@ -22,6 +22,9 @@ const dynamic = computed(() => {
 
 /** Las fichas individuales se suben varias seguidas */
 const multi = computed(() => dynamic.value.id === PREMORTEM.id)
+/** Fotos de más (post-its, borradores…): por el QR «Añadir más fotos» o tras enviar la principal */
+const extra = ref(route.query.extra === '1')
+const extrasCount = computed(() => store.photos(props.id).filter((p) => p.dynamicId === dynamic.value.id && p.kind === 'other').length)
 const sentCount = computed(() => store.photos(props.id).filter((p) => p.dynamicId === dynamic.value.id).length)
 
 const sentUrl = ref('')
@@ -33,7 +36,7 @@ async function onPhoto(url: string) {
   sending.value = true
   failed.value = false
   try {
-    await addPhoto(props.id, dynamic.value.id, dynamic.value.photo.kind, url)
+    await addPhoto(props.id, dynamic.value.id, extra.value ? 'other' : dynamic.value.photo.kind, url)
     failed.value = store.lastSaveFailed()
     if (!failed.value) sentUrl.value = url
   } catch {
@@ -60,23 +63,35 @@ async function onPhoto(url: string) {
         <p>Cuando estén todas, sigue en el ordenador del equipo.</p>
       </template>
 
+      <!-- Fotos de más: una detrás de otra -->
+      <template v-else-if="sentUrl && !failed && extra">
+        <span class="ok" aria-hidden="true">✓</span>
+        <h1 class="titulo">Foto añadida</h1>
+        <p class="contador">Lleváis <strong>{{ extrasCount }}</strong> {{ extrasCount === 1 ? 'foto de más' : 'fotos de más' }} en «{{ dynamic.title }}».</p>
+        <img class="previa" :src="sentUrl" alt="Foto de más" />
+        <button class="boton grande-boton" type="button" @click="sentUrl = ''">Añadir otra foto</button>
+      </template>
+
       <template v-else-if="sentUrl && !failed">
         <span class="ok" aria-hidden="true">✓</span>
         <h1 class="titulo">Foto subida</h1>
         <p>Ya está en el expediente del {{ team.name }}. Mirad el ordenador: ya podéis seguir.</p>
         <img class="previa" :src="sentUrl" :alt="`Foto: ${dynamic.photo.label}`" />
-        <button class="enlace" type="button" @click="sentUrl = ''">Repetir la foto</button>
+        <button class="boton grande-boton" type="button" @click="extra = true; sentUrl = ''">＋ Añadir más fotos (post-its, borradores…)</button>
+        <button class="enlace" type="button" @click="sentUrl = ''">Repetir la foto principal</button>
       </template>
 
       <!-- Hacer la foto -->
       <template v-else>
         <span class="kicker">{{ team.name }} · {{ dynamic.title }}</span>
         <h1 v-if="multi" class="titulo">Sube las fichas de «{{ PREMORTEM.title }}»</h1>
+        <h1 v-else-if="extra" class="titulo">Añadid más fotos</h1>
         <h1 v-else class="titulo">Haced la foto {{ photoOf(dynamic) }}</h1>
         <p v-if="multi">Una foto por ficha. <template v-if="sentCount">Llevas {{ sentCount }}.</template></p>
+        <p v-else-if="extra">Post-its, borradores, esquemas… todo lo que habéis trabajado. <template v-if="extrasCount">Lleváis {{ extrasCount }}.</template></p>
         <p v-else>Que se vea entero y se pueda leer. Antes de enviarla, comprobaréis que se ve bien.</p>
         <p v-if="sending" class="enviando">Subiendo la foto… no cerréis esta pantalla.</p>
-        <PhotoUpload v-else class="grande" :no-review="multi" :label="multi ? 'Hacer la foto de una ficha' : 'Hacer la foto'" @uploaded="onPhoto" />
+        <PhotoUpload v-else class="grande" :no-review="multi || extra" :label="multi ? 'Hacer la foto de una ficha' : extra ? 'Hacer otra foto' : 'Hacer la foto'" @uploaded="onPhoto" />
         <p v-if="failed" class="alerta">No se ha podido subir la foto. Comprobad la conexión y probad otra vez.</p>
       </template>
     </div>

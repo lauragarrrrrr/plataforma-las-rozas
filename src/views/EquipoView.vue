@@ -140,12 +140,15 @@ watch(
 )
 
 const showQr = ref(false)
-watch(() => dynamic.value.id, () => (showQr.value = false))
+/** Fotos de más de esta dinámica (post-its, borradores…), además de la principal */
+const showExtraQr = ref(false)
+watch(() => dynamic.value.id, () => { showQr.value = false; showExtraQr.value = false })
+const extras = computed(() => store.photos(props.id).filter((p) => p.dynamicId === dynamic.value.id && p.kind === 'other'))
 
 const saveFailed = ref(false)
-async function onPhoto(url: string) {
+async function onPhoto(url: string, extra = false) {
   try {
-    await addPhoto(props.id, dynamic.value.id, dynamic.value.photo.kind, url)
+    await addPhoto(props.id, dynamic.value.id, extra ? 'other' : dynamic.value.photo.kind, url)
     saveFailed.value = store.lastSaveFailed()
   } catch {
     saveFailed.value = true
@@ -367,10 +370,22 @@ const expediente = computed(() =>
               <span v-else-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
               <span v-else>¡Hecho! Esperad indicaciones del equipo facilitador.</span>
             </p>
+            <!-- Más fotos: post-its, borradores… -->
+            <div class="extras">
+              <div v-if="extras.length" class="extras__fotos">
+                <button v-for="(p, n) in extras" :key="p.id" type="button" @click="openPhoto(p.url, `${dynamic.title} · foto de más ${n + 1}`)">
+                  <img :src="p.url" :alt="`Foto de más ${n + 1}`" />
+                </button>
+              </div>
+              <button v-if="!showExtraQr" class="enlace" type="button" @click="showExtraQr = true">
+                ＋ Añadir más fotos (post-its, borradores…){{ extras.length ? ` · lleváis ${extras.length}` : '' }}
+              </button>
+              <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" extra @uploaded="(u) => onPhoto(u, true)" />
+            </div>
           </template>
           <template v-else>
             <span class="kicker">Al terminar</span>
-            <p>Subid una foto {{ photoOf(dynamic) }}. Sin la foto no podéis pasar a la siguiente dinámica.</p>
+            <p>Subid una foto {{ photoOf(dynamic) }} y, si queréis, de todo lo que habéis hecho y creáis importante para el reto (post-its, borradores…). Sin la foto principal no podéis pasar a la siguiente dinámica.</p>
             <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir foto</button>
             <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
           </template>
@@ -515,6 +530,10 @@ const expediente = computed(() =>
 
 
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}
+.extras{display:grid;gap:.6rem;border-top:1px solid var(--c-gris-10);padding-top:.8rem}
+.extras__fotos{display:flex;flex-wrap:wrap;gap:.4rem}
+.extras__fotos button{border:0;padding:0;background:none;cursor:pointer}
+.extras__fotos img{width:4.5rem;height:4.5rem;object-fit:cover;border-radius:.6rem;max-height:none}
 .esperando{display:flex;gap:.6rem;align-items:flex-start;background:var(--c-green-light);border-radius:1rem;padding:.8rem 1rem;color:var(--c-ink)}
 .esperando .punto{flex:none;margin-top:.45rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--c-innova);animation:latir 1.2s ease-in-out infinite}
 @keyframes latir{50%{opacity:.3;transform:scale(.8)}}

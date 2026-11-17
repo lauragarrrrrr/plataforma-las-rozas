@@ -120,7 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         </div>
         <div class="card">
           <span class="kicker">Al terminar</span>
-          <p>Subid una foto {{ photoOf(d) }}. Sin la foto no podéis pasar a la siguiente dinámica.</p>
+          <p>Subid una foto {{ photoOf(d) }} y, si queréis, de todo lo que habéis hecho y creáis importante para el reto (post-its, borradores…). Sin la foto principal no podéis pasar a la siguiente dinámica.</p>
           <PhotoQr team-id="vista-previa" :dynamic-id="d.id" />
           <p v-if="backToRoomAfter(d)" class="aviso-sala">Después de la foto les sale: <strong>«¡Volved a la sala principal!»</strong></p>
         </div>

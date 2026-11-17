@@ -252,8 +252,12 @@ export function useStore() {
     progress: (teamId: string) => db.progress.find((p) => p.teamId === teamId),
     photos: (teamId: string) => db.photos.filter((p) => p.teamId === teamId),
     /** Última foto de una dinámica (la dinámica está hecha si existe) */
+    /**
+     * La foto principal de una dinámica: la última que no sea «otra» (post-its, borradores…).
+     * Las fotos de más nunca cuentan para pasar a la siguiente.
+     */
     photoFor: (teamId: string, dynamicId: string) =>
-      db.photos.filter((p) => p.teamId === teamId && p.dynamicId === dynamicId).slice(-1)[0],
+      db.photos.filter((p) => p.teamId === teamId && p.dynamicId === dynamicId && p.kind !== 'other').slice(-1)[0],
     chat: (teamId: string) => db.chat.filter((m) => m.teamId === teamId),
     pendingHelp: (teamId: string) => db.helpRequests.find((h) => h.teamId === teamId && !h.attendedAt),
     /** Titular de la portada del equipo (lo escribe el equipo facilitador en el panel) */
@@ -404,7 +408,7 @@ export async function addPhoto(teamId: string, dynamicId: string, kind: PhotoKin
 export function nextDynamic(teamId: string) {
   const p = progressOf(teamId)
   const current = TEAM_DYNAMICS[p.current]
-  if (!current || !state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id)) return
+  if (!current || !state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id && x.kind !== 'other')) return
   if (p.current >= allowedFor(teamId)) return
   p.current += 1
   saveQuiet('progress', p)
@@ -430,7 +434,7 @@ export function autoAdvance(teamId: string) {
   const current = TEAM_DYNAMICS[p.current]
   const next = TEAM_DYNAMICS[p.current + 1]
   if (!current || !next) return
-  if (!state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id)) return
+  if (!state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id && x.kind !== 'other')) return
   const opened = openedAtFor(teamId, current.id)
   if (!opened || new Date(opened).getTime() + current.minutes * 60_000 > Date.now()) return
   p.current += 1
