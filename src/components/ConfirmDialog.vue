@@ -10,12 +10,14 @@ const input = ref<HTMLInputElement>()
 watch(() => c.open, async (open) => {
   if (!open) return
   await nextTick()
-  ;(c.word ? input.value : okBtn.value)?.focus()
+  const main = c.choices.length ? document.querySelector<HTMLButtonElement>('.caja .botones .boton:last-child') : okBtn.value
+  ;(c.word ? input.value : main)?.focus()
 })
 
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape') answerConfirm(false)
-  if (e.key === 'Enter' && canAccept.value) answerConfirm(true)
+  // Intro = el botón principal (el último)
+  if (e.key === 'Enter' && canAccept.value) answerConfirm(c.choices.length ? c.choices.length - 1 : true)
 }
 </script>
 
@@ -29,7 +31,17 @@ function onKey(e: KeyboardEvent) {
       </label>
       <div class="botones">
         <button class="boton boton--sec" type="button" @click="answerConfirm(false)">Cancelar</button>
-        <button ref="okBtn" class="boton" type="button" :disabled="!canAccept" @click="answerConfirm(true)">{{ c.okLabel }}</button>
+        <template v-if="c.choices.length">
+          <button
+            v-for="(label, n) in c.choices"
+            :key="label"
+            class="boton"
+            :class="{ 'boton--sec': n < c.choices.length - 1 }"
+            type="button"
+            @click="answerConfirm(n)"
+          >{{ label }}</button>
+        </template>
+        <button v-else ref="okBtn" class="boton" type="button" :disabled="!canAccept" @click="answerConfirm(true)">{{ c.okLabel }}</button>
       </div>
     </div>
   </div>

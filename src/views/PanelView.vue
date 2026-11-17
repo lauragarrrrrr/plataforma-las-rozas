@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // /panel · Seguimiento del equipo facilitador
 // Peticiones de ayuda arriba; debajo, por dónde va cada equipo.
-import { askConfirm } from '../composables/useConfirm'
+import { askChoice, askConfirm } from '../composables/useConfirm'
 import { computed, ref } from 'vue'
 import { photosZip, saveFile } from '../data/photoZip'
 import { AGENDA } from '../data/agenda'
 import { PHASES } from '../data/config'
 import { TEAM_DYNAMICS } from '../data/dynamics'
-import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, useStore } from '../data/store'
+import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, setTeamPace, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import EscaletaTimeline from '../components/EscaletaTimeline.vue'
 import PanelEquipos from '../components/PanelEquipos.vue'
@@ -73,7 +73,26 @@ async function abrirSiguiente() {
         ? ` ${sinFoto} ${sinFoto === 1 ? 'equipo todavía no ha' : 'equipos todavía no han'} subido la foto de «${actual!.title}»: cuando la suban, pasarán directamente sin volver a la sala principal.`
         : '') + '\n\n'
     : ''
-  if (await askConfirm(`${avisoFase}${aviso}¿Abrir ${texto} para todos los equipos?`, '', 'Sí, abrir')) openNextDynamic()
+  // Equipos retenidos («Retener» en su tarjeta): no pasan aunque se abra para todos
+  const retenidos = store.db.teams.filter((t) => {
+    const lim = store.progress(t.id)?.limit
+    return lim !== undefined && lim <= abierta.value
+  })
+  const pregunta = `${avisoFase}${aviso}¿Abrir ${texto} para todos los equipos?`
+  if (!retenidos.length) {
+    if (await askConfirm(pregunta, '', 'Sí, abrir')) openNextDynamic()
+    return
+  }
+  const lista = retenidos.map((t) => t.id).join(', ').replace(/, ([^,]*)$/, ' y $1')
+  const uno = retenidos.length === 1
+  const avisoRetenidos = `⚠️ Todos pasarán salvo ${uno ? `el equipo ${lista}, que está retenido` : `los equipos ${lista}, que están retenidos`}.`
+  const n = await askChoice(`${pregunta}\n\n${avisoRetenidos}`, [
+    uno ? `Que pase también el ${lista}` : 'Que pasen también los retenidos',
+    `Abrir, ${uno ? `el ${lista} sigue retenido` : 'siguen retenidos'}`,
+  ])
+  if (n < 0) return
+  if (n === 0) for (const t of retenidos) setTeamPace(t.id, 'group')
+  openNextDynamic()
 }
 async function volver() {
   if (await askConfirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()
