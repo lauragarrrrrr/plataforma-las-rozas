@@ -225,9 +225,17 @@ function allowedFor(teamId: string): number {
   return p?.limit ?? groupOpen()
 }
 
+/**
+ * Cuándo empezó el cronómetro de una dinámica para un equipo.
+ * Si el grupo ya la ha abierto, todos van con el mismo reloj que el panel; un equipo
+ * solo usa su propia hora si llegó antes que el grupo (porque iba adelantado).
+ */
 function openedAtFor(teamId: string, dynamicId: string): string | undefined {
   const p = state.progress.find((x) => x.teamId === teamId)
-  return p?.openedAt?.[dynamicId] ?? state.event.openedAt?.[dynamicId] ?? p?.started[dynamicId]
+  const own = p?.openedAt?.[dynamicId]
+  const group = state.event.openedAt?.[dynamicId]
+  if (own && group) return own < group ? own : group
+  return own ?? group ?? p?.started[dynamicId]
 }
 
 // ---------------------------------------------------------------------------
