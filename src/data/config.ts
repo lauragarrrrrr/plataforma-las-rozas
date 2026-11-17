@@ -1,6 +1,9 @@
 // Configuración de la jornada. Cambiar aquí, no en las pantallas.
 import type { AreaId, PhaseId } from './types'
 
+/** Dirección de la web pública (Cloudflare). Los QR para los participantes llevan siempre aquí. */
+export const PUBLIC_URL = 'https://plataforma-las-rozas.laura-07d.workers.dev'
+
 /** Los 6 ámbitos, en el orden de los equipos (metodología v3 y presentación, 16/11/2026). */
 export const AREAS: Record<AreaId, string> = {
   city: 'Ciudad + calidad de vida',
@@ -9,6 +12,16 @@ export const AREAS: Record<AreaId, string> = {
   education: 'Educación + futuro',
   public: 'Administración Pública',
   open: 'Mirada abierta',
+}
+
+/** La pregunta de cada ámbito (metodología v3, «Transición · Ámbitos, equipos y salas») */
+export const AREA_QUESTIONS: Record<AreaId, string> = {
+  city: '¿Cómo puede la innovación mejorar la vida de las personas y hacer de Las Rozas una ciudad cada vez más atractiva para vivir y trabajar?',
+  business: '¿Cómo hacemos de Las Rozas un lugar donde empresas y emprendedores quieran instalarse, crecer y colaborar?',
+  talent: '¿Cómo hacemos de Las Rozas un lugar capaz de atraer, conectar y generar oportunidades para el talento?',
+  education: '¿Cómo preparamos a nuestra población para las capacidades y oportunidades que traerá el futuro?',
+  public: '¿Qué papel puede desempeñar la Administración Pública en el impulso y la transformación de la ciudad?',
+  open: '¿Qué oportunidades para Las Rozas 2040 no estamos contemplando todavía?',
 }
 
 /**

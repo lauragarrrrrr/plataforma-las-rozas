@@ -1,18 +1,17 @@
 <script setup lang="ts">
 // /participa · Entrada de los participantes (llegan por QR desde el móvil)
-// «¿Quién eres?» → escriben su nombre, tocan el suyo → «Eres del equipo C · busca tu mesa».
-// El ámbito aparece aquí mismo cuando el panel revela los ámbitos (10:20), no antes.
+// «¿Quién eres?» → escriben su nombre, tocan el suyo → su ámbito (lo primero) y su equipo y mesa.
+// Todo se descubre a la vez al escanear, como en la metodología v3 («Ámbitos y equipos»).
 // Solo se ven los nombres que coinciden con lo que se escribe, nunca la lista entera.
 // Después: «¿Ya estáis todos juntos? ¿Quién será vuestro digital owner?». Lo elige
 // cualquiera del equipo desde su móvil y lo ven todos. El digital owner entra desde el
 // ordenador con el enlace que le envía por correo el equipo facilitador (/equipo/:id).
 import { computed, ref } from 'vue'
-import { AREAS } from '../data/config'
+import { AREA_QUESTIONS, AREAS } from '../data/config'
 import { SIMULATED_ROSTER } from '../data/roster'
 import { saveSetup, useStore } from '../data/store'
 
 const store = useStore()
-const revealed = computed(() => store.db.event.areasRevealed)
 
 interface Person { name: string; teamId: string }
 const people: Person[] = Object.entries(SIMULATED_ROSTER).flatMap(([teamId, names]) => names.map((name) => ({ name, teamId })))
@@ -45,6 +44,7 @@ function reset() {
 
 const myTeam = computed(() => (me.value ? store.db.teams.find((t) => t.id === me.value!.teamId) : undefined))
 const myArea = computed(() => (myTeam.value ? AREAS[myTeam.value.area] : ''))
+const myQuestion = computed(() => (myTeam.value ? AREA_QUESTIONS[myTeam.value.area] : ''))
 const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
 
 // --- Digital owner del equipo ---
@@ -78,14 +78,18 @@ function chooseOwner(name: string) {
         <!-- Ya sabe quién es: su equipo -->
         <div v-if="me" class="resultado">
           <span class="kicker">¡Hola, {{ firstName }}!</span>
-          <p class="resultado__eres">Eres del equipo</p>
-          <span class="resultado__letra">{{ me.teamId }}</span>
-          <p class="resultado__mesa">Busca la mesa con la letra <strong>{{ me.teamId }}</strong>.</p>
 
-          <div class="resultado__ambito" :class="{ 'resultado__ambito--oculto': !revealed }">
+          <!-- Lo primero, el ámbito -->
+          <div class="resultado__ambito">
             <span class="kicker">Vuestro ámbito</span>
-            <strong v-if="revealed">{{ myArea }}</strong>
-            <span v-else>Se revela en la sala. ¡Atentos!</span>
+            <strong>{{ myArea }}</strong>
+            <p v-if="myQuestion">{{ myQuestion }}</p>
+          </div>
+
+          <!-- Después, el equipo y la mesa -->
+          <div class="resultado__equipo">
+            <span class="resultado__letra">{{ me.teamId }}</span>
+            <p class="resultado__mesa">Sois el <strong>equipo {{ me.teamId }}</strong>.<br />Buscad la mesa con la letra <strong>{{ me.teamId }}</strong>.</p>
           </div>
 
           <!-- ¿Quién será vuestro digital owner? -->
@@ -163,14 +167,13 @@ h1{font-size:clamp(3rem,10vw,8rem);line-height:.92}
 
 /* Resultado: tu equipo */
 .resultado{display:grid;justify-items:center;text-align:center;gap:.6rem;background:var(--c-white);border-radius:var(--radius-card);padding:clamp(1.8rem,5vw,3rem) 1.5rem;max-width:34rem;width:100%;box-sizing:border-box;justify-self:center}
-.resultado__eres{font-size:1.2rem;color:var(--c-ink);margin:0}
-.resultado__letra{display:grid;place-items:center;width:clamp(7rem,30vw,9rem);height:clamp(7rem,30vw,9rem);border-radius:50%;background:var(--gradient-anio);color:var(--c-white);font-size:clamp(4rem,18vw,5.5rem);font-weight:700;line-height:1}
-.resultado__mesa{font-size:1.1rem;margin:.4rem 0 0}
-.resultado__ambito{display:grid;gap:.25rem;width:100%;box-sizing:border-box;margin-top:.8rem;padding:1rem 1.2rem;border-radius:1.2rem;background:var(--gradient-dark);color:var(--c-white)}
+.resultado__equipo{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:1rem;width:100%;box-sizing:border-box;text-align:left}
+.resultado__letra{display:grid;place-items:center;width:4.5rem;height:4.5rem;border-radius:50%;background:var(--gradient-anio);color:var(--c-white);font-size:2.6rem;font-weight:700;line-height:1}
+.resultado__mesa{font-size:1.05rem;margin:0;color:var(--c-ink)}
+.resultado__ambito{display:grid;gap:.4rem;width:100%;box-sizing:border-box;margin-top:.4rem;padding:1.4rem 1.3rem;border-radius:1.2rem;background:var(--gradient-dark);color:var(--c-white)}
 .resultado__ambito .kicker{color:var(--c-green-mid)}
-.resultado__ambito strong{font-size:1.4rem;font-weight:600;letter-spacing:-.02em}
-.resultado__ambito--oculto{background:var(--c-green-light);color:var(--c-green-dark)}
-.resultado__ambito--oculto .kicker{color:var(--c-innova-dark)}
+.resultado__ambito strong{font-size:clamp(1.8rem,7vw,2.4rem);font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.resultado__ambito p{margin:0;font-size:.95rem;color:var(--c-green-light)}
 .otra{margin-top:.6rem;font:inherit;font-size:.85rem;color:var(--c-green-dark);background:none;border:0;text-decoration:underline;cursor:pointer}
 
 /* Digital owner */

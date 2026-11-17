@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { useStore } from '../data/store'
+import QrParticipantes from '../components/QrParticipantes.vue'
 
 const store = useStore()
 const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attendedAt).length)
@@ -30,6 +31,8 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
           <span>Recorred todas las pantallas que verán los equipos, una a una, sin esperar cronómetros ni subir fotos. No se guarda nada.</span>
         </RouterLink>
       </div>
+
+      <QrParticipantes />
     </div>
   </main>
 </template>
