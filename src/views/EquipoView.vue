@@ -93,6 +93,17 @@ const allowed = computed(() => store.allowed(props.id))
 /** El equipo ya está en las dinámicas (para el aviso «¡Cambiamos de pantalla!») */
 const inDynamics = computed(() => !!setup.value?.premortemDone && allowed.value >= 0 && !finished.value)
 const waitingNext = computed(() => !!photo.value && index.value >= allowed.value)
+/**
+ * ¿Toca pausa después de esta dinámica? Sí, si en la escaleta el siguiente momento es un descanso
+ * (la pausa para café de las 11:45). Devuelve sus minutos y a qué hora se vuelve a la sala.
+ */
+const pausa = computed(() => {
+  const stepId = dynamic.value.id === 'como-podriamos' ? 'a-quien' : dynamic.value.id
+  const i = AGENDA.findIndex((s) => s.id === stepId)
+  const siguiente = AGENDA[i + 1]
+  if (i < 0 || !siguiente || siguiente.kind !== 'break' || siguiente.id === 'comida') return null
+  return { minutes: siguiente.minutes, vuelta: AGENDA[i + 2]?.time ?? '' }
+})
 const startedAt = computed(() => store.openedAt(props.id, dynamic.value.id))
 const remaining = computed(() => {
   if (!startedAt.value) return dynamic.value.minutes * 60_000
@@ -381,11 +392,20 @@ const expediente = computed(() =>
     </div>
 
     <!-- Fin de fase: todos a la sala principal hasta que se abra la siguiente -->
-    <div v-if="!finished && waitingNext && backToRoomAfter(dynamic)" class="bloqueo sala-aviso" role="dialog" aria-modal="true" aria-labelledby="sala-titulo">
+    <div v-if="!finished && waitingNext && backToRoomAfter(dynamic)" class="bloqueo sala-aviso" :class="{ 'sala-aviso--pausa': pausa }" role="dialog" aria-modal="true" aria-labelledby="sala-titulo">
       <div class="sala-aviso__caja">
-        <span class="sala-aviso__icono" aria-hidden="true">→</span>
-        <h2 id="sala-titulo">¡Volved a la sala principal!</h2>
-        <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
+        <!-- Si después de esta fase toca la pausa (11:45, metodología v3) -->
+        <template v-if="pausa">
+          <span class="sala-aviso__icono" aria-hidden="true">☕</span>
+          <h2 id="sala-titulo">¡Pausa! Hay que descansar un poco</h2>
+          <p>Habéis terminado esta fase. Id a levantar las piernas y a tomaros algo: tenéis {{ pausa.minutes }} minutos.</p>
+          <p v-if="pausa.vuelta" class="nota">A las {{ pausa.vuelta }} nos vemos en la sala principal.</p>
+        </template>
+        <template v-else>
+          <span class="sala-aviso__icono" aria-hidden="true">→</span>
+          <h2 id="sala-titulo">¡Volved a la sala principal!</h2>
+          <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
+        </template>
         <p v-if="nextOne" class="nota">Cuando sea el momento, accederéis todos a la siguiente fase desde aquí.</p>
         <!-- Por si algo falla: esta pantalla tapa el botón de «Pedir ayuda» -->
         <p v-if="store.pendingHelp(id)" class="sala-aviso__enviado">Aviso enviado: el equipo facilitador viene a vuestra mesa.</p>
@@ -510,6 +530,7 @@ const expediente = computed(() =>
 .intro-din__texto{font-size:clamp(1.2rem,2.4vw,1.7rem);color:var(--c-ink);max-width:30ch}
 .intro-din__boton{justify-self:center;font-size:1.1rem;padding:.9em 1.8em}
 .sala-aviso{background:color-mix(in srgb,var(--c-rubi) 88%,transparent)}
+.sala-aviso--pausa{background:color-mix(in srgb,var(--c-green-deep) 92%,transparent)}
 .sala-aviso__caja{display:grid;justify-items:center;gap:.8rem;text-align:center;color:var(--c-white);max-width:40rem}
 .sala-aviso__icono{display:grid;place-items:center;width:5rem;height:5rem;border-radius:50%;background:var(--c-white);color:var(--c-rubi);font-size:2.6rem;font-weight:700;animation:empuja 1.4s ease-in-out infinite}
 @keyframes empuja{50%{transform:translateX(10px)}}
