@@ -4,6 +4,7 @@ import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import PhotoViewer from './components/PhotoViewer.vue'
+import FacilitacionNav from './components/FacilitacionNav.vue'
 import { useStore } from './data/store'
 
 const route = useRoute()
@@ -12,6 +13,7 @@ const { ready, connError } = useStore()
 
 <template>
   <SiteHeader v-if="!route.meta.fullscreen" />
+  <FacilitacionNav v-if="route.meta.facilitator && !route.meta.fullscreen" />
   <p v-if="connError" class="alerta conexion" role="alert">{{ connError }}</p>
   <RouterView v-if="ready" />
   <main v-else-if="!connError" class="cargando" aria-live="polite">Conectando…</main>

@@ -3,7 +3,7 @@
 // Se pasa como una presentación: flechas del teclado o botones de abajo.
 // Las diapositivas de apertura, recorrido y Juanjo van en una presentación aparte. El vídeo se añadirá cuando lo subáis.
 import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { AREAS, TEAM_AREAS } from '../data/config'
 import { revealAreas, setRoomStep, startRoomTimer, stopRoomTimer, useStore } from '../data/store'
@@ -32,6 +32,13 @@ const ambitos = computed(() =>
 function go(delta: number) {
   const next = index.value + delta
   if (next >= 0 && next < AGENDA.length) setRoomStep(next)
+}
+// «← Volver»: a la pantalla anterior; si se entró directamente, a la entrada de facilitación
+const router = useRouter()
+function volver() {
+  if (document.fullscreenElement) document.exitFullscreen()
+  if (window.history.state?.back) router.back()
+  else router.push('/facilitacion')
 }
 function fullscreen() {
   if (document.fullscreenElement) document.exitFullscreen()
@@ -100,7 +107,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
     <!-- Controles del equipo facilitador -->
     <nav class="controles" aria-label="Controles de la presentación">
-      <RouterLink class="ctrl" to="/facilitacion">Salir</RouterLink>
+      <button class="ctrl" type="button" @click="volver">← Volver</button>
+      <RouterLink class="ctrl" to="/panel">Panel</RouterLink>
       <button class="ctrl" type="button" :disabled="index === 0" @click="go(-1)">← Anterior</button>
       <span class="ctrl__paso">{{ index + 1 }} / {{ AGENDA.length }} · {{ step.time }}</span>
       <button class="ctrl" type="button" :disabled="index === AGENDA.length - 1" @click="go(1)">Siguiente →</button>
