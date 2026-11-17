@@ -398,8 +398,8 @@ const expediente = computed(() =>
         <template v-if="pausa">
           <span class="sala-aviso__icono" aria-hidden="true">☕</span>
           <h2 id="sala-titulo">¡Pausa! Hay que descansar un poco</h2>
-          <p>Habéis terminado esta fase. Id a levantar las piernas y a tomaros algo: tenéis {{ pausa.minutes }} minutos.</p>
-          <p v-if="pausa.vuelta" class="nota">A las {{ pausa.vuelta }} nos vemos en la sala principal.</p>
+          <p>Habéis terminado esta fase. Id a levantar las piernas y a tomaros algo.</p>
+          <p class="nota">En {{ pausa.minutes }} minutos exactos nos vemos en la sala principal.</p>
         </template>
         <template v-else>
           <span class="sala-aviso__icono" aria-hidden="true">→</span>
