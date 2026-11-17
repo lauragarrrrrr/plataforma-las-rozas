@@ -32,6 +32,10 @@ watchEffect(async () => {
           <li>Vota las <strong>tres</strong> iniciativas que más le han gustado. No se puede votar al propio equipo.</li>
         </ol>
       </div>
+      <p class="votacion__aqui">
+        ¿Lo hacéis desde esta pantalla?
+        <a :href="link" target="_blank" rel="noopener">Haz clic aquí</a>
+      </p>
     </template>
   </section>
 </template>
@@ -42,6 +46,8 @@ watchEffect(async () => {
 .votacion--cerrada{opacity:.85;box-shadow:inset 0 0 0 2px var(--c-green-mid)}
 .candado{font-size:2rem}
 .votacion__qr{display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center}
+.votacion__aqui{margin:0;font-size:.95rem}
+.votacion__aqui a{font-weight:600;color:var(--c-innova-dark)}
 .votacion__qr img{width:200px;height:200px;border-radius:1rem;box-shadow:0 0 0 1px var(--c-gris-10)}
 .votacion__qr ol{margin:0;padding-left:1.2rem;display:grid;gap:.3rem;flex:1;min-width:14rem;color:var(--c-ink)}
 </style>
