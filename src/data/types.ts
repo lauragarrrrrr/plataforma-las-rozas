@@ -39,6 +39,10 @@ export interface EventState {
   openedAt?: Record<string, string>
   /** La votación está abierta (la abre el equipo facilitador al terminar el speed pitch) */
   votingOpen?: boolean
+  /** Podio final (1.º, 2.º y 3.º) que decide el equipo facilitador; sin valor, sale de los votos */
+  podium?: string[]
+  /** Los resultados se ven en la página de resultados, en el móvil y en la app del equipo */
+  resultsPublished?: boolean
 }
 
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */

@@ -3,7 +3,7 @@
 // El recuento solo lo ve el equipo facilitador.
 import { askConfirm } from '../composables/useConfirm'
 import { computed } from 'vue'
-import { setVotingOpen, useStore } from '../data/store'
+import { publishResults, setPodium, setVotingOpen, useStore } from '../data/store'
 
 const store = useStore()
 const abierta = computed(() => store.votingOpen())
@@ -16,6 +16,29 @@ async function alternar() {
     ? '¿Cerrar la votación? Nadie más podrá votar.'
     : '¿Abrir la votación? A los equipos les aparecerá el QR para votar desde el móvil.'
   if (await askConfirm(texto)) setVotingOpen(!abierta.value)
+}
+
+// --- Resultado final: el podio lo decide el equipo facilitador (por defecto, los más votados) ---
+const PUESTOS = ['1.º', '2.º', '3.º']
+const podio = computed(() => store.podium())
+const publicado = computed(() => store.resultsPublished())
+function cambiarPuesto(i: number, teamId: string) {
+  const nuevo = [...podio.value]
+  // Si el equipo ya estaba en otro puesto, se intercambian
+  const j = nuevo.indexOf(teamId)
+  if (j >= 0 && j !== i) nuevo[j] = nuevo[i]
+  nuevo[i] = teamId
+  setPodium(nuevo)
+}
+function porVotos() {
+  setPodium([])
+}
+async function alternarPublicar() {
+  const lineas = podio.value.map((t, i) => `${PUESTOS[i]} Equipo ${t}${store.coverHeadline(t) ? ` · ${store.coverHeadline(t)}` : ''}`)
+  const texto = publicado.value
+    ? '¿Retirar los resultados? Los participantes dejarán de verlos.'
+    : ['¿Publicar los resultados? Los verán todos los participantes:', '', ...lineas].join('\n')
+  if (await askConfirm(texto, '', publicado.value ? 'Sí, retirar' : 'Sí, publicar')) publishResults(!publicado.value)
 }
 </script>
 
@@ -44,6 +67,28 @@ async function alternar() {
         </li>
       </ol>
     </details>
+
+    <!-- Resultado final -->
+    <div class="final">
+      <span class="kicker">Resultado final</span>
+      <p class="nota">Por defecto, los más votados. Podéis cambiar cualquier puesto antes de publicar.</p>
+      <div class="final__puestos">
+        <label v-for="(t, i) in podio" :key="i" class="final__puesto">
+          <span>{{ PUESTOS[i] }}</span>
+          <select :value="t" @change="cambiarPuesto(i, ($event.target as HTMLSelectElement).value)">
+            <option v-for="eq in store.db.teams" :key="eq.id" :value="eq.id">Equipo {{ eq.id }}{{ store.coverHeadline(eq.id) ? ` · ${store.coverHeadline(eq.id)}` : '' }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="final__botones">
+        <button class="boton" :class="{ 'boton--sec': publicado }" type="button" @click="alternarPublicar">
+          {{ publicado ? 'Retirar los resultados' : 'Publicar resultados' }}
+        </button>
+        <button v-if="store.db.event.podium?.length" class="boton boton--sec" type="button" @click="porVotos">Volver a los más votados</button>
+        <a class="final__ver" href="/resultados" target="_blank" rel="noopener">Abrir la página de resultados (para proyectar) ↗</a>
+      </div>
+      <p v-if="publicado" class="final__ok">✓ Publicados: los participantes ya los ven en su móvil y en la app del equipo.</p>
+    </div>
   </section>
 </template>
 
@@ -61,4 +106,12 @@ details summary{cursor:pointer;font-weight:600;color:var(--c-ink);margin-top:.4r
 .recuento__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
 .recuento__barra i{display:block;height:100%;background:var(--gradient-verde)}
 .recuento strong{text-align:right;color:var(--c-ink)}
+.final{display:grid;gap:.6rem;border-top:1px solid var(--c-gris-10);padding-top:1rem;margin-top:.4rem}
+.final .nota{margin:0;font-size:.85rem}
+.final__puestos{display:grid;gap:.45rem}
+.final__puesto{display:grid;grid-template-columns:2.5rem 1fr;align-items:center;gap:.6rem;font-weight:700;color:var(--c-ink)}
+.final__puesto select{font:inherit;font-weight:400;font-size:.95rem;padding:.5em .8em;border:1.5px solid var(--c-paper-line);border-radius:.8rem;background:var(--c-white);min-width:0}
+.final__botones{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem}
+.final__ver{font-size:.9rem;font-weight:600;color:var(--c-innova-dark)}
+.final__ok{margin:0;font-weight:600;color:var(--c-innova-dark)}
 </style>

@@ -4,8 +4,11 @@
 // Abierta: un QR para que cada persona vote desde su móvil.
 import { computed, ref, watchEffect } from 'vue'
 import QRCode from 'qrcode'
+import { useStore } from '../data/store'
+import ResultadosPodio from './ResultadosPodio.vue'
 
 const props = defineProps<{ teamId: string; open: boolean }>()
+const store = useStore()
 
 const link = computed(() => `${location.origin}/votar?equipo=${props.teamId}`)
 const qr = ref('')
@@ -17,7 +20,12 @@ watchEffect(async () => {
 <template>
   <section class="card votacion" :class="{ 'votacion--cerrada': !open }">
     <span class="kicker">Votación</span>
-    <template v-if="!open">
+    <!-- Resultados publicados por el equipo facilitador -->
+    <template v-if="store.resultsPublished()">
+      <h2>✦ ¡Ya tenemos ganadores!</h2>
+      <ResultadosPodio :mi-equipo="teamId" />
+    </template>
+    <template v-else-if="!open">
       <span class="candado" aria-hidden="true">🔒</span>
       <h2>¿Qué titulares te han gustado más?</h2>
       <p>La votación se abrirá al terminar el speed pitch. Entonces cada persona votará desde su móvil.</p>

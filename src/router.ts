@@ -30,6 +30,7 @@ export const router = createRouter({
     { path: '/vista-previa', name: 'vista-previa', component: () => import('./views/VistaPreviaView.vue'), meta: { title: 'Vista previa de las dinámicas', facilitator: true } },
     { path: '/sala', name: 'sala', component: () => import('./views/SalaView.vue'), meta: { title: 'Sala', fullscreen: true, facilitator: true } },
     { path: '/panel', name: 'panel', component: () => import('./views/PanelView.vue'), meta: { title: 'Panel', facilitator: true } },
+    { path: '/resultados', name: 'resultados', component: () => import('./views/ResultadosView.vue'), meta: { title: 'Resultados', fullscreen: true, facilitator: true } },
     { path: '/:pathMatch(.*)*', name: 'no-encontrada', component: () => import('./views/NoEncontradaView.vue'), meta: { title: 'Página no encontrada' } },
   ],
   scrollBehavior: () => ({ top: 0 }),

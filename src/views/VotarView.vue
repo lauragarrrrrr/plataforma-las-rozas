@@ -9,6 +9,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { castVote, useStore } from '../data/store'
 import { SIMULATED_ROSTER } from '../data/roster'
+import ResultadosPodio from '../components/ResultadosPodio.vue'
 
 const route = useRoute()
 const store = useStore()
@@ -67,8 +68,15 @@ async function enviar() {
     <div class="wrap votar__in">
       <span class="kicker">Las Rozas 2040 · Votación</span>
 
+      <!-- Resultados publicados por el equipo facilitador -->
+      <template v-if="store.resultsPublished()">
+        <h1 class="titulo">✦ ¡Ya tenemos ganadores!</h1>
+        <p>Gracias por votar. Estos son los equipos ganadores de Las Rozas 2040.</p>
+        <ResultadosPodio :mi-equipo="equipo" />
+      </template>
+
       <!-- Cerrada -->
-      <template v-if="!store.votingOpen() && !hecho">
+      <template v-else-if="!store.votingOpen() && !hecho">
         <span class="candado" aria-hidden="true">🔒</span>
         <h1 class="titulo">La votación todavía no está abierta</h1>
         <p>Se abrirá al terminar el speed pitch. Vuelve a escanear el código entonces.</p>

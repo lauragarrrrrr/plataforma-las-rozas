@@ -285,20 +285,33 @@ export function useStore() {
      * Recuento para el equipo facilitador, de más a menos puntos.
      * Favorita 1 = 3 puntos, favorita 2 = 2 y favorita 3 = 1. `votes`: en cuántos votos aparece.
      */
-    voteCounts: () => {
-      const points: Record<string, number> = {}
-      const votes: Record<string, number> = {}
-      for (const v of db.votes) {
-        v.teamIds.forEach((t, i) => {
-          points[t] = (points[t] ?? 0) + VOTE_POINTS[i]
-          votes[t] = (votes[t] ?? 0) + 1
-        })
-      }
-      return db.teams
-        .map((t) => ({ teamId: t.id, points: points[t.id] ?? 0, votes: votes[t.id] ?? 0 }))
-        .sort((a, b) => b.points - a.points || b.votes - a.votes)
+    voteCounts: () => countVotes(db),
+    /**
+     * Podio final (1.º, 2.º y 3.º): los puestos que haya fijado el equipo facilitador
+     * y, en los que no, los más votados que no estén ya en el podio.
+     */
+    podium: (): string[] => {
+      const fijado = (db.event.podium ?? []).slice(0, 3)
+      const libres = countVotes(db).map((r) => r.teamId).filter((t) => !fijado.includes(t))
+      return [0, 1, 2].map((i) => fijado[i] || libres.shift() || '')
     },
+    resultsPublished: () => !!db.event.resultsPublished,
   }
+}
+
+/** Recuento por puntos (favorita 1 = 3, 2 = 2, 3 = 1), de más a menos */
+function countVotes(db: { votes: readonly { teamIds: readonly string[] }[]; teams: readonly { id: string }[] }) {
+  const points: Record<string, number> = {}
+  const votes: Record<string, number> = {}
+  for (const v of db.votes) {
+    v.teamIds.forEach((t, i) => {
+      points[t] = (points[t] ?? 0) + VOTE_POINTS[i]
+      votes[t] = (votes[t] ?? 0) + 1
+    })
+  }
+  return db.teams
+    .map((t) => ({ teamId: t.id, points: points[t.id] ?? 0, votes: votes[t.id] ?? 0 }))
+    .sort((a, b) => b.points - a.points || b.votes - a.votes)
 }
 
 /** Puntos de cada puesto: favorita 1, 2 y 3 (decidido por Laura) */
@@ -565,6 +578,18 @@ export function setTeamPace(teamId: string, mode: 'hold' | 'pass' | 'group') {
 // ---------------------------------------------------------------------------
 export function setVotingOpen(open: boolean) {
   state.event.votingOpen = open
+  saveQuiet('event')
+}
+
+/** Podio final que decide el equipo facilitador (letras de los equipos, de 1.º a 3.º) */
+export function setPodium(teamIds: string[]) {
+  state.event.podium = teamIds.slice(0, 3)
+  saveQuiet('event')
+}
+
+/** Publica (o retira) los resultados para los participantes */
+export function publishResults(published: boolean) {
+  state.event.resultsPublished = published
   saveQuiet('event')
 }
 
