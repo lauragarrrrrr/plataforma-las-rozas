@@ -6,6 +6,7 @@ import { computed, ref } from 'vue'
 import { photosZip, saveFile } from '../data/photoZip'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
+import { PHASES } from '../data/config'
 import { TEAM_DYNAMICS } from '../data/dynamics'
 import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
@@ -62,7 +63,18 @@ async function abrirSiguiente() {
   const r = restante.value
   const texto = dinSiguiente.value ? `«${dinSiguiente.value.title}»` : 'el final de las dinámicas de equipo'
   const aviso = r !== null && r > 0 ? `Todavía quedan ${formatClock(r)} de la dinámica actual. ` : ''
-  if (await askConfirm(`${aviso}¿Abrir ${texto} para todos los equipos?`, '', 'Sí, abrir')) openNextDynamic()
+  // Abrir la primera dinámica de una fase nueva: quien aún no tenga la foto ya no vuelve a la sala
+  const actual = dinAbierta.value
+  const siguiente = dinSiguiente.value
+  const faseNueva = !!actual && !!siguiente && actual.phase !== siguiente.phase
+  const sinFoto = store.db.teams.length - conFoto.value
+  const avisoFase = faseNueva
+    ? `⚠️ Vais a abrir la fase de ${PHASES.find((p) => p.id === siguiente!.phase)?.name ?? 'la siguiente fase'}.` +
+      (sinFoto > 0
+        ? ` ${sinFoto} ${sinFoto === 1 ? 'equipo todavía no ha' : 'equipos todavía no han'} subido la foto de «${actual!.title}»: cuando la suban, pasarán directamente sin volver a la sala principal.`
+        : '') + '\n\n'
+    : ''
+  if (await askConfirm(`${avisoFase}${aviso}¿Abrir ${texto} para todos los equipos?`, '', 'Sí, abrir')) openNextDynamic()
 }
 async function volver() {
   if (await askConfirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()

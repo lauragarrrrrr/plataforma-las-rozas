@@ -42,12 +42,11 @@ export function createBlank(): Database {
   }
 }
 
-/** Base de datos para probar: en blanco, con los ámbitos ya revelados y el equipo E de ejemplo. */
+/** Base de datos para probar: como al empezar la jornada (ámbitos sin revelar, nada abierto) y con el equipo E de ejemplo. */
 export function createSeed(): Database {
   const db = createBlank()
   const id = DEMO_TEAM_ID
   db.demoTeamIds = [id]
-  db.event.areasRevealed = true
 
   // Nombres ficticios
   db.setups.push({ teamId: id, members: ['Andrea S.', 'Iván T.', 'Noelia C.', 'Pedro A.', 'Rocío L.'], digitalOwner: 'Andrea S.', premortemDone: true })
