@@ -17,6 +17,7 @@ import DynamicTimer from '../components/DynamicTimer.vue'
 import HelpButton from '../components/HelpButton.vue'
 import PhotoQr from '../components/PhotoQr.vue'
 import VotacionEquipo from '../components/VotacionEquipo.vue'
+import TeamNotices from '../components/TeamNotices.vue'
 import { SIMULATED_ROSTER } from '../data/roster'
 
 const props = defineProps<{ id: string }>()
@@ -89,6 +90,8 @@ const photo = computed(() => store.photoFor(props.id, dynamic.value.id))
 
 /** Hasta qué dinámica nos deja llegar el equipo facilitador */
 const allowed = computed(() => store.allowed(props.id))
+/** El equipo ya está en las dinámicas (para el aviso «¡Cambiamos de pantalla!») */
+const inDynamics = computed(() => !!setup.value?.premortemDone && allowed.value >= 0 && !finished.value)
 const waitingNext = computed(() => !!photo.value && index.value >= allowed.value)
 const startedAt = computed(() => store.openedAt(props.id, dynamic.value.id))
 const remaining = computed(() => {
@@ -323,6 +326,10 @@ const expediente = computed(() =>
 
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
+        <!-- El equipo facilitador ya ha abierto la siguiente: solo falta la foto -->
+        <p v-if="!photo && allowed > index" class="avanzar" role="alert">
+          <strong>¡Tenemos que avanzar!</strong> Subid ya la foto de «{{ dynamic.title }}» para pasar a la siguiente.
+        </p>
         <DynamicTimer :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" />
 
         <div class="card explica">
@@ -403,6 +410,15 @@ const expediente = computed(() =>
 
     <HelpButton v-if="!finished" :team-id="id" :dynamic-id="dynamic.id" />
   </main>
+
+  <!-- Avisos a pantalla completa: cambio de pantalla y avisos del panel -->
+  <TeamNotices
+    v-if="team && setup && verified"
+    :team-id="id"
+    :dynamic-id="inDynamics ? dynamic.id : undefined"
+    :dynamic-title="dynamic.title"
+    :dynamic-minutes="dynamic.minutes"
+  />
 </template>
 
 <style scoped>
@@ -463,6 +479,8 @@ const expediente = computed(() =>
 .dinamica--sin-chat .dinamica__izq{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:start}
 /* Sin chat: cronómetro arriba a todo el ancho; debajo, la explicación y la foto, una al lado de la otra */
 .dinamica--sin-chat .reloj{grid-column:1/-1}
+.avanzar{grid-column:1/-1;margin:0;padding:.9rem 1.2rem;border-radius:1.2rem;background:var(--c-rubi);color:var(--c-white);font-size:1.05rem}
+.avanzar strong{color:var(--c-white)}
 @media(max-width:960px){.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}}
 .dinamica__izq{display:grid;gap:1.25rem}
 .dinamica__chat{position:sticky;top:1rem}

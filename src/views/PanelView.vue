@@ -12,6 +12,7 @@ import { formatClock, useNow } from '../composables/useNow'
 import EscaletaTimeline from '../components/EscaletaTimeline.vue'
 import PanelEquipos from '../components/PanelEquipos.vue'
 import PanelVotacion from '../components/PanelVotacion.vue'
+import PanelAvisos from '../components/PanelAvisos.vue'
 
 const store = useStore()
 const now = useNow()
@@ -167,6 +168,8 @@ async function restaurar() {
           </ul>
         </details>
       </section>
+
+      <PanelAvisos />
 
       <PanelEquipos />
 

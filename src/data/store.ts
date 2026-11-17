@@ -256,6 +256,16 @@ export function useStore() {
       db.photos.filter((p) => p.teamId === teamId && p.dynamicId === dynamicId).slice(-1)[0],
     chat: (teamId: string) => db.chat.filter((m) => m.teamId === teamId),
     pendingHelp: (teamId: string) => db.helpRequests.find((h) => h.teamId === teamId && !h.attendedAt),
+    /** Avisos del panel para este equipo que todavía no ha leído (el más antiguo primero) */
+    unseenAlerts: (teamId: string) => {
+      const seen = db.progress.find((p) => p.teamId === teamId)?.alertsSeen ?? []
+      return db.alerts
+        .filter((a) => a.launchedAt && (a.target === 'all' || a.target === teamId) && !seen.includes(a.id))
+        .slice()
+        .sort((a, b) => (a.launchedAt ?? '').localeCompare(b.launchedAt ?? ''))
+    },
+    /** Qué equipos han leído un aviso */
+    alertSeenBy: (alertId: string) => db.progress.filter((p) => p.alertsSeen?.includes(alertId)).map((p) => p.teamId),
     initiative: (teamId: string) => db.initiatives.find((i) => i.teamId === teamId),
     isDemo: (teamId: string) => db.demoTeamIds.includes(teamId),
     /** Dinámica abierta para todos (-1 si todavía ninguna) */
@@ -428,8 +438,23 @@ export function requestHelp(teamId: string, dynamicId: string) {
   saveQuiet('helpRequests', h)
 }
 
+/** El equipo ha leído un aviso del panel («¡Entendido!») */
+export function ackAlert(teamId: string, alertId: string) {
+  const p = progressOf(teamId)
+  if (p.alertsSeen?.includes(alertId)) return
+  p.alertsSeen = [...(p.alertsSeen ?? []), alertId]
+  saveQuiet('progress', p)
+}
+
 // ---------------------------------------------------------------------------
 // Escritura · equipo facilitador
+
+/** Lanza un aviso a todos los equipos o a uno (target = 'all' o la letra del equipo) */
+export function launchAlert(target: string, title: string, body = '') {
+  const a = { id: uid(), target, title: title.trim(), body: body.trim(), launchedAt: now() }
+  state.alerts.push(a)
+  saveQuiet('alerts', a)
+}
 // ---------------------------------------------------------------------------
 export function attendHelp(id: string) {
   const h = state.helpRequests.find((x) => x.id === id)

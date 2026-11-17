@@ -69,6 +69,8 @@ export interface TeamProgress {
   openedAt?: Record<string, string>
   /** Pantallas previas ya vistas (por ejemplo, el sobre de las cartas) */
   introSeen?: Record<string, boolean>
+  /** Avisos del panel que el equipo ya ha leído («¡Entendido!») */
+  alertsSeen?: string[]
 }
 
 /** Mensaje del chat que les reta. `from: 'coach'` son las preguntas de la plataforma. */
