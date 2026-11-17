@@ -19,7 +19,7 @@ watchEffect(async () => {
     <span class="kicker">Votación</span>
     <template v-if="!open">
       <span class="candado" aria-hidden="true">🔒</span>
-      <h2>¿Qué iniciativas os han gustado más?</h2>
+      <h2>¿Qué titulares te han gustado más?</h2>
       <p>La votación se abrirá al terminar el speed pitch. Entonces cada persona votará desde su móvil.</p>
     </template>
     <template v-else>
