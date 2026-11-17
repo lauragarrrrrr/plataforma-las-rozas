@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // /votar?equipo=X · Votación desde el móvil, como la «Pieza 08 · Votación en sala» de la metodología.
 // 0. ¿Quién eres? (equipo del QR + nombre, para que cada persona vote una sola vez)
-// 1. Paso 1 de 2: los 12 titulares de 2040 (los escribe el equipo facilitador) → «Ir a votar»
-// 2. Paso 2 de 2: ★ Favorita 1, 2 y 3 (3, 2 y 1 puntos), nunca su propio equipo
+// 1. ★ Favorita 1, 2 y 3 (3, 2 y 1 puntos), nunca su propio equipo; en cada opción, el titular
+//    del equipo (lo escribe el equipo facilitador). Sin pantalla previa de titulares (17/11/2026).
 // 3. «¡Voto recibido!»
 // El voto se guarda con el equipo y la posición de la persona, nunca con su nombre.
 import { computed, ref } from 'vue'
@@ -16,7 +16,6 @@ const store = useStore()
 
 const equipo = ref(typeof route.query.equipo === 'string' ? route.query.equipo.toUpperCase() : '')
 const persona = ref<number | null>(null)
-const paso = ref<1 | 2>(1)
 const favoritas = ref<string[]>(['', '', ''])
 const enviando = ref(false)
 const aviso = ref('')
@@ -128,37 +127,17 @@ async function enviar() {
         <button class="enlace" type="button" @click="equipo = ''">No es mi equipo</button>
       </template>
 
-      <!-- Paso 1 de 2 · Los 12 titulares (los escribe el equipo facilitador en el panel) -->
-      <template v-else-if="paso === 1">
-        <span class="paso">Paso 1 de 2</span>
-        <h1 class="titulo">Los 12 titulares de 2040</h1>
-        <p>Repasa todos los titulares antes de votar.</p>
-        <div class="voto-titulares">
-          <article v-for="t in store.db.teams" :key="t.id" class="voto-tit" :class="{ 'voto-tit--mio': t.id === equipo }">
-            <small class="voto-tit__cab">Las Rozas Times · Eq. {{ t.id }} · {{ store.areaName(t.area) }}</small>
-            <p v-if="store.coverHeadline(t.id)" class="voto-tit__texto">{{ store.coverHeadline(t.id) }}</p>
-            <p v-else class="voto-tit__sin">Titular pendiente</p>
-            <em v-if="t.id === equipo" class="voto-tit__mio">Tu equipo</em>
-          </article>
-        </div>
-        <div class="barra-inferior">
-          <button class="boton" type="button" @click="paso = 2">Ir a votar →</button>
-        </div>
-      </template>
-
-      <!-- Paso 2 de 2 · Las tres favoritas -->
+      <!-- Las tres favoritas (se ve el titular de cada equipo en el desplegable) -->
       <template v-else>
-        <button class="enlace" type="button" @click="paso = 1">← Ver los titulares</button>
-        <span class="paso">Paso 2 de 2</span>
         <h1 class="titulo">¿Qué ideas te gustaría ver avanzar?</h1>
         <p class="quien">Votas como <strong>{{ nombres[persona!] }}</strong>, del <strong>equipo {{ equipo }}</strong>.</p>
-        <p>Selecciona tus tres iniciativas favoritas. No puedes votar a tu propio equipo.</p>
+        <p>Elige tus tres titulares favoritos. No puedes votar a tu propio equipo.</p>
 
         <div v-for="k in [0, 1, 2]" :key="k" class="favorita">
           <label :for="`fav-${k}`"><span class="estrella">★</span> Favorita {{ k + 1 }} <small>· {{ 3 - k }} {{ k === 2 ? 'punto' : 'puntos' }}</small></label>
           <select :id="`fav-${k}`" v-model="favoritas[k]" class="selector">
             <option value="">Seleccionar</option>
-            <option v-for="t in opciones(k)" :key="t.id" :value="t.id">Equipo {{ t.id }} · {{ store.areaName(t.area) }}</option>
+            <option v-for="t in opciones(k)" :key="t.id" :value="t.id">Equipo {{ t.id }} · {{ store.coverHeadline(t.id) || store.areaName(t.area) }}</option>
             <option disabled :value="`propio-${equipo}`">Equipo {{ equipo }} · es tu equipo (no se puede)</option>
           </select>
           <div v-if="elegida(k)" class="favorita__info">
@@ -171,7 +150,7 @@ async function enviar() {
           <button class="boton" type="button" :disabled="enviando" @click="enviar">
             {{ enviando ? 'Enviando…' : 'Enviar mis preferencias →' }}
           </button>
-          <button class="enlace" type="button" @click="persona = null; favoritas = ['', '', '']; paso = 1">No soy {{ nombres[persona] }}</button>
+          <button class="enlace" type="button" @click="persona = null; favoritas = ['', '', '']">No soy {{ nombres[persona] }}</button>
         </div>
       </template>
     </div>
@@ -182,7 +161,6 @@ async function enviar() {
 .votar{min-height:calc(100vh - 4.5rem);background:var(--c-green-light)}
 .votar__in{display:grid;gap:1rem;padding-block:2rem 7rem;max-width:40rem}
 .titulo{font-size:clamp(1.8rem,7vw,2.6rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
-.paso{justify-self:start;background:var(--c-innova-dark);color:var(--c-white);border-radius:99px;padding:.25em .9em;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .candado{font-size:2.5rem}
 .ok{display:grid;place-items:center;width:4rem;height:4rem;border-radius:50%;background:var(--c-innova);color:var(--c-ink);font-size:2rem;font-weight:700}
 .estrella{color:var(--c-innova-dark);font-weight:700}
@@ -202,13 +180,6 @@ async function enviar() {
 .nombre:disabled{opacity:.5;cursor:default}
 .nombre small{font-size:.8rem;color:var(--c-green-dark)}
 
-.voto-titulares{display:grid;gap:.6rem}
-.voto-tit{display:grid;gap:.35rem;margin:0;padding:1rem 1.1rem;border-radius:1rem;background:var(--c-paper);box-shadow:0 0 0 1px var(--c-paper-line)}
-.voto-tit__cab{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c-innova-dark);font-weight:600}
-.voto-tit__texto{margin:0;font-family:var(--font-paper);font-size:1.25rem;font-weight:700;line-height:1.3;letter-spacing:normal;color:var(--c-ink)}
-.voto-tit__sin{margin:0;font-family:var(--font-paper);font-style:italic;color:var(--c-green-dark)}
-.voto-tit__mio{font-style:normal;font-size:.8rem;font-weight:700;color:var(--c-green-deep)}
-.voto-tit--mio{opacity:.6}
 
 .favorita{display:grid;gap:.4rem;background:var(--c-white);border-radius:var(--radius-card);padding:1rem}
 .favorita label{font-weight:600;color:var(--c-ink)}
