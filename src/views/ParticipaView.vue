@@ -3,15 +3,16 @@
 // «¿Quién eres?» → escriben su nombre, tocan el suyo → «Eres del equipo C · busca tu mesa».
 // El ámbito aparece aquí mismo cuando el panel revela los ámbitos (10:20), no antes.
 // Solo se ven los nombres que coinciden con lo que se escribe, nunca la lista entera.
+// Después: «¿Ya estáis todos juntos? ¿Quién será vuestro digital owner?». Lo elige
+// cualquiera del equipo desde su móvil y lo ven todos. El digital owner entra desde el
+// ordenador con el enlace que le envía por correo el equipo facilitador (/equipo/:id).
 import { computed, ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import { AREAS } from '../data/config'
 import { SIMULATED_ROSTER } from '../data/roster'
-import { useStore } from '../data/store'
+import { saveSetup, useStore } from '../data/store'
 
 const store = useStore()
 const revealed = computed(() => store.db.event.areasRevealed)
-const teams = computed(() => store.db.teams.slice().sort((a, b) => a.number - b.number))
 
 interface Person { name: string; teamId: string }
 const people: Person[] = Object.entries(SIMULATED_ROSTER).flatMap(([teamId, names]) => names.map((name) => ({ name, teamId })))
@@ -45,6 +46,20 @@ function reset() {
 const myTeam = computed(() => (me.value ? store.db.teams.find((t) => t.id === me.value!.teamId) : undefined))
 const myArea = computed(() => (myTeam.value ? AREAS[myTeam.value.area] : ''))
 const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
+
+// --- Digital owner del equipo ---
+const setup = computed(() => (me.value ? store.setup(me.value.teamId) : undefined))
+const members = computed(() => (me.value ? setup.value?.members ?? SIMULATED_ROSTER[me.value.teamId] ?? [] : []))
+const owner = computed(() => setup.value?.digitalOwner ?? '')
+const ownerFirst = computed(() => owner.value.split(' ')[0])
+const soyOwner = computed(() => !!me.value && owner.value === me.value.name)
+const changingOwner = ref(false)
+const teamLink = computed(() => (me.value ? `${location.host}/equipo/${me.value.teamId}` : ''))
+function chooseOwner(name: string) {
+  if (!me.value) return
+  saveSetup(me.value.teamId, [...members.value], name)
+  changingOwner.value = false
+}
 </script>
 
 <template>
@@ -70,7 +85,32 @@ const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
           <div class="resultado__ambito" :class="{ 'resultado__ambito--oculto': !revealed }">
             <span class="kicker">Vuestro ámbito</span>
             <strong v-if="revealed">{{ myArea }}</strong>
-            <span v-else>Se revela en la sala a las 10:20. ¡Atentos!</span>
+            <span v-else>Se revela en la sala. ¡Atentos!</span>
+          </div>
+
+          <!-- ¿Quién será vuestro digital owner? -->
+          <div class="owner">
+            <template v-if="!owner || changingOwner">
+              <span class="kicker">¿Ya estáis todos juntos?</span>
+              <h2 class="owner__titulo">¿Quién será vuestro digital owner?</h2>
+              <p class="owner__nota">La persona que llevará el ordenador y centralizará toda la experiencia digital del equipo. Elegidla entre todos.</p>
+              <div class="owner__nombres">
+                <button v-for="m in members" :key="m" type="button" class="owner__nombre" :class="{ 'owner__nombre--actual': m === owner }" @click="chooseOwner(m)">{{ m }}</button>
+              </div>
+              <button v-if="changingOwner" class="otra" type="button" @click="changingOwner = false">Cancelar</button>
+            </template>
+            <template v-else>
+              <span class="kicker">Vuestro digital owner</span>
+              <p class="owner__elegido">{{ owner }}</p>
+              <p v-if="soyOwner" class="owner__pasos">
+                <strong>¡Eres tú!</strong> Abre el correo que os ha enviado el equipo facilitador y entra en el enlace <strong>desde el ordenador de vuestra mesa</strong>.
+              </p>
+              <p v-else class="owner__pasos">
+                <strong>{{ ownerFirst }}</strong> abrirá el correo del equipo facilitador y entrará en el enlace desde el ordenador de vuestra mesa.
+              </p>
+              <p class="owner__link">¿No llega el correo? Escribid en el ordenador:<strong>{{ teamLink }}</strong></p>
+              <button class="otra" type="button" @click="changingOwner = true">Cambiar de digital owner</button>
+            </template>
           </div>
 
           <button class="otra" type="button" @click="reset">No soy {{ firstName }}</button>
@@ -99,16 +139,6 @@ const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
             No te encontramos. Prueba solo con tu nombre o pregunta al equipo facilitador.
           </p>
         </div>
-      </div>
-    </section>
-
-    <!-- Para los ordenadores de las mesas (sin nombres) -->
-    <section class="mesas">
-      <div class="wrap mesas__in">
-        <span class="kicker">¿Es el ordenador de una mesa? Entrad en vuestro equipo</span>
-        <nav class="mesas__letras" aria-label="Equipos">
-          <RouterLink v-for="t in teams" :key="t.id" class="mesas__letra" :to="`/equipo/${t.id}`">{{ t.id }}</RouterLink>
-        </nav>
       </div>
     </section>
   </main>
@@ -143,10 +173,16 @@ h1{font-size:clamp(3rem,10vw,8rem);line-height:.92}
 .resultado__ambito--oculto .kicker{color:var(--c-innova-dark)}
 .otra{margin-top:.6rem;font:inherit;font-size:.85rem;color:var(--c-green-dark);background:none;border:0;text-decoration:underline;cursor:pointer}
 
-/* Ordenadores de las mesas */
-.mesas{padding-block:2rem}
-.mesas__in{display:grid;gap:.8rem}
-.mesas__letras{display:flex;flex-wrap:wrap;gap:.5rem}
-.mesas__letra{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;background:var(--c-green-light);color:var(--c-green-dark);font-weight:600;text-decoration:none}
-.mesas__letra:hover{background:var(--c-innova);color:var(--c-ink)}
+/* Digital owner */
+.owner{display:grid;gap:.6rem;justify-items:center;width:100%;box-sizing:border-box;margin-top:.8rem;padding:1.2rem;border-radius:1.2rem;border:2px dashed var(--c-green-mid)}
+.owner__titulo{margin:0;font-size:1.35rem;font-weight:600;letter-spacing:-.02em;color:var(--c-ink);line-height:1.2}
+.owner__nota{margin:0;font-size:.9rem}
+.owner__nombres{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.3rem}
+.owner__nombre{font:inherit;font-weight:500;color:var(--c-ink);background:var(--c-green-light);border:0;border-radius:99px;padding:.6em 1.1em;cursor:pointer;transition:background .2s,transform .2s var(--ease-out)}
+.owner__nombre:hover,.owner__nombre:focus-visible{background:var(--c-innova);transform:translateY(-2px);outline:none}
+.owner__nombre--actual{box-shadow:inset 0 0 0 2px var(--c-innova)}
+.owner__elegido{margin:0;font-size:1.6rem;font-weight:600;color:var(--c-ink);letter-spacing:-.02em}
+.owner__pasos{margin:0;font-size:1rem;color:var(--c-ink)}
+.owner__link{margin:0;font-size:.85rem}
+.owner__link strong{display:block;word-break:break-all;color:var(--c-ink)}
 </style>

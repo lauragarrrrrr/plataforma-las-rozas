@@ -46,6 +46,40 @@ function guardarEquipo() {
   editing.value = false
 }
 
+// --- 0. ¿Eres el digital owner? ------------------------------------------------
+// El equipo elige a su digital owner desde el móvil (/participa). Al entrar desde el
+// ordenador con el enlace del correo, escribe su nombre: si es la persona elegida,
+// bienvenida; si es otra persona del equipo, puede tomar el relevo.
+// Este ordenador se acuerda de quién entró (no se vuelve a preguntar al recargar).
+const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+const OWNER_KEY = `lr2040-ordenador-${props.id}`
+function readOwnerKey() {
+  try { return localStorage.getItem(OWNER_KEY) ?? '' } catch { return '' }
+}
+const deviceOwner = ref(readOwnerKey())
+const verified = computed(() => !!setup.value && !!deviceOwner.value)
+const teamMembers = computed(() => setup.value?.members ?? previstos)
+const ownerQuery = ref('')
+const ownerMatches = computed(() => {
+  const q = plain(ownerQuery.value)
+  if (q.length < 2) return []
+  return teamMembers.value.filter((m) => plain(m).split(/\s+/).some((w) => w.startsWith(q)) || plain(m).startsWith(q))
+})
+const picked = ref('')
+const pickedFirst = computed(() => picked.value.split(' ')[0])
+/** owner: es la persona elegida · other: el equipo eligió a otra · new: aún no han elegido */
+const pickedKind = computed(() => {
+  if (!picked.value) return ''
+  if (!setup.value?.digitalOwner) return 'new'
+  return setup.value.digitalOwner === picked.value ? 'owner' : 'other'
+})
+function enterAsOwner() {
+  if (!picked.value) return
+  if (setup.value?.digitalOwner !== picked.value) saveSetup(props.id, [...teamMembers.value], picked.value)
+  try { localStorage.setItem(OWNER_KEY, picked.value) } catch { /* sin almacenamiento: se volverá a preguntar */ }
+  deviceOwner.value = picked.value
+}
+
 // --- 3. Dinámicas -------------------------------------------------------------
 const index = computed(() => progress.value?.current ?? 0)
 const finished = computed(() => index.value >= TEAM_DYNAMICS.length)
@@ -133,8 +167,46 @@ const expediente = computed(() =>
     </div>
   </main>
 
-  <!-- 1 · ¿Quiénes sois? -->
-  <main v-else-if="!setup || editing" class="section s-claro">
+  <!-- 0 · ¿Eres el digital owner? -->
+  <main v-else-if="!setup || (!verified && !editing)" class="section s-claro">
+    <div class="wrap estrecho">
+      <span class="kicker">{{ team.name }}</span>
+
+      <!-- Ya ha tocado su nombre -->
+      <div v-if="picked" class="card bienvenida">
+        <template v-if="pickedKind === 'owner'">
+          <h1 class="titular">¡{{ pickedFirst }}, eres digital owner!</h1>
+          <p class="intro">Te damos la bienvenida. Desde este ordenador llevarás toda la experiencia digital del equipo {{ team.id }}.</p>
+          <button class="boton" type="button" @click="enterAsOwner">¡Empezamos!</button>
+        </template>
+        <template v-else-if="pickedKind === 'other'">
+          <h1 class="titular">Hola, {{ pickedFirst }}</h1>
+          <p class="intro">El digital owner de vuestro equipo es <strong>{{ setup?.digitalOwner }}</strong>. ¿Pasas a serlo tú?</p>
+          <button class="boton" type="button" @click="enterAsOwner">Sí, soy yo el digital owner</button>
+        </template>
+        <template v-else>
+          <h1 class="titular">Hola, {{ pickedFirst }}</h1>
+          <p class="intro">Todavía no habéis elegido digital owner. ¿Lo eres tú?</p>
+          <button class="boton" type="button" @click="enterAsOwner">Sí, soy yo el digital owner</button>
+        </template>
+        <button class="enlace" type="button" @click="picked = ''">No soy {{ pickedFirst }}</button>
+      </div>
+
+      <!-- «Escribe tu nombre» -->
+      <template v-else>
+        <h1 class="titular">¡Hola, digital owner!</h1>
+        <p class="intro">Escribe tu nombre y tócalo para entrar.</p>
+        <input v-model="ownerQuery" class="campo-nombre" type="text" autocomplete="off" autocapitalize="words" placeholder="Tu nombre" />
+        <div v-if="ownerMatches.length" class="nombres">
+          <button v-for="m in ownerMatches" :key="m" type="button" class="nombres__btn" @click="picked = m">{{ m }}</button>
+        </div>
+        <p v-else-if="ownerQuery.trim().length >= 2" class="nota">No encontramos ese nombre en el equipo {{ team.id }}. Pulsad «Pedir ayuda» o avisad al equipo facilitador.</p>
+      </template>
+    </div>
+  </main>
+
+  <!-- 1 · ¿Quiénes sois? (para corregir las personas del equipo) -->
+  <main v-else-if="editing" class="section s-claro">
     <div class="wrap estrecho">
       <span class="kicker">{{ team.name }}</span>
       <h1 class="titular">¿Quiénes sois?</h1>
@@ -164,7 +236,7 @@ const expediente = computed(() =>
     <div class="wrap reto__in">
       <div class="reto__cab">
         <span class="kicker">{{ team.name }} · Primer reto</span>
-        <h1 class="titular">¡{{ setup.digitalOwner }}, digital owner!</h1>
+        <h1 class="titular">¡{{ setup.digitalOwner.split(" ")[0] }}, digital owner!</h1>
         <p class="reto__lema">Te ponemos un reto:</p>
         <p class="intro">
           Sube las fichas individuales de <strong>«{{ PREMORTEM.title }}»</strong> que ha rellenado cada persona de tu equipo.
@@ -335,6 +407,12 @@ const expediente = computed(() =>
 
 <style scoped>
 .estrecho{max-width:44rem}
+.bienvenida{display:grid;gap:1rem;justify-items:start}
+.campo-nombre{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:1.3rem;color:var(--c-ink);background:var(--c-white);border:2px solid var(--c-paper-line);border-radius:99px;padding:.8em 1.2em}
+.campo-nombre:focus{outline:none;border-color:var(--c-innova)}
+.nombres{display:flex;flex-wrap:wrap;gap:.6rem}
+.nombres__btn{font:inherit;font-size:1.15rem;font-weight:500;color:var(--c-ink);background:var(--c-white);border:0;border-radius:99px;padding:.7em 1.3em;cursor:pointer;transition:background .2s,transform .2s var(--ease-out)}
+.nombres__btn:hover,.nombres__btn:focus-visible{background:var(--c-innova);transform:translateY(-2px);outline:none}
 .estrecho > *{margin-bottom:1rem}
 .quienes{gap:.8rem}
 .campo{display:grid;gap:.25rem}
