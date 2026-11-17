@@ -47,7 +47,6 @@ function opciones(puesto: number) {
     (t) => t.id !== equipo.value && !favoritas.value.some((f, k) => k !== puesto && f === t.id),
   )
 }
-const elegida = (puesto: number) => store.team(favoritas.value[puesto])
 
 async function enviar() {
   aviso.value = ''
@@ -140,15 +139,12 @@ async function enviar() {
             <option v-for="t in opciones(k)" :key="t.id" :value="t.id">Equipo {{ t.id }} · {{ store.coverHeadline(t.id) || store.areaName(t.area) }}</option>
             <option disabled :value="`propio-${equipo}`">Equipo {{ equipo }} · es tu equipo (no se puede)</option>
           </select>
-          <div v-if="elegida(k)" class="favorita__info">
-            <span><b>Equipo {{ elegida(k)!.id }}</b> · {{ store.coverHeadline(elegida(k)!.id) || store.areaName(elegida(k)!.area) }}</span>
-          </div>
         </div>
 
         <p v-if="aviso" class="alerta" role="alert">{{ aviso }}</p>
         <div class="barra-inferior">
           <button class="boton" type="button" :disabled="enviando" @click="enviar">
-            {{ enviando ? 'Enviando…' : 'Enviar mis preferencias →' }}
+            {{ enviando ? 'Enviando…' : 'Enviar mi votación →' }}
           </button>
           <button class="enlace" type="button" @click="persona = null; favoritas = ['', '', '']">No soy {{ nombres[persona] }}</button>
         </div>
@@ -184,7 +180,6 @@ async function enviar() {
 .favorita{display:grid;gap:.4rem;background:var(--c-white);border-radius:var(--radius-card);padding:1rem}
 .favorita label{font-weight:600;color:var(--c-ink)}
 .favorita label small{font-weight:400;color:var(--c-green-dark)}
-.favorita__info{display:flex;gap:.7rem;align-items:center;font-size:.85rem}
 
 .barra-inferior{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1rem;padding:.9rem 16px;background:var(--c-white);box-shadow:0 -8px 24px -16px var(--c-green-deep);z-index:5}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;font-size:.85rem;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
