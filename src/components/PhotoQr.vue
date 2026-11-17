@@ -34,7 +34,7 @@ watchEffect(async () => {
       </ol>
       <p class="qr__espera"><span class="punto" aria-hidden="true"></span> {{ multi ? 'Esperando las fichas…' : 'Esperando la foto…' }}</p>
       <button class="enlace" type="button" @click="showBackup = !showBackup">¿El QR no funciona?</button>
-      <PhotoUpload v-if="showBackup" label="Subir desde este ordenador" @uploaded="(u) => emit('uploaded', u)" />
+      <PhotoUpload v-if="showBackup" :no-review="multi" label="Subir desde este ordenador" @uploaded="(u) => emit('uploaded', u)" />
     </div>
   </div>
 </template>

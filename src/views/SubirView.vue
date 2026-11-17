@@ -74,9 +74,9 @@ async function onPhoto(url: string) {
         <h1 v-if="multi" class="titulo">Sube las fichas de «{{ PREMORTEM.title }}»</h1>
         <h1 v-else class="titulo">Haced la foto {{ photoOf(dynamic) }}</h1>
         <p v-if="multi">Una foto por ficha. <template v-if="sentCount">Llevas {{ sentCount }}.</template></p>
-        <p v-else>Que se vea entero y se pueda leer. Se sube sola al pulsar.</p>
+        <p v-else>Que se vea entero y se pueda leer. Antes de enviarla, comprobaréis que se ve bien.</p>
         <p v-if="sending" class="enviando">Subiendo la foto… no cerréis esta pantalla.</p>
-        <PhotoUpload v-else class="grande" :label="multi ? 'Hacer la foto de una ficha' : 'Hacer la foto'" @uploaded="onPhoto" />
+        <PhotoUpload v-else class="grande" :no-review="multi" :label="multi ? 'Hacer la foto de una ficha' : 'Hacer la foto'" @uploaded="onPhoto" />
         <p v-if="failed" class="alerta">No se ha podido subir la foto. Comprobad la conexión y probad otra vez.</p>
       </template>
     </div>
