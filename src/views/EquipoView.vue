@@ -379,7 +379,7 @@ const expediente = computed(() =>
         <span class="sala-aviso__icono" aria-hidden="true">→</span>
         <h2 id="sala-titulo">¡Volved a la sala principal!</h2>
         <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
-        <p v-if="nextOne" class="nota">Cuando el equipo facilitador abra «{{ nextOne.title }}», esta pantalla seguirá sola.</p>
+        <p v-if="nextOne" class="nota">Cuando sea el momento, accederéis todos a la siguiente fase desde aquí.</p>
         <!-- Por si algo falla: esta pantalla tapa el botón de «Pedir ayuda» -->
         <p v-if="store.pendingHelp(id)" class="sala-aviso__enviado">Aviso enviado: el equipo facilitador viene a vuestra mesa.</p>
         <button v-else class="sala-aviso__error" type="button" @click="requestHelp(id, dynamic.id)">
