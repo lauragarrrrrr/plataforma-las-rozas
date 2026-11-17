@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // /panel · Seguimiento del equipo facilitador
 // Peticiones de ayuda arriba; debajo, por dónde va cada equipo.
-// ⚠️ La contraseña del panel llega más adelante.
 import { askConfirm } from '../composables/useConfirm'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { photosZip, saveFile } from '../data/photoZip'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { TEAM_DYNAMICS } from '../data/dynamics'
@@ -23,6 +23,27 @@ const hora = (iso: string) => new Date(iso).toLocaleTimeString('es-ES', { hour: 
 const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attendedAt).slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)))
 const atendidas = computed(() => store.db.helpRequests.filter((h) => h.attendedAt).slice(-8).reverse())
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
+
+// --- Descargar todas las fotos en un ZIP, por equipos (para guardarlas en un Drive) ---
+const zipProgreso = ref('')
+const zipAviso = ref('')
+async function descargarFotos() {
+  const fotos = store.db.photos
+  if (!fotos.length || zipProgreso.value) return
+  zipAviso.value = ''
+  zipProgreso.value = `Preparando 0 de ${fotos.length}…`
+  try {
+    const { zip, failed } = await photosZip(fotos, store.db.teams, (n, total) => (zipProgreso.value = `Preparando ${n} de ${total}…`))
+    const d = new Date()
+    const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}`
+    saveFile(zip, `Las Rozas 2040 · Fotos ${stamp}.zip`)
+    zipAviso.value = failed ? `Descargado, pero ${failed} ${failed === 1 ? 'foto no se ha' : 'fotos no se han'} podido incluir. Probad otra vez.` : '¡Descargado! Ahora podéis subir el ZIP a vuestro Drive.'
+  } catch {
+    zipAviso.value = 'No se ha podido preparar el ZIP. Comprobad la conexión y probad otra vez.'
+  } finally {
+    zipProgreso.value = ''
+  }
+}
 
 // --- Ritmo: qué dinámica está abierta para todos ---
 const abierta = computed(() => store.openDynamic())
@@ -122,6 +143,17 @@ async function restaurar() {
       <PanelVotacion />
 
       <section class="card">
+        <span class="kicker">Copia de las fotos</span>
+        <p>Descarga todas las fotos en un ZIP, ordenadas en una carpeta por equipo. Después, subidlo a vuestro Drive. Podéis hacerlo varias veces durante el día.</p>
+        <div class="botones">
+          <button class="boton" type="button" :disabled="!store.db.photos.length || !!zipProgreso" @click="descargarFotos">
+            {{ zipProgreso || `Descargar todas las fotos (${store.db.photos.length})` }}
+          </button>
+        </div>
+        <p v-if="zipAviso" class="zip-aviso">{{ zipAviso }}</p>
+      </section>
+
+      <section class="card">
         <span class="kicker">Datos</span>
         <p>Antes del evento hay que dejar todo en blanco. Mientras preparamos, podéis volver a los datos de ejemplo.</p>
         <div class="botones">
@@ -134,6 +166,8 @@ async function restaurar() {
 </template>
 
 <style scoped>
+.zip-aviso{margin:0;font-weight:600;color:var(--c-innova-dark)}
+.boton:disabled{opacity:.6;cursor:progress;transform:none}
 .cabeza{display:grid;gap:.8rem}
 .ayudas--activa{box-shadow:inset 0 0 0 3px var(--c-rubi)}
 .ayudas__lista{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
