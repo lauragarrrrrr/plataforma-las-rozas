@@ -23,6 +23,23 @@ const aviso = ref('')
 const hecho = ref(false)
 
 const miEquipo = computed(() => store.team(equipo.value))
+
+// Si este móvil ya dijo por la mañana quién era (en /participa), se le propone directamente
+function recordado(): { name: string; teamId: string } | null {
+  try { return JSON.parse(localStorage.getItem('lr2040-participante') ?? 'null') } catch { return null }
+}
+const yo = ref(recordado())
+const yoIndice = computed(() => {
+  if (!yo.value) return -1
+  const lista = store.setup(yo.value.teamId)?.members ?? SIMULATED_ROSTER[yo.value.teamId] ?? []
+  return lista.indexOf(yo.value.name)
+})
+const proponerYo = computed(() => !!yo.value && yoIndice.value >= 0 && !equipo.value && persona.value === null && !store.hasVoted(yo.value.teamId, yoIndice.value))
+function soyYo() {
+  if (!yo.value) return
+  equipo.value = yo.value.teamId
+  persona.value = yoIndice.value
+}
 const nombres = computed(() => store.setup(equipo.value)?.members ?? SIMULATED_ROSTER[equipo.value] ?? [])
 const portada = (t: Team) => store.photoFor(t.id, 'portada')?.url
 
@@ -69,18 +86,30 @@ async function enviar() {
         <p>Los resultados se verán en la pantalla de la sala.</p>
       </template>
 
-      <!-- 0 · ¿De qué equipo eres? (si se llega sin el QR del equipo) -->
+      <!-- 0 · Este móvil ya sabe quién eres -->
+      <template v-else-if="proponerYo">
+        <h1 class="titulo">¿Eres {{ yo!.name }}?</h1>
+        <p>Para hacer esta votación final necesitamos saber quién eres. Del equipo {{ yo!.teamId }} · {{ store.areaName(store.team(yo!.teamId)!.area) }}.</p>
+        <button class="nombre nombre--yo" type="button" @click="soyYo">Sí, soy {{ yo!.name }}</button>
+        <button class="enlace" type="button" @click="yo = null">No soy yo</button>
+      </template>
+
+      <!-- 0 · ¿A qué equipo perteneces? (si se llega sin el QR del equipo) -->
       <template v-else-if="!miEquipo">
-        <h1 class="titulo">¿De qué equipo eres?</h1>
-        <select class="selector" :value="equipo" @change="equipo = ($event.target as HTMLSelectElement).value">
-          <option value="">Elige tu equipo</option>
-          <option v-for="t in store.db.teams" :key="t.id" :value="t.id">Equipo {{ t.id }}</option>
-        </select>
+        <h1 class="titulo">¿Quién eres?</h1>
+        <p>Para hacer esta votación final necesitamos saber quién eres. Primero, <strong>¿a qué equipo perteneces?</strong></p>
+        <div class="equipos">
+          <button v-for="t in store.db.teams" :key="t.id" class="equipo-btn" type="button" @click="equipo = t.id">
+            <span class="equipo-btn__letra">{{ t.id }}</span>
+            <span class="equipo-btn__ambito">{{ store.areaName(t.area) }}</span>
+          </button>
+        </div>
       </template>
 
       <!-- 0 · ¿Quién eres? -->
       <template v-else-if="persona === null">
         <h1 class="titulo">¿Quién eres?</h1>
+        <p>Para hacer esta votación final necesitamos saber quién eres. <strong>Selecciona tu nombre exacto.</strong></p>
         <p>{{ miEquipo.name }} · {{ store.areaName(miEquipo.area) }}</p>
         <div class="nombres">
           <button
@@ -158,6 +187,12 @@ async function enviar() {
 
 .selector{width:100%;font:inherit;font-size:1rem;padding:.8rem 1rem;border:1.5px solid var(--c-green-mid);border-radius:1rem;background:var(--c-white);color:var(--c-ink)}
 .nombres{display:grid;gap:.5rem}
+.nombre--yo{background:var(--c-innova);text-align:center}
+.equipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.5rem}
+.equipo-btn{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.7rem;border:0;border-radius:1rem;background:var(--c-white);padding:.7rem .9rem;font:inherit;text-align:left;cursor:pointer;color:var(--c-ink)}
+.equipo-btn:hover{background:var(--c-green-mid)}
+.equipo-btn__letra{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--c-innova-dark);color:var(--c-white);font-size:1.2rem;font-weight:600}
+.equipo-btn__ambito{font-size:.8rem;line-height:1.25;color:var(--c-green-dark)}
 .nombre{border:0;border-radius:1rem;background:var(--c-white);padding:1rem 1.2rem;font:inherit;font-size:1.15rem;font-weight:500;color:var(--c-ink);text-align:left;cursor:pointer}
 .nombre:disabled{opacity:.5;cursor:default}
 .nombre small{font-size:.8rem;color:var(--c-green-dark)}
