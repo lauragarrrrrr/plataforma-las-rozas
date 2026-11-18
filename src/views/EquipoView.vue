@@ -368,7 +368,7 @@ const expediente = computed(() =>
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
         <!-- El equipo facilitador ya ha abierto la siguiente: solo falta la foto -->
-        <p v-if="!photo && allowed > index && remaining <= 3 * 60_000" class="avanzar" role="alert">
+        <p v-if="!photo && allowed > index" class="avanzar" role="alert">
           <strong>¡Tenemos que avanzar!</strong> Subid ya la foto de «{{ dynamic.title }}» para pasar a la siguiente.
         </p>
         <p v-if="pendiente" class="pendiente" role="status">
@@ -442,9 +442,10 @@ const expediente = computed(() =>
     </section>
 
     <!-- Se acabó el tiempo: hay que subir la foto para seguir -->
-    <div v-if="!finished && timeUp && !photo" class="bloqueo" role="dialog" aria-modal="true" aria-labelledby="bloqueo-titulo">
+    <!-- Se acabó el tiempo, o el equipo facilitador ya ha abierto la siguiente: hay que subir la foto para seguir -->
+    <div v-if="!finished && !photo && (timeUp || allowed > index)" class="bloqueo" role="dialog" aria-modal="true" aria-labelledby="bloqueo-titulo">
       <div class="bloqueo__caja">
-        <span class="kicker">Se acabó el tiempo</span>
+        <span class="kicker">{{ timeUp ? 'Se acabó el tiempo' : '¡Tenemos que avanzar!' }}</span>
         <h2 id="bloqueo-titulo">Subid la foto para continuar</h2>
         <p>Fotografiad {{ dynamic.photo.label }} tal y como está ahora, aunque no esté terminado.</p>
         <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
