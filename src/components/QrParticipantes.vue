@@ -8,7 +8,7 @@ import QRCode from 'qrcode'
 import { PUBLIC_URL } from '../data/config'
 
 const QRS = [
-  { id: 'participa', titulo: 'Al llegar: ¿Quién eres?', texto: 'Descubren su ámbito, su equipo y su mesa, y eligen al digital owner.', ruta: '/participa' },
+  { id: 'participa', titulo: 'Al llegar: ¿Quién eres?', texto: 'Descubren su ámbito, su equipo y su mesa.', ruta: '/participa' },
   { id: 'votar', titulo: 'Al final: la votación', texto: 'Cada persona vota desde su móvil sus tres titulares favoritos.', ruta: '/votar' },
 ]
 const imagenes = ref<Record<string, string>>({})

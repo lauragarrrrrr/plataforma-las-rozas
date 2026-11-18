@@ -119,7 +119,7 @@ async function restaurar() {
 </script>
 
 <template>
-  <main class="section s-claro">
+  <main class="section s-claro panel">
     <div class="wrap">
       <div class="cabeza">
         <span class="kicker">Equipo facilitador</span>
@@ -215,7 +215,11 @@ async function restaurar() {
 .ayuda__va{justify-self:start;display:inline-block;margin-top:.2rem;background:var(--c-green-light);color:var(--c-ink);border-radius:99px;padding:.1em .7em;font-size:.8rem;font-weight:600}
 .zip-aviso{margin:0;font-weight:600;color:var(--c-innova-dark)}
 .boton:disabled{opacity:.6;cursor:progress;transform:none}
-.cabeza{display:grid;gap:.8rem}
+.panel{padding-block:1.2rem 4rem}
+.cabeza{display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem 1.2rem}
+.cabeza .kicker{width:100%}
+.cabeza .titular{font-size:clamp(1.8rem,3vw,2.4rem);line-height:1.1;margin:0}
+.cabeza p{margin:0}
 .ayudas--activa{box-shadow:inset 0 0 0 3px var(--c-rubi)}
 .ayudas__lista{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
 .ayuda{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:color-mix(in srgb,var(--c-rubi) 10%,var(--c-white));border-radius:1rem;padding:.8rem 1rem}
