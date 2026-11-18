@@ -486,6 +486,14 @@ export function launchAlert(target: string, title: string, body = '') {
   saveQuiet('alerts', a)
 }
 // ---------------------------------------------------------------------------
+/** «Voy yo»: una persona del equipo facilitador va a atender la petición */
+export function takeHelp(id: string, name: string) {
+  const h = state.helpRequests.find((x) => x.id === id)
+  if (!h || h.attendedAt) return
+  h.takenBy = name
+  saveQuiet('helpRequests', h)
+}
+
 export function attendHelp(id: string) {
   const h = state.helpRequests.find((x) => x.id === id)
   if (!h || h.attendedAt) return

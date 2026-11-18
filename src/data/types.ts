@@ -88,7 +88,7 @@ export interface TeamProgress {
 export interface ChatMessage { id: string; teamId: string; dynamicId: string; from: 'team' | 'coach'; text: string; createdAt: string }
 
 /** El equipo pide ayuda; el panel la marca como atendida. */
-export interface HelpRequest { id: string; teamId: string; dynamicId: string; createdAt: string; attendedAt?: string }
+export interface HelpRequest { id: string; teamId: string; dynamicId: string; createdAt: string; attendedAt?: string; /** Quién del equipo facilitador va («Voy yo» en /avisos) */ takenBy?: string }
 
 /** Todo lo que guarda la plataforma. */
 export interface Database {

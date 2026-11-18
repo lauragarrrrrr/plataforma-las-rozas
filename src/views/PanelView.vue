@@ -169,6 +169,7 @@ async function restaurar() {
             <div>
               <strong>{{ store.team(h.teamId)?.name }}</strong>
               <span>{{ titleOf(h.dynamicId) }} · hace {{ minutesAgo(h.createdAt) }} min · {{ store.setup(h.teamId)?.digitalOwner }}</span>
+              <span v-if="h.takenBy" class="ayuda__va">Va {{ h.takenBy }}</span>
             </div>
             <button class="boton" type="button" @click="attendHelp(h.id)">Atendida</button>
           </li>
@@ -212,6 +213,7 @@ async function restaurar() {
 </template>
 
 <style scoped>
+.ayuda__va{justify-self:start;display:inline-block;margin-top:.2rem;background:var(--c-green-light);color:var(--c-ink);border-radius:99px;padding:.1em .7em;font-size:.8rem;font-weight:600}
 .zip-aviso{margin:0;font-weight:600;color:var(--c-innova-dark)}
 .boton:disabled{opacity:.6;cursor:progress;transform:none}
 .cabeza{display:grid;gap:.8rem}

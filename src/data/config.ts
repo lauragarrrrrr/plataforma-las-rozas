@@ -4,6 +4,9 @@ import type { AreaId, PhaseId } from './types'
 /** Día del evento: ese día la escaleta sigue la hora real («Seguir el horario» en el panel) */
 export const EVENT_DATE = '2026-11-21'
 
+/** Equipo facilitador que recibe avisos en el móvil (/avisos). Solo el nombre de pila. */
+export const FACILITATORS = ['Andrea', 'Juanjo', 'Irene', 'Laura']
+
 /** Dirección de la web pública (Cloudflare). Los QR para los participantes llevan siempre aquí. */
 export const PUBLIC_URL = 'https://plataforma-las-rozas.laura-07d.workers.dev'
 

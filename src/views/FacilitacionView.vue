@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // /facilitacion · Entrada del equipo facilitador
 // La presentación de la sala va aparte (decidido por Laura el 17/11/2026): aquí solo panel y vista previa.
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import QRCode from 'qrcode'
+import { PUBLIC_URL } from '../data/config'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { useStore } from '../data/store'
@@ -10,6 +12,10 @@ import QrParticipantes from '../components/QrParticipantes.vue'
 const store = useStore()
 const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attendedAt).length)
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
+
+// QR de /avisos para el móvil de cada persona del equipo facilitador
+const qrAvisos = ref('')
+QRCode.toDataURL(PUBLIC_URL + '/avisos', { margin: 2, width: 600 }).then((u) => (qrAvisos.value = u))
 </script>
 
 <template>
@@ -32,6 +38,17 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
         </RouterLink>
       </div>
 
+      <section class="avisos-movil">
+        <img v-if="qrAvisos" :src="qrAvisos" alt="Código QR de los avisos en el móvil" />
+        <div>
+          <span class="kicker">En vuestro móvil</span>
+          <strong>Avisos de ayuda</strong>
+          <span>Cada persona elige quién es y qué equipos lleva. Le suena y vibra cuando uno de sus equipos pide ayuda, y puede decir «Voy yo».</span>
+          <RouterLink class="boton" to="/avisos">Abrir los avisos</RouterLink>
+          <code>{{ PUBLIC_URL }}/avisos</code>
+        </div>
+      </section>
+
       <QrParticipantes />
     </div>
   </main>
@@ -44,6 +61,12 @@ const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 .opcion:hover{transform:translateY(-4px)}
 .opcion strong{font-size:clamp(1.4rem,2.6vw,2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1;color:var(--c-ink)}
 .opcion--previa{background:var(--c-white);box-shadow:inset 0 0 0 2px var(--c-green-mid)}
+.avisos-movil{display:grid;grid-template-columns:9rem 1fr;gap:1.2rem;align-items:center;background:var(--c-white);border-radius:var(--radius-card);padding:1.2rem;margin-block:1rem}
+.avisos-movil img{width:9rem;height:9rem;border-radius:.8rem;box-shadow:0 0 0 1px var(--c-gris-10)}
+.avisos-movil div{display:grid;gap:.4rem;justify-items:start}
+.avisos-movil strong{font-size:1.3rem;font-weight:500;color:var(--c-ink)}
+.avisos-movil code{font-size:.75rem;word-break:break-all}
+@media(max-width:500px){.avisos-movil{grid-template-columns:1fr}}
 .ahora{margin-top:.5rem;font-weight:600;color:var(--c-innova-dark)}
 .aviso{justify-self:start;margin-top:.5rem;background:var(--c-rubi);color:var(--c-white);border-radius:99px;padding:.3em .9em;font-size:.85rem;font-weight:600}
 </style>
