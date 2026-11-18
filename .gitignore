@@ -19,3 +19,6 @@ desktop.ini
 
 # Configuración local de Claude Code
 .claude/launch.json
+
+# Nombres reales de las personas inscritas: nunca se suben (el repositorio es público)
+src/data/roster.local.json

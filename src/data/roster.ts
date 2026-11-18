@@ -21,3 +21,10 @@ export const SIMULATED_ROSTER: Record<string, string[]> = {
   K: ['Héctor S.', 'Silvia T.', 'Jaime U.', 'Patricia V.'],
   L: ['Alicia Z.', 'Rodrigo A.', 'Miriam B.', 'Emilio C.', 'Teresa D.'],
 }
+
+// Nombres reales: solo en el ordenador de Laura, en src/data/roster.local.json (no se sube).
+// Si ese archivo existe, manda sobre la simulación.
+const local = Object.values(import.meta.glob<Record<string, string[]>>('./roster.local.json', { eager: true, import: 'default' }))[0]
+
+/** Personas de cada equipo: las reales si están en este ordenador; si no, la simulación */
+export const ROSTER: Record<string, string[]> = local ?? SIMULATED_ROSTER

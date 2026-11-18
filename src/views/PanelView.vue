@@ -14,6 +14,7 @@ import PanelEquipos from '../components/PanelEquipos.vue'
 import PanelVotacion from '../components/PanelVotacion.vue'
 import PanelTitulares from '../components/PanelTitulares.vue'
 import PanelAvisos from '../components/PanelAvisos.vue'
+import PanelHorario from '../components/PanelHorario.vue'
 
 const store = useStore()
 const now = useNow()
@@ -128,6 +129,8 @@ async function restaurar() {
           Ámbitos {{ store.db.event.areasRevealed ? 'revelados' : 'sin revelar' }}
         </p>
       </div>
+
+      <PanelHorario @abrir="abrirSiguiente" />
 
       <EscaletaTimeline />
 

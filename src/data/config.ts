@@ -1,6 +1,9 @@
 // Configuración de la jornada. Cambiar aquí, no en las pantallas.
 import type { AreaId, PhaseId } from './types'
 
+/** Día del evento: ese día la escaleta sigue la hora real («Seguir el horario» en el panel) */
+export const EVENT_DATE = '2026-11-21'
+
 /** Dirección de la web pública (Cloudflare). Los QR para los participantes llevan siempre aquí. */
 export const PUBLIC_URL = 'https://plataforma-las-rozas.laura-07d.workers.dev'
 

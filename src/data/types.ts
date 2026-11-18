@@ -48,6 +48,8 @@ export interface EventState {
    * así los móviles y ordenadores olvidan quién era cada persona.
    */
   jornada?: string
+  /** «Ahora» avanza solo con la hora el día del evento (por defecto, sí). Las dinámicas, siempre a mano. */
+  seguirHorario?: boolean
 }
 
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */

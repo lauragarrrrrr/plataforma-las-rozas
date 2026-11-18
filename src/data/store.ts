@@ -603,6 +603,12 @@ export function setVotingOpen(open: boolean) {
   saveQuiet('event')
 }
 
+/** «Seguir el horario»: el momento «Ahora» de la escaleta avanza solo con la hora */
+export function setSeguirHorario(on: boolean) {
+  state.event.seguirHorario = on
+  saveQuiet('event')
+}
+
 /** Podio final que decide el equipo facilitador (letras de los equipos, de 1.º a 3.º) */
 export function setPodium(teamIds: string[]) {
   state.event.podium = teamIds.slice(0, 3)

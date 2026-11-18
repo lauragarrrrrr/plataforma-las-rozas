@@ -18,7 +18,7 @@ import HelpButton from '../components/HelpButton.vue'
 import PhotoQr from '../components/PhotoQr.vue'
 import VotacionEquipo from '../components/VotacionEquipo.vue'
 import TeamNotices from '../components/TeamNotices.vue'
-import { SIMULATED_ROSTER } from '../data/roster'
+import { ROSTER } from '../data/roster'
 
 const props = defineProps<{ id: string }>()
 const store = useStore()
@@ -31,7 +31,7 @@ const roomStep = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 
 // --- 1. Quiénes sois ----------------------------------------------------------
 // Los nombres vienen ya puestos (lista prevista del equipo); se pueden corregir.
-const previstos = SIMULATED_ROSTER[props.id] ?? []
+const previstos = ROSTER[props.id] ?? []
 const form = reactive({ members: [...previstos, '', '', '', '', ''].slice(0, 5), owner: '' })
 const named = computed(() => form.members.map((m) => m.trim()).filter(Boolean))
 const editing = ref(false)
@@ -52,19 +52,12 @@ function guardarEquipo() {
 // ordenador con el enlace del correo, escribe su nombre: si es la persona elegida,
 // bienvenida; si es otra persona del equipo, puede tomar el relevo.
 // Este ordenador se acuerda de quién entró (no se vuelve a preguntar al recargar).
-const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 const OWNER_KEY = `lr2040-ordenador-${props.id}`
 // Se olvida al dejar todo en blanco o restaurar (va unido a la jornada de datos)
 const deviceOwner = ref(recallOnDevice<string>(OWNER_KEY) ?? '')
 watch(() => store.db.event.jornada, () => { deviceOwner.value = recallOnDevice<string>(OWNER_KEY) ?? '' })
 const verified = computed(() => !!setup.value && !!deviceOwner.value)
 const teamMembers = computed(() => setup.value?.members ?? previstos)
-const ownerQuery = ref('')
-const ownerMatches = computed(() => {
-  const q = plain(ownerQuery.value)
-  if (q.length < 2) return []
-  return teamMembers.value.filter((m) => plain(m).split(/\s+/).some((w) => w.startsWith(q)) || plain(m).startsWith(q))
-})
 const picked = ref('')
 const pickedFirst = computed(() => picked.value.split(' ')[0])
 /** owner: es la persona elegida · other: el equipo eligió a otra · new: aún no han elegido */
@@ -211,12 +204,11 @@ const expediente = computed(() =>
       <!-- «Escribe tu nombre» -->
       <template v-else>
         <h1 class="titular">¡Hola, digital owner!</h1>
-        <p class="intro">Escribe tu nombre y tócalo para entrar.</p>
-        <input v-model="ownerQuery" class="campo-nombre" type="text" autocomplete="off" autocapitalize="words" placeholder="Tu nombre" />
-        <div v-if="ownerMatches.length" class="nombres">
-          <button v-for="m in ownerMatches" :key="m" type="button" class="nombres__btn" @click="picked = m">{{ m }}</button>
+        <p class="intro">¿Quién eres? Toca tu nombre para entrar.</p>
+        <div class="nombres">
+          <button v-for="m in teamMembers" :key="m" type="button" class="nombres__btn" :class="{ 'nombres__btn--owner': m === setup?.digitalOwner }" @click="picked = m">{{ m }}</button>
         </div>
-        <p v-else-if="ownerQuery.trim().length >= 2" class="nota">No encontramos ese nombre en el equipo {{ team.id }}. Pulsad «Pedir ayuda» o avisad al equipo facilitador.</p>
+        <p class="nota">¿No sale tu nombre? Avisad al equipo facilitador.</p>
       </template>
     </div>
   </main>
@@ -473,6 +465,7 @@ const expediente = computed(() =>
 <style scoped>
 .estrecho{max-width:44rem}
 .bienvenida{display:grid;gap:1rem;justify-items:start}
+.nombres__btn--owner{box-shadow:inset 0 0 0 2px var(--c-innova)}
 .campo-nombre{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:1.3rem;color:var(--c-ink);background:var(--c-white);border:2px solid var(--c-paper-line);border-radius:99px;padding:.8em 1.2em}
 .campo-nombre:focus{outline:none;border-color:var(--c-innova)}
 .nombres{display:flex;flex-wrap:wrap;gap:.6rem}

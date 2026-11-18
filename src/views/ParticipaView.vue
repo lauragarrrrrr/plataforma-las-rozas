@@ -8,13 +8,13 @@
 // ordenador con el enlace que le envía por correo el equipo facilitador (/equipo/:id).
 import { computed, ref, watch } from 'vue'
 import { AREA_QUESTIONS, AREAS } from '../data/config'
-import { SIMULATED_ROSTER } from '../data/roster'
+import { ROSTER } from '../data/roster'
 import { forgetOnDevice, recallOnDevice, rememberOnDevice, saveSetup, useStore } from '../data/store'
 
 const store = useStore()
 
 interface Person { name: string; teamId: string }
-const people: Person[] = Object.entries(SIMULATED_ROSTER).flatMap(([teamId, names]) => names.map((name) => ({ name, teamId })))
+const people: Person[] = Object.entries(ROSTER).flatMap(([teamId, names]) => names.map((name) => ({ name, teamId })))
 
 /** Sin tildes ni mayúsculas, para que «lucia» encuentre a «Lucía» */
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
@@ -48,12 +48,15 @@ const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
 
 // --- Digital owner del equipo ---
 const setup = computed(() => (me.value ? store.setup(me.value.teamId) : undefined))
-const members = computed(() => (me.value ? setup.value?.members ?? SIMULATED_ROSTER[me.value.teamId] ?? [] : []))
+const members = computed(() => (me.value ? setup.value?.members ?? ROSTER[me.value.teamId] ?? [] : []))
 const owner = computed(() => setup.value?.digitalOwner ?? '')
 const ownerFirst = computed(() => owner.value.split(' ')[0])
 const soyOwner = computed(() => !!me.value && owner.value === me.value.name)
 const changingOwner = ref(false)
+/** Han pulsado «¡Ya estamos todos juntos!»: ahora eligen digital owner */
+const juntos = ref(false)
 const teamLink = computed(() => (me.value ? `${location.host}/equipo/${me.value.teamId}` : ''))
+const teamUrl = computed(() => (me.value ? `${location.origin}/equipo/${me.value.teamId}` : ''))
 function chooseOwner(name: string) {
   if (!me.value) return
   saveSetup(me.value.teamId, [...members.value], name)
@@ -93,13 +96,17 @@ function chooseOwner(name: string) {
 
           <!-- ¿Quién será vuestro digital owner? -->
           <div class="owner">
-            <template v-if="!owner || changingOwner">
-              <span class="kicker">¿Ya estáis todos juntos?</span>
+            <template v-if="!owner && !juntos">
+              <p class="owner__nota">Cuando estéis todas las personas del equipo en la mesa:</p>
+              <button class="boton owner__juntos" type="button" @click="juntos = true">¡Ya estamos todos juntos!</button>
+            </template>
+            <template v-else-if="!owner || changingOwner">
               <h2 class="owner__titulo">¿Quién será vuestro digital owner?</h2>
               <p class="owner__nota">La persona que llevará el ordenador y centralizará toda la experiencia digital del equipo. Elegidla entre todos.</p>
               <div class="owner__nombres">
                 <button v-for="m in members" :key="m" type="button" class="owner__nombre" :class="{ 'owner__nombre--actual': m === owner }" @click="chooseOwner(m)">{{ m }}</button>
               </div>
+              <button v-if="!owner" class="otra" type="button" @click="juntos = false">Todavía no</button>
               <button v-if="changingOwner" class="otra" type="button" @click="changingOwner = false">Cancelar</button>
             </template>
             <template v-else>
@@ -111,7 +118,7 @@ function chooseOwner(name: string) {
               <p v-else class="owner__pasos">
                 <strong>{{ ownerFirst }}</strong> abrirá el correo del equipo facilitador y entrará en el enlace desde el ordenador de vuestra mesa.
               </p>
-              <p class="owner__link">¿No llega el correo? Escribid en el ordenador:<strong>{{ teamLink }}</strong></p>
+              <p class="owner__link">¿No llega el correo? Abrid este enlace en el ordenador:<a :href="teamUrl" target="_blank" rel="noopener">{{ teamLink }}</a></p>
               <button class="otra" type="button" @click="changingOwner = true">Cambiar de digital owner</button>
             </template>
           </div>
@@ -186,5 +193,6 @@ h1{font-size:clamp(3rem,10vw,8rem);line-height:.92}
 .owner__elegido{margin:0;font-size:1.6rem;font-weight:600;color:var(--c-ink);letter-spacing:-.02em}
 .owner__pasos{margin:0;font-size:1rem;color:var(--c-ink)}
 .owner__link{margin:0;font-size:.85rem}
-.owner__link strong{display:block;word-break:break-all;color:var(--c-ink)}
+.owner__link a{display:block;word-break:break-all;font-weight:600;color:var(--c-innova-dark)}
+.owner__juntos{font-size:1.1rem}
 </style>
