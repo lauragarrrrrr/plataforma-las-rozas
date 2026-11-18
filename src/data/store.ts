@@ -235,8 +235,19 @@ function allowedFor(teamId: string): number {
  */
 function openedAtFor(teamId: string, dynamicId: string): string | undefined {
   const p = state.progress.find((x) => x.teamId === teamId)
-  return state.event.openedAt?.[dynamicId] ?? p?.openedAt?.[dynamicId] ?? p?.started[dynamicId]
+  const group = state.event.openedAt?.[dynamicId] ?? p?.openedAt?.[dynamicId]
+  const own = p?.started[dynamicId]
+  if (!group) return own
+  // Equipo que llega tarde (con menos de LATE_MARGIN_MIN minutos por delante, o con el tiempo ya acabado):
+  // cuenta su propio tiempo desde que llega, para que primero lea la dinámica y trabaje, y no le salte la foto.
+  if (own) {
+    const minutes = TEAM_DYNAMICS.find((d) => d.id === dynamicId)?.minutes ?? 0
+    if (Date.parse(own) - Date.parse(group) > (minutes - LATE_MARGIN_MIN) * 60_000) return own
+  }
+  return group
 }
+/** Si un equipo llega a una dinámica con menos de estos minutos por delante, se le da su tiempo completo */
+const LATE_MARGIN_MIN = 5
 
 // ---------------------------------------------------------------------------
 // Lectura

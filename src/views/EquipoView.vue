@@ -110,9 +110,10 @@ const timeUp = computed(() => remaining.value <= 0)
 
 // Apuntamos cuándo llega el equipo a cada dinámica (el cronómetro cuenta desde que se abrió)
 watch(
-  () => [allowed.value, setup.value?.teamId, dynamic.value.id, finished.value] as const,
-  ([open, hasSetup, dynId, isFinished]) => {
-    if (open >= 0 && hasSetup && !isFinished) startDynamic(props.id, dynId)
+  // Solo cuando el equipo VE la dinámica (después del reto de las fichas y de «Antes de empezar»)
+  () => [allowed.value, setup.value?.teamId, dynamic.value.id, finished.value, !!setup.value?.premortemDone, !!progress.value?.introSeen?.[COMO_FUNCIONA]] as const,
+  ([open, hasSetup, dynId, isFinished, retoHecho, leido]) => {
+    if (open >= 0 && hasSetup && !isFinished && retoHecho && leido) startDynamic(props.id, dynId)
   },
   { immediate: true },
 )
