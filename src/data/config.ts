@@ -8,7 +8,7 @@ export const EVENT_DATE = '2026-11-21'
 export const FACILITATORS = ['Andrea', 'Juanjo', 'Irene', 'Laura']
 
 /** Dirección de la web pública (Cloudflare). Los QR para los participantes llevan siempre aquí. */
-export const PUBLIC_URL = 'https://plataforma-las-rozas.laura-07d.workers.dev'
+export const PUBLIC_URL = 'https://plataforma-las-rozas.hackathon-las-rozas-2040.workers.dev'
 
 /** Los 6 ámbitos, en el orden de los equipos (metodología v3 y presentación, 16/11/2026). */
 export const AREAS: Record<AreaId, string> = {
