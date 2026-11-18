@@ -73,8 +73,11 @@ watch(() => messages.value.length, scrollToEnd)
 <template>
   <section class="chat card" aria-label="Chat que os reta">
     <header class="chat__cab">
-      <span class="kicker">{{ dynamic.research ? 'Unidad de Investigación' : 'Os reta' }}</span>
-      <small>Preguntas para pensar mejor. No hace el trabajo por vosotros.</small>
+      <span class="chat__icono" aria-hidden="true">?</span>
+      <div>
+        <strong class="chat__titulo">{{ dynamic.research ? 'Unidad de Investigación' : 'Os reta' }}</strong>
+        <small>Os hace preguntas para pensar mejor. El trabajo lo hacéis vosotros, en el papel.</small>
+      </div>
     </header>
     <ol ref="list" class="chat__lista">
       <template v-for="(m, i) in messages" :key="m.id">
@@ -96,8 +99,12 @@ watch(() => messages.value.length, scrollToEnd)
 
 <style scoped>
 .chat{grid-template-rows:auto 1fr auto;gap:.8rem;min-height:26rem;max-height:34rem;background:var(--c-white)}
-.chat__cab{display:grid;gap:.2rem}
-.chat__cab small{font-size:.8rem}
+.chat{box-shadow:inset 0 0 0 3px var(--c-innova)}
+.chat__cab{display:grid;grid-template-columns:auto 1fr;gap:.8rem;align-items:center;margin:-.4rem -.4rem 0;padding:.9rem 1rem;border-radius:1.2rem;background:var(--gradient-dark);color:var(--c-white)}
+.chat__cab div{display:grid;gap:.1rem}
+.chat__icono{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--c-innova);color:var(--c-ink);font-size:1.3rem;font-weight:700}
+.chat__titulo{font-size:1.2rem;font-weight:600;letter-spacing:-.02em;color:var(--c-white)}
+.chat__cab small{font-size:.8rem;color:var(--c-green-light)}
 .chat__lista{list-style:none;margin:0;padding:0 .2rem;display:flex;flex-direction:column;gap:.5rem;overflow-y:auto;min-height:0}
 .chat__separador{align-self:center;font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);margin:.6rem 0 .2rem}
 .burbuja{max-width:85%;padding:.7rem 1rem;font-size:.92rem;line-height:1.45;white-space:pre-wrap}

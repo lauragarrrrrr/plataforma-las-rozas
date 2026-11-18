@@ -6,6 +6,7 @@
 // Para cambiar textos o añadir reglas, todo está aquí.
 // ==========================================================
 import type { TeamDynamic } from './dynamics'
+import { plainText } from '../utils/rich'
 import { ejemploPara } from './examples'
 
 export type ReplyKind = 'help' | 'example' | 'question' | 'short' | 'unsure' | 'answer'
@@ -89,22 +90,22 @@ export function coachReply(dynamic: TeamDynamic, text: string, answered: number,
   }
   if (kind === 'example') {
     const ej = ejemploPara(dynamic.id, turn)
-    if (!ej) return `Aquí no tengo ejemplos: lo importante es lo que penséis vosotros. Una pista: ${dynamic.what.charAt(0).toLowerCase()}${dynamic.what.slice(1)}`
+    if (!ej) return `Aquí no tengo ejemplos: lo importante es lo que penséis vosotros. Una pista: ${plainText(dynamic.what).charAt(0).toLowerCase()}${plainText(dynamic.what).slice(1)}`
     return dynamic.id === 'cartas'
       ? `${ej} ¿Qué idea os sale con ella?`
       : `Un ejemplo: ${ej} No lo copiéis: ¿cómo sería el vuestro?`
   }
   if (kind === 'unsure') {
     // Nunca la pista de hacer o subir la foto
-    const tips = dynamic.how.filter((h) => !/foto|subid|subir/i.test(h))
-    const tip = tips.length ? tips[turn % tips.length] : dynamic.what
+    const tips = dynamic.how.map(plainText).filter((h) => !/foto|subid|subir/i.test(h))
+    const tip = tips.length ? tips[turn % tips.length] : plainText(dynamic.what)
     return `Es normal. Una pista: ${tip.charAt(0).toLowerCase()}${tip.slice(1)} ¿Qué se os ocurre?`
   }
   if (kind === 'question') {
     // La primera vez, una pista de la explicación de la dinámica; después, se la devolvemos
     const asked = turn === 0 || !/pregunta|duda/.test(plain(text))
     return asked && turn < 2
-      ? `Buena pregunta. Una pista: ${dynamic.what.charAt(0).toLowerCase()}${dynamic.what.slice(1)} ¿Qué pensáis vosotros?`
+      ? `Buena pregunta. Una pista: ${plainText(dynamic.what).charAt(0).toLowerCase()}${plainText(dynamic.what).slice(1)} ¿Qué pensáis vosotros?`
       : pick(QUESTION, turn)
   }
   if (kind === 'short') return pick(SHORT, turn)

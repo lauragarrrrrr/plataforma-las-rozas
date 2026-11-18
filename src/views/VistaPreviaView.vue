@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { rich } from '../utils/rich'
 // /vista-previa · Para el equipo facilitador: recorrer todas las pantallas que verán
 // los equipos, una a una, sin cronómetros, sin fotos y SIN GUARDAR NADA.
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -111,11 +112,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <div class="card">
           <span class="kicker">Dinámica {{ numDinamica }} de {{ TEAM_DYNAMICS.length }} · {{ d.minutes }} min</span>
           <h1 class="titulo">{{ d.title }}</h1>
-          <p class="que">{{ d.what }}</p>
+          <p class="que" v-html="rich(d.what)"></p>
           <dl class="qpco">
-            <div><dt>Para qué</dt><dd>{{ d.why }}</dd></div>
-            <div><dt>Cómo</dt><dd><ol class="como"><li v-for="h in d.how" :key="h">{{ h }}</li></ol></dd></div>
-            <div><dt>¿Qué tendríais que obtener?</dt><dd>{{ d.output }}</dd></div>
+            <div><dt>Para qué</dt><dd v-html="rich(d.why)"></dd></div>
+            <div><dt>Cómo</dt><dd><ol class="como"><li v-for="h in d.how" :key="h" v-html="rich(h)"></li></ol></dd></div>
+            <div><dt>¿Qué tendríais que obtener?</dt><dd v-html="rich(d.output)"></dd></div>
           </dl>
         </div>
         <div class="card">

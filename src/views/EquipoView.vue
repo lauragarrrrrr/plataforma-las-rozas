@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { rich } from '../utils/rich'
 // /equipo/:id · App del equipo (parte de participantes)
 // 1. ¿Quiénes sois? y ¿quién es el digital owner?
 // 2. Mientras la sala está en la parte de facilitación: ya ven «Titular positivo», sin cronómetro en marcha.
@@ -367,7 +368,7 @@ const expediente = computed(() =>
     <section v-else class="wrap dinamica" :class="{ 'dinamica--sin-chat': dynamic.noChat }">
       <div class="dinamica__izq">
         <!-- El equipo facilitador ya ha abierto la siguiente: solo falta la foto -->
-        <p v-if="!photo && allowed > index" class="avanzar" role="alert">
+        <p v-if="!photo && allowed > index && remaining <= 3 * 60_000" class="avanzar" role="alert">
           <strong>¡Tenemos que avanzar!</strong> Subid ya la foto de «{{ dynamic.title }}» para pasar a la siguiente.
         </p>
         <p v-if="pendiente" class="pendiente" role="status">
@@ -378,20 +379,21 @@ const expediente = computed(() =>
         <div class="card explica">
           <span class="kicker">Dinámica {{ index + 1 }} de {{ TEAM_DYNAMICS.length }} · {{ dynamic.minutes }} min</span>
           <h1 class="dinamica__titulo">{{ dynamic.title }}</h1>
-          <p class="que">{{ dynamic.what }}</p>
+          <p class="que" v-html="rich(dynamic.what)"></p>
           <dl class="qpco">
-            <div><dt>Para qué</dt><dd>{{ dynamic.why }}</dd></div>
+            <div><dt>Para qué</dt><dd v-html="rich(dynamic.why)"></dd></div>
             <div>
               <dt>Cómo</dt>
-              <dd><ol class="como"><li v-for="h in dynamic.how" :key="h">{{ h }}</li></ol></dd>
+              <dd><ol class="como"><li v-for="h in dynamic.how" :key="h" v-html="rich(h)"></li></ol></dd>
             </div>
-            <div><dt>¿Qué tendríais que obtener?</dt><dd>{{ dynamic.output }}</dd></div>
+            <div><dt>¿Qué tendríais que obtener?</dt><dd v-html="rich(dynamic.output)"></dd></div>
           </dl>
         </div>
 
       </div>
 
       <div class="dinamica__der">
+        <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
           <div v-if="!pendiente" class="card foto">
             <template v-if="photo">
               <span class="kicker">Foto registrada ✓</span>
@@ -437,7 +439,6 @@ const expediente = computed(() =>
             </template>
             <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez o avisad al equipo facilitador.</p>
           </div>
-        <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
       </div>
     </section>
 
@@ -595,7 +596,8 @@ const expediente = computed(() =>
 .qpco > div{display:grid;grid-template-columns:7rem 1fr;gap:.8rem;padding:.5rem 0;border-bottom:1px solid var(--c-gris-10)}
 .qpco dt{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);padding-top:.2rem}
 .qpco dd{margin:0;min-width:0}
-.como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
+.como{margin:0;padding-left:1.1rem;display:grid;gap:.5rem}
+.que :deep(strong),.qpco dd :deep(strong){color:inherit;font-weight:600}
 @media(max-width:520px){.qpco > div{grid-template-columns:1fr;gap:.15rem}}
 
 
@@ -604,6 +606,7 @@ const expediente = computed(() =>
 @media(max-width:700px){.foto__cab{grid-template-columns:1fr}}
 .explica{padding:clamp(1.2rem,2.2vw,1.7rem)}
 .foto{padding:1.1rem 1.4rem}
+.dinamica__chat + .foto{background:color-mix(in srgb,var(--c-white) 70%,transparent);box-shadow:inset 0 0 0 1px var(--c-green-mid)}
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}
 .extras{display:grid;gap:.6rem;border-top:1px solid var(--c-gris-10);padding-top:.8rem}
 .extras__fotos{display:flex;flex-wrap:wrap;gap:.4rem}
