@@ -394,7 +394,7 @@ const expediente = computed(() =>
 
       <div class="dinamica__der">
         <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
-          <div v-if="!pendiente" class="card foto">
+          <div v-if="!pendiente" class="card foto" :class="{ 'foto--boton': !photo && !showQr }">
             <template v-if="photo">
               <span class="kicker">Foto registrada ✓</span>
               <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
@@ -418,12 +418,11 @@ const expediente = computed(() =>
               </div>
             </template>
             <template v-else>
-              <div class="foto__cab">
-                <div>
-                  <span class="kicker">Al terminar</span>
-                  <p>Subid la foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Sin la foto no podéis pasar a la siguiente.</p>
-                </div>
-                <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir fotos</button>
+              <!-- Un solo botón; al pulsarlo sale el QR -->
+              <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">📷 Subir imágenes</button>
+              <div v-else class="foto__cab">
+                <span class="kicker">Subir imágenes</span>
+                <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores.</p>
               </div>
               <template v-if="showQr">
                 <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
@@ -601,7 +600,10 @@ const expediente = computed(() =>
 @media(max-width:520px){.qpco > div{grid-template-columns:1fr;gap:.15rem}}
 
 
-.foto__cab{display:grid;gap:.7rem;justify-items:start}
+.foto__cab{display:grid;gap:.3rem;justify-items:start}
+/* Antes de subir: solo el botón, sin tarjeta */
+.foto--boton{background:none !important;box-shadow:none !important;padding:0 !important}
+.foto__subir{justify-self:stretch;justify-content:center;font-size:1.15rem;padding:1em 1.2em}
 .foto__cab p{margin:.2rem 0 0;font-size:.92rem}
 @media(max-width:700px){.foto__cab{grid-template-columns:1fr}}
 .explica{padding:clamp(1.2rem,2.2vw,1.7rem)}
