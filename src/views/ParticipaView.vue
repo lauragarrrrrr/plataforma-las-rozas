@@ -7,13 +7,12 @@
 // (/equipo: «¿Qué equipo sois?» → «¿Quién es vuestro digital owner?»).
 import { computed, ref, watch } from 'vue'
 import { AREA_QUESTIONS, AREAS } from '../data/config'
-import { ROSTER } from '../data/roster'
 import { forgetOnDevice, recallOnDevice, rememberOnDevice, useStore } from '../data/store'
 
 const store = useStore()
 
 interface Person { name: string; teamId: string }
-const people: Person[] = Object.entries(ROSTER).flatMap(([teamId, names]) => names.map((name) => ({ name, teamId })))
+const people = computed<Person[]>(() => Object.entries(store.roster()).flatMap(([teamId, names]) => names.map((name) => ({ name, teamId }))))
 
 /** Sin tildes ni mayúsculas, para que «lucia» encuentre a «Lucía» */
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
@@ -22,7 +21,7 @@ const query = ref('')
 const matches = computed(() => {
   const q = plain(query.value)
   if (q.length < 2) return []
-  return people.filter((p) => plain(p.name).split(/\s+/).some((w) => w.startsWith(q)) || plain(p.name).startsWith(q)).slice(0, 8)
+  return people.value.filter((p) => plain(p.name).split(/\s+/).some((w) => w.startsWith(q)) || plain(p.name).startsWith(q)).slice(0, 8)
 })
 
 // Se recuerda en este móvil (si vuelven a abrir el QR, ven su equipo directamente),

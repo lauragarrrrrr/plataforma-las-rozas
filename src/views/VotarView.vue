@@ -8,7 +8,6 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { castVote, recallOnDevice, useStore } from '../data/store'
-import { ROSTER } from '../data/roster'
 import ResultadosPodio from '../components/ResultadosPodio.vue'
 
 const route = useRoute()
@@ -27,7 +26,7 @@ const miEquipo = computed(() => store.team(equipo.value))
 const yo = ref(recallOnDevice<{ name: string; teamId: string }>('lr2040-participante'))
 const yoIndice = computed(() => {
   if (!yo.value) return -1
-  const lista = store.setup(yo.value.teamId)?.members ?? ROSTER[yo.value.teamId] ?? []
+  const lista = store.setup(yo.value.teamId)?.members ?? store.roster()[yo.value.teamId] ?? []
   return lista.indexOf(yo.value.name)
 })
 const proponerYo = computed(() => !!yo.value && yoIndice.value >= 0 && !equipo.value && persona.value === null && !store.hasVoted(yo.value.teamId, yoIndice.value))
@@ -36,7 +35,7 @@ function soyYo() {
   equipo.value = yo.value.teamId
   persona.value = yoIndice.value
 }
-const nombres = computed(() => store.setup(equipo.value)?.members ?? ROSTER[equipo.value] ?? [])
+const nombres = computed(() => store.setup(equipo.value)?.members ?? store.roster()[equipo.value] ?? [])
 
 /** Opciones de cada puesto: nunca su equipo ni las ya elegidas en otro puesto */
 function opciones(puesto: number) {

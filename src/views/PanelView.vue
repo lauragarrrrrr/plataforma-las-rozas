@@ -15,6 +15,7 @@ import PanelVotacion from '../components/PanelVotacion.vue'
 import PanelTitulares from '../components/PanelTitulares.vue'
 import PanelAvisos from '../components/PanelAvisos.vue'
 import PanelReloj from '../components/PanelReloj.vue'
+import PanelPersonas from '../components/PanelPersonas.vue'
 
 const store = useStore()
 const now = useNow()
@@ -187,6 +188,8 @@ async function restaurar() {
 
       <PanelTitulares v-if="!titularesArriba" />
       <PanelVotacion v-if="!votacionArriba" />
+
+      <PanelPersonas />
 
       <section class="card">
         <span class="kicker">Copia de las fotos</span>

@@ -31,6 +31,8 @@ export interface RoomState {
 
 /** Estado general de la jornada, que controla el equipo facilitador. */
 export interface EventState {
+  /** Personas de cada equipo (nombre de pila e inicial), cargadas desde el panel. Si no hay, se usa src/data/roster.ts */
+  roster?: Record<string, string[]>
   /** Los ámbitos se revelan a todos los equipos a la vez (10:20) */
   areasRevealed: boolean
   /** Hasta qué dinámica (índice en TEAM_DYNAMICS) pueden llegar los equipos. -1: ninguna */

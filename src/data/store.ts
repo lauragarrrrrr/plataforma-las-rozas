@@ -11,6 +11,7 @@ import { AGENDA } from './agenda'
 import { AREAS, TEAM_AREAS } from './config'
 import { backToRoomAfter, TEAM_DYNAMICS } from './dynamics'
 import { createBlank, createSeed, DB_VERSION } from './seed'
+import { ROSTER } from './roster'
 import {
   deleteAll, deleteRow, fetchAll, LISTS, sb, SINGLETONS, subscribe, toRows, upsertRows, uploadPhoto,
   type Collection, type ListName, type Row,
@@ -285,6 +286,8 @@ export function useStore() {
     /** Cuándo empezó a contar el tiempo de una dinámica para este equipo */
     openedAt: (teamId: string, dynamicId: string) => openedAtFor(teamId, dynamicId),
     lastSaveFailed: () => saveError,
+    /** Personas de cada equipo: las cargadas en el panel (Supabase) o, si no hay, las del archivo */
+    roster: (): Record<string, string[]> => (db.event.roster && Object.keys(db.event.roster).length ? (db.event.roster as Record<string, string[]>) : ROSTER),
     // --- Votación ---
     votingOpen: () => !!db.event.votingOpen,
     /** ¿Ya ha votado esta persona? (se identifica por equipo y posición, sin guardar su nombre) */
@@ -542,6 +545,17 @@ export function setPhase(teamId: string, phase: PhaseId, value: PhaseState) {
   if (!team) return
   team.phases[phase] = value
   saveQuiet('teams', team)
+}
+
+/** Guarda las personas de cada equipo para todos los dispositivos (panel · «Personas de cada equipo») */
+export function saveRoster(roster: Record<string, string[]>) {
+  const limpio: Record<string, string[]> = {}
+  for (const [k, v] of Object.entries(roster)) {
+    const nombres = v.map((n) => n.trim()).filter(Boolean)
+    if (nombres.length) limpio[k] = nombres
+  }
+  state.event.roster = limpio
+  saveQuiet('event')
 }
 
 /** Revelar los ámbitos en la sala. Ya NO abre el Titular: eso se hace siempre con «Abrir para todos». */

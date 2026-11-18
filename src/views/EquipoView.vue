@@ -19,7 +19,6 @@ import HelpButton from '../components/HelpButton.vue'
 import PhotoQr from '../components/PhotoQr.vue'
 import VotacionEquipo from '../components/VotacionEquipo.vue'
 import TeamNotices from '../components/TeamNotices.vue'
-import { ROSTER } from '../data/roster'
 
 const props = defineProps<{ id: string }>()
 const store = useStore()
@@ -31,8 +30,8 @@ const progress = computed(() => store.progress(props.id))
 
 // --- 1. Quiénes sois ----------------------------------------------------------
 // Los nombres vienen ya puestos (lista prevista del equipo); se pueden corregir.
-const previstos = ROSTER[props.id] ?? []
-const form = reactive({ members: [...previstos, '', '', '', '', ''].slice(0, 5), owner: '' })
+const previstos = computed(() => store.roster()[props.id] ?? [])
+const form = reactive({ members: [...previstos.value, '', '', '', '', ''].slice(0, 6), owner: '' })
 const named = computed(() => form.members.map((m) => m.trim()).filter(Boolean))
 const editing = ref(false)
 function startEditing() {
@@ -57,7 +56,7 @@ const OWNER_KEY = `lr2040-ordenador-${props.id}`
 const deviceOwner = ref(recallOnDevice<string>(OWNER_KEY) ?? '')
 watch(() => store.db.event.jornada, () => { deviceOwner.value = recallOnDevice<string>(OWNER_KEY) ?? '' })
 const verified = computed(() => !!setup.value && !!deviceOwner.value)
-const teamMembers = computed(() => setup.value?.members ?? previstos)
+const teamMembers = computed(() => setup.value?.members ?? previstos.value)
 const picked = ref('')
 /** «No somos este equipo»: el ordenador olvida el equipo y vuelve a «¿Qué equipo sois?» */
 function cambiarEquipo() { forgetOnDevice('lr2040-equipo-del-ordenador') }
