@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // /equipo/:id · App del equipo (parte de participantes)
 // 1. ¿Quiénes sois? y ¿quién es el digital owner?
-// 2. Mientras la sala está en la parte de facilitación: pantalla de espera.
+// 2. Mientras la sala está en la parte de facilitación: ya ven «Titular positivo», sin cronómetro en marcha.
 // 3. Cuando se revelan los ámbitos: las dinámicas, una a una, con explicación,
 //    chat que os reta, cronómetro, «Pedir ayuda» y foto obligatoria para seguir.
 import { askConfirm } from '../composables/useConfirm'
@@ -27,7 +27,6 @@ const now = useNow()
 const team = computed(() => store.team(props.id))
 const setup = computed(() => store.setup(props.id))
 const progress = computed(() => store.progress(props.id))
-const roomStep = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 
 // --- 1. Quiénes sois ----------------------------------------------------------
 // Los nombres vienen ya puestos (lista prevista del equipo); se pueden corregir.
@@ -82,6 +81,8 @@ const photo = computed(() => store.photoFor(props.id, dynamic.value.id))
 
 /** Hasta qué dinámica nos deja llegar el equipo facilitador */
 const allowed = computed(() => store.allowed(props.id))
+/** Todavía no se ha abierto la primera dinámica: la ven, pero el cronómetro no corre */
+const pendiente = computed(() => allowed.value < 0)
 /** El equipo ya está en las dinámicas (para el aviso «¡Cambiamos de pantalla!») */
 const inDynamics = computed(() => !!setup.value?.premortemDone && allowed.value >= 0 && !finished.value)
 const waitingNext = computed(() => !!photo.value && index.value >= allowed.value)
@@ -275,28 +276,13 @@ const expediente = computed(() =>
     <HelpButton :team-id="id" :dynamic-id="PREMORTEM.id" />
   </main>
 
-  <!-- 2 · Esperando: la sala está en la parte de facilitación -->
-  <main v-else-if="allowed < 0" class="espera">
-    <div class="wrap espera__in">
-      <span class="kicker">{{ team.name }} · Digital owner: {{ setup.digitalOwner }}</span>
-      <h1 class="titular">Atentos a la sala</h1>
-      <p class="intro">La jornada empieza todos juntos. Cuando se revele vuestro ámbito, empezaréis aquí vuestro trabajo en equipo.</p>
-      <div class="card ahora">
-        <span class="kicker">Ahora en la sala · {{ roomStep.time }}</span>
-        <strong>{{ roomStep.title }}</strong>
-        <p>{{ roomStep.description }}</p>
-      </div>
-      <button class="enlace" type="button" @click="startEditing">Cambiar las personas del equipo</button>
-    </div>
-  </main>
-
   <!-- 3 · Dinámicas -->
   <main v-else class="app">
     <header class="app__cab">
       <div class="wrap app__cab-in">
         <div>
           <span class="kicker">{{ team.name }} · {{ store.areaName(team.area) }}</span>
-          <p class="owner-linea">Digital owner: <strong>{{ setup.digitalOwner }}</strong> · {{ setup.members.join(', ') }}</p>
+          <p class="owner-linea">Digital owner: <strong>{{ setup.digitalOwner }}</strong> · {{ setup.members.join(', ') }} · <button class="enlace" type="button" @click="startEditing">Cambiar</button></p>
         </div>
         <ol class="pasos" aria-label="Dinámicas">
           <li v-for="(d, i) in TEAM_DYNAMICS" :key="d.id" :class="{ hecho: i < index, actual: i === index }" :title="d.title">
@@ -335,6 +321,10 @@ const expediente = computed(() =>
         <p v-if="!photo && allowed > index" class="avanzar" role="alert">
           <strong>¡Tenemos que avanzar!</strong> Subid ya la foto de «{{ dynamic.title }}» para pasar a la siguiente.
         </p>
+        <p v-if="pendiente" class="pendiente" role="status">
+          <span class="punto" aria-hidden="true"></span>
+          <span><strong>Atentos a la sala.</strong> Empezaréis «{{ dynamic.title }}» cuando lo abra el equipo facilitador: en ese momento arranca vuestro cronómetro. Mientras, podéis leer de qué va.</span>
+        </p>
         <DynamicTimer :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" />
 
         <div class="card explica">
@@ -351,7 +341,7 @@ const expediente = computed(() =>
           </dl>
         </div>
 
-        <div class="card foto">
+        <div v-if="!pendiente" class="card foto">
           <template v-if="photo">
             <span class="kicker">Foto registrada ✓</span>
             <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
@@ -498,10 +488,6 @@ const expediente = computed(() =>
 .reto__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width .4s var(--ease-out)}
 .reto__fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.4rem}
 .reto__fotos img{aspect-ratio:3/4;object-fit:cover;border-radius:.6rem;width:100%}
-.espera{min-height:70vh;display:grid;align-items:center;background:var(--c-green-light)}
-.espera__in{display:grid;gap:1.2rem;padding-block:3rem}
-.ahora{gap:.4rem;max-width:44rem}
-.ahora strong{font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:500;color:var(--c-ink);letter-spacing:-.02em}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;font-size:.85rem;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
 
 .app{background:var(--c-green-light);padding-bottom:6rem}
@@ -541,6 +527,8 @@ const expediente = computed(() =>
 .extras__fotos{display:flex;flex-wrap:wrap;gap:.4rem}
 .extras__fotos button{border:0;padding:0;background:none;cursor:pointer}
 .extras__fotos img{width:4.5rem;height:4.5rem;object-fit:cover;border-radius:.6rem;max-height:none}
+.pendiente{display:flex;gap:.6rem;align-items:flex-start;margin:0;background:var(--c-white);border-radius:1rem;padding:.9rem 1.1rem;color:var(--c-ink);box-shadow:inset 0 0 0 2px var(--c-innova)}
+.pendiente .punto{flex:none;margin-top:.45rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--c-innova);animation:latir 1.2s ease-in-out infinite}
 .esperando{display:flex;gap:.6rem;align-items:flex-start;background:var(--c-green-light);border-radius:1rem;padding:.8rem 1rem;color:var(--c-ink)}
 .esperando .punto{flex:none;margin-top:.45rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--c-innova);animation:latir 1.2s ease-in-out infinite}
 @keyframes latir{50%{opacity:.3;transform:scale(.8)}}
