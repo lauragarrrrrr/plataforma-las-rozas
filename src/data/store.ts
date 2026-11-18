@@ -580,6 +580,24 @@ export function setTeamPace(teamId: string, mode: 'hold' | 'pass' | 'group') {
 // ---------------------------------------------------------------------------
 // Votación
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Lo que recuerda cada dispositivo (quién es esta persona, quién entró en el ordenador)
+// Va unido a la jornada: al dejar todo en blanco o restaurar, se olvida.
+// ---------------------------------------------------------------------------
+export function rememberOnDevice(key: string, value: unknown) {
+  try { localStorage.setItem(key, JSON.stringify({ jornada: state.event.jornada ?? '', value })) } catch { /* sin almacenamiento */ }
+}
+export function recallOnDevice<T>(key: string): T | null {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) ?? 'null') as { jornada?: string; value?: T } | null
+    if (!raw || raw.jornada === undefined || raw.jornada !== (state.event.jornada ?? '')) return null
+    return raw.value ?? null
+  } catch { return null }
+}
+export function forgetOnDevice(key: string) {
+  try { localStorage.removeItem(key) } catch { /* nada */ }
+}
+
 export function setVotingOpen(open: boolean) {
   state.event.votingOpen = open
   saveQuiet('event')

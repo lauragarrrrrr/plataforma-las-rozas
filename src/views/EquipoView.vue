@@ -9,7 +9,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
-import { addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
+import { recallOnDevice, rememberOnDevice, addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
 import { openPhoto } from '../composables/usePhotoViewer'
 import CoachChat from '../components/CoachChat.vue'
@@ -54,10 +54,9 @@ function guardarEquipo() {
 // Este ordenador se acuerda de quién entró (no se vuelve a preguntar al recargar).
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 const OWNER_KEY = `lr2040-ordenador-${props.id}`
-function readOwnerKey() {
-  try { return localStorage.getItem(OWNER_KEY) ?? '' } catch { return '' }
-}
-const deviceOwner = ref(readOwnerKey())
+// Se olvida al dejar todo en blanco o restaurar (va unido a la jornada de datos)
+const deviceOwner = ref(recallOnDevice<string>(OWNER_KEY) ?? '')
+watch(() => store.db.event.jornada, () => { deviceOwner.value = recallOnDevice<string>(OWNER_KEY) ?? '' })
 const verified = computed(() => !!setup.value && !!deviceOwner.value)
 const teamMembers = computed(() => setup.value?.members ?? previstos)
 const ownerQuery = ref('')
@@ -77,7 +76,7 @@ const pickedKind = computed(() => {
 function enterAsOwner() {
   if (!picked.value) return
   if (setup.value?.digitalOwner !== picked.value) saveSetup(props.id, [...teamMembers.value], picked.value)
-  try { localStorage.setItem(OWNER_KEY, picked.value) } catch { /* sin almacenamiento: se volverá a preguntar */ }
+  rememberOnDevice(OWNER_KEY, picked.value)
   deviceOwner.value = picked.value
 }
 

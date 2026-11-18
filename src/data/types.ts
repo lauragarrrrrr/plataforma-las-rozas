@@ -43,6 +43,11 @@ export interface EventState {
   podium?: string[]
   /** Los resultados se ven en la página de resultados, en el móvil y en la app del equipo */
   resultsPublished?: boolean
+  /**
+   * Identificador de esta «jornada» de datos. Cambia al dejar todo en blanco o restaurar:
+   * así los móviles y ordenadores olvidan quién era cada persona.
+   */
+  jornada?: string
 }
 
 /** Quiénes forman el equipo (solo nombre de pila) y quién lleva el ordenador. */

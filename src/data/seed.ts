@@ -33,7 +33,7 @@ export function createBlank(): Database {
   return {
     version: DB_VERSION,
     demoTeamIds: [],
-    event: { areasRevealed: false },
+    event: { areasRevealed: false, jornada: Math.random().toString(36).slice(2, 10) },
     room: { mode: 'welcome', step: 0, resultsApproved: false },
     teams: blankTeams(),
     headlines: [], signals: [], dossiers: [], ideas: [], initiatives: [],

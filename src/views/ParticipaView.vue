@@ -6,10 +6,10 @@
 // Después: «¿Ya estáis todos juntos? ¿Quién será vuestro digital owner?». Lo elige
 // cualquiera del equipo desde su móvil y lo ven todos. El digital owner entra desde el
 // ordenador con el enlace que le envía por correo el equipo facilitador (/equipo/:id).
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { AREA_QUESTIONS, AREAS } from '../data/config'
 import { SIMULATED_ROSTER } from '../data/roster'
-import { saveSetup, useStore } from '../data/store'
+import { forgetOnDevice, recallOnDevice, rememberOnDevice, saveSetup, useStore } from '../data/store'
 
 const store = useStore()
 
@@ -26,20 +26,19 @@ const matches = computed(() => {
   return people.filter((p) => plain(p.name).split(/\s+/).some((w) => w.startsWith(q)) || plain(p.name).startsWith(q)).slice(0, 8)
 })
 
-// Se recuerda en este móvil: si vuelven a abrir el QR, ven su equipo directamente
+// Se recuerda en este móvil (si vuelven a abrir el QR, ven su equipo directamente),
+// pero se olvida cuando el equipo facilitador deja todo en blanco o restaura los datos.
 const KEY = 'lr2040-participante'
-function load(): Person | null {
-  try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') } catch { return null }
-}
-const me = ref<Person | null>(load())
+const me = ref<Person | null>(recallOnDevice<Person>(KEY))
+watch(() => store.db.event.jornada, () => { me.value = recallOnDevice<Person>(KEY) })
 function choose(p: Person) {
   me.value = p
-  try { localStorage.setItem(KEY, JSON.stringify(p)) } catch { /* sin almacenamiento: no pasa nada */ }
+  rememberOnDevice(KEY, p)
 }
 function reset() {
   me.value = null
   query.value = ''
-  try { localStorage.removeItem(KEY) } catch { /* nada */ }
+  forgetOnDevice(KEY)
 }
 
 const myTeam = computed(() => (me.value ? store.db.teams.find((t) => t.id === me.value!.teamId) : undefined))

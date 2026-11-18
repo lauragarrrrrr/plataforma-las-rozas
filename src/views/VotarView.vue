@@ -7,7 +7,7 @@
 // El voto se guarda con el equipo y la posición de la persona, nunca con su nombre.
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { castVote, useStore } from '../data/store'
+import { castVote, recallOnDevice, useStore } from '../data/store'
 import { SIMULATED_ROSTER } from '../data/roster'
 import ResultadosPodio from '../components/ResultadosPodio.vue'
 
@@ -24,10 +24,7 @@ const hecho = ref(false)
 const miEquipo = computed(() => store.team(equipo.value))
 
 // Si este móvil ya dijo por la mañana quién era (en /participa), se le propone directamente
-function recordado(): { name: string; teamId: string } | null {
-  try { return JSON.parse(localStorage.getItem('lr2040-participante') ?? 'null') } catch { return null }
-}
-const yo = ref(recordado())
+const yo = ref(recallOnDevice<{ name: string; teamId: string }>('lr2040-participante'))
 const yoIndice = computed(() => {
   if (!yo.value) return -1
   const lista = store.setup(yo.value.teamId)?.members ?? SIMULATED_ROSTER[yo.value.teamId] ?? []
