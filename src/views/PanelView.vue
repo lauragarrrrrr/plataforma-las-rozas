@@ -103,7 +103,7 @@ async function abrirSiguiente() {
   openNextDynamic()
 }
 async function volver() {
-  if (await askConfirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado se quedan donde están.')) closeLastDynamic()
+  if (await askConfirm('¿Volver a la dinámica anterior para todos? Los equipos que ya hayan pasado también vuelven, y su cronómetro empieza de nuevo.')) closeLastDynamic()
 }
 
 // Borrar afecta a TODOS los dispositivos: se pide escribir BORRAR para evitar sustos

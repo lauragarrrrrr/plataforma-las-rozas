@@ -443,12 +443,11 @@ const expediente = computed(() =>
               <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">{{ dynamic.noChat ? 'Subir imágenes' : '📷 Subir imágenes' }}</button>
               <div v-else class="foto__cab">
                 <span class="kicker">Subir imágenes</span>
-                <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores.</p>
+                <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Podéis hacer <strong>varias fotos a la vez</strong> y enviarlas todas juntas.</p>
               </div>
               <template v-if="showQr">
                 <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
-                <p class="nota">Desde el móvil podéis hacer o elegir <strong>varias fotos a la vez</strong> (la del papel y las de post-its y borradores) y enviarlas todas juntas.</p>
-                <div v-if="extras.length" class="extras">
+                                <div v-if="extras.length" class="extras">
                   <div v-if="extras.length" class="extras__fotos">
                     <button v-for="(p, n) in extras" :key="p.id" type="button" @click="openPhoto(p.url, `${dynamic.title} · foto de más ${n + 1}`)">
                       <img :src="p.url" :alt="`Foto de más ${n + 1}`" />

@@ -573,10 +573,33 @@ function advanceRoomTo(stepId: string) {
   if (i > state.room.step) setRoomStep(i)
 }
 
-/** Vuelve a la dinámica anterior para todos (por si se abre una por error) */
-export function closeLastDynamic() {
-  state.event.openDynamic = Math.max(groupOpen() - 1, 0)
+/**
+ * Lleva a TODOS a la dinámica j (decidido por Laura el 18/11/2026):
+ * · Hacia atrás: los equipos que iban por delante vuelven también a esa dinámica.
+ * · Hacia delante: se abre para todos (los equipos pasan al subir la foto, como siempre).
+ * El cronómetro de esa dinámica empieza de nuevo y la sala salta a ese momento.
+ */
+export function goToDynamic(j: number) {
+  const k = Math.max(0, Math.min(j, TEAM_DYNAMICS.length - 1))
+  const dyn = TEAM_DYNAMICS[k]
+  state.event.openDynamic = k
+  state.event.openedAt = { ...(state.event.openedAt ?? {}), [dyn.id]: now() }
   saveQuiet('event')
+  for (const p of state.progress) {
+    if (p.current <= k) continue
+    p.current = k
+    p.limit = undefined
+    // Que vuelvan a ver los avisos de esa parte («Volved a la sala», cambio de pantalla…)
+    if (p.introSeen) for (const d of TEAM_DYNAMICS.slice(k)) delete p.introSeen[`sala-${d.id}`]
+    saveQuiet('progress', p)
+  }
+  const i = AGENDA.findIndex((s) => s.id === (ROOM_STEP_OF_DYNAMIC[dyn.id] ?? dyn.id))
+  if (i >= 0) setRoomStep(i)
+}
+
+/** Vuelve a la dinámica anterior para todos: los equipos que iban por delante también vuelven */
+export function closeLastDynamic() {
+  goToDynamic(groupOpen() - 1)
 }
 
 /**

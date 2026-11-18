@@ -6,7 +6,7 @@ import { askConfirm } from '../composables/useConfirm'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { AGENDA } from '../data/agenda'
 import { TEAM_DYNAMICS } from '../data/dynamics'
-import { setRoomStep, useStore } from '../data/store'
+import { goToDynamic, setRoomStep, useStore } from '../data/store'
 
 const store = useStore()
 const actual = computed(() => store.db.room.step)
@@ -21,6 +21,16 @@ function abiertaEnEquipos(stepId: string) {
 }
 
 async function ir(i: number) {
+  // Si es el momento de una dinámica de equipo, se lleva allí a todos los equipos (atrás o adelante)
+  const j = TEAM_DYNAMICS.findIndex((d) => d.id === (DYNAMICS_OF_STEP[AGENDA[i].id]?.[0] ?? AGENDA[i].id))
+  if (j >= 0 && j !== store.openDynamic()) {
+    const atras = j < store.openDynamic()
+    const texto = atras
+      ? `¿Volver a «${TEAM_DYNAMICS[j].title}» con todos los equipos? Los que iban por delante también vuelven, y el cronómetro empieza de nuevo (${TEAM_DYNAMICS[j].minutes} min).`
+      : `¿Abrir «${TEAM_DYNAMICS[j].title}» para todos los equipos? Su cronómetro empieza ahora (${TEAM_DYNAMICS[j].minutes} min). Pasarán en cuanto suban la foto de la dinámica en la que están.`
+    if (await askConfirm(texto, '', atras ? 'Sí, volver' : 'Sí, abrir')) goToDynamic(j)
+    return
+  }
   if (i === actual.value) return
   if (await askConfirm(`¿Marcar «${AGENDA[i].title}» (${AGENDA[i].time}) como el momento actual de la jornada?`)) setRoomStep(i)
 }
