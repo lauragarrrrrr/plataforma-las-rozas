@@ -14,7 +14,7 @@ import PanelEquipos from '../components/PanelEquipos.vue'
 import PanelVotacion from '../components/PanelVotacion.vue'
 import PanelTitulares from '../components/PanelTitulares.vue'
 import PanelAvisos from '../components/PanelAvisos.vue'
-import PanelHorario from '../components/PanelHorario.vue'
+import PanelReloj from '../components/PanelReloj.vue'
 
 const store = useStore()
 const now = useNow()
@@ -129,7 +129,7 @@ async function restaurar() {
         </p>
       </div>
 
-      <PanelHorario @abrir="abrirSiguiente" />
+      <PanelReloj />
 
       <EscaletaTimeline />
 

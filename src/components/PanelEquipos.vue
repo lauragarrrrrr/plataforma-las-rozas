@@ -108,24 +108,6 @@ function verFotos(t: Team) {
 </script>
 
 <template>
-  <!-- 1 · Fotos recién subidas -->
-  <section class="card recientes">
-    <div class="cab">
-      <span class="kicker">Fotos recién subidas</span>
-      <small>{{ store.db.photos.length }} en total · al pulsar se abren en grande</small>
-    </div>
-    <p v-if="!recientes.length" class="vacio">Todavía no ha llegado ninguna foto.</p>
-    <ol v-else class="tira">
-      <li v-for="p in recientes" :key="p.id">
-        <a :href="p.url" @click.prevent="openPhoto(p.url, `${store.team(p.teamId)?.name} · ${titleOf(p.dynamicId)}`)">
-          <img :src="p.url" :alt="`${store.team(p.teamId)?.name} · ${titleOf(p.dynamicId)}`" loading="lazy" />
-          <span class="tira__txt"><strong>{{ store.team(p.teamId)?.name }}</strong> {{ titleOf(p.dynamicId) }}</span>
-          <span class="tira__hora">{{ hace(p.createdAt) }}</span>
-        </a>
-      </li>
-    </ol>
-  </section>
-
   <!-- 2 · Equipos -->
   <section class="equipos" aria-label="Equipos">
     <article
@@ -174,6 +156,24 @@ function verFotos(t: Team) {
         </div>
       </details>
     </article>
+  </section>
+
+  <!-- 1 · Fotos recién subidas -->
+  <section class="card recientes">
+    <div class="cab">
+      <span class="kicker">Fotos recién subidas</span>
+      <small>{{ store.db.photos.length }} en total · al pulsar se abren en grande</small>
+    </div>
+    <p v-if="!recientes.length" class="vacio">Todavía no ha llegado ninguna foto.</p>
+    <ol v-else class="tira">
+      <li v-for="p in recientes" :key="p.id">
+        <a :href="p.url" @click.prevent="openPhoto(p.url, `${store.team(p.teamId)?.name} · ${titleOf(p.dynamicId)}`)">
+          <img :src="p.url" :alt="`${store.team(p.teamId)?.name} · ${titleOf(p.dynamicId)}`" loading="lazy" />
+          <span class="tira__txt"><strong>{{ store.team(p.teamId)?.name }}</strong> {{ titleOf(p.dynamicId) }}</span>
+          <span class="tira__hora">{{ hace(p.createdAt) }}</span>
+        </a>
+      </li>
+    </ol>
   </section>
 
   <!-- 3 · Fotos de un equipo -->
