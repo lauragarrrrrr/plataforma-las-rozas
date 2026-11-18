@@ -35,7 +35,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
   {
     id: 'titular', phase: 'foresight', title: 'Titular positivo', minutes: 15, noChat: true,
     what: 'Escribid vuestro primer titular positivo para Las Rozas Times 2040.',
-    why: 'Pasar del futuro que queremos evitar al que sí queremos construir, con un punto de partida común.',
+    why: 'Pasar del futuro que queremos evitar al que sí queremos, con un punto de partida común.',
     how: [
       'Escribidlo en el periódico A2, como una noticia que ya ha pasado en 2040.',
       'Responded a las tres preguntas: ¿Qué nos gustaría que se dijera de Las Rozas en 2040? ¿Qué tendría que haber cambiado? ¿Cómo sabríamos que lo hemos conseguido?',
@@ -151,7 +151,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
       'Seis campos: nombre, a quién ayudamos, problema, beneficio, solución y tres palancas para impulsarla.',
       'Primero, a quién ayudamos y su problema.',
       'Después, lo que obtiene (beneficio).',
-      'Al final, lo que construimos (solución).',
+      'Al final, lo que vamos a hacer (solución).',
     ],
     output: 'Una iniciativa por equipo.',
     photo: { kind: 'initiative', label: 'la ficha de iniciativa' },

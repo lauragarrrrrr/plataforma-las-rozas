@@ -60,7 +60,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <div class="burbujas" aria-hidden="true"><i></i><i></i><i></i></div>
       <span class="sala__kicker">Hackathon · Sábado 21/11/2026</span>
       <h1><span class="nombre">Las Rozas</span> <span class="anio">2040</span></h1>
-      <p class="lema">El futuro no se espera. Se construye juntos.</p>
+      <p class="lema">El futuro no se espera. Se imagina juntos.</p>
       <div class="logos">
         <img src="/logos/ayuntamiento-las-rozas.png" alt="Ayuntamiento de Las Rozas" />
         <img src="/logos/las-rozas-innova.png" alt="Las Rozas Innova" />

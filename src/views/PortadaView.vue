@@ -8,7 +8,7 @@ import { RouterLink } from 'vue-router'
     <div class="wrap entrada__in">
       <span class="tipo">Hackathon · Sábado 21/11/2026</span>
       <h1><span class="nombre">Las Rozas</span><span class="anio">2040</span></h1>
-      <p class="lema">El futuro no se espera. Se construye juntos.</p>
+      <p class="lema">El futuro no se espera. Se imagina juntos.</p>
 
       <div class="puertas">
         <RouterLink to="/participa" class="puerta puerta--participante">

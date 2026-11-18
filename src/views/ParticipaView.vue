@@ -70,7 +70,7 @@ function chooseOwner(name: string) {
       <div class="wrap hero__in">
         <span class="kicker">Participantes</span>
         <h1><span class="nombre">Las Rozas</span> <span class="anio">2040</span></h1>
-        <p class="lema">El futuro no se espera. Se construye juntos.</p>
+        <p class="lema">El futuro no se espera. Se imagina juntos.</p>
         <p class="intro">Una jornada para escuchar a quienes forman Las Rozas, <strong>imaginar la ciudad de 2040</strong> y convertir sus necesidades en ideas concretas. Primero se conversa; después se contrasta; finalmente, el equipo decide qué registrar.</p>
       </div>
     </section>
