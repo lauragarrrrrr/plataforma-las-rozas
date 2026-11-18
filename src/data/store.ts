@@ -163,13 +163,15 @@ async function initRemote() {
   try {
     let rows = await fetchAll()
     const meta = rows.find((r) => r.coleccion === 'meta')?.datos as { version?: number } | undefined
-    const outdated = !rows.some((r) => r.coleccion === 'teams') || meta?.version !== DB_VERSION
-    // Base vacía o de una versión anterior: SOLO se rellena con el ejemplo si se abre
-    // desde una pantalla del equipo facilitador. Un participante nunca borra ni reescribe nada.
-    if (outdated && isFacilitatorPage()) {
+    // Base VACÍA (sin equipos): solo entonces se rellena, y solo desde una pantalla del equipo facilitador.
+    // Si ya hay datos, NUNCA se borran solos al publicar una versión nueva (aunque cambie DB_VERSION):
+    // así se pueden hacer cambios el mismo día sin perder nada. Borrar es solo con los botones del panel.
+    const empty = !rows.some((r) => r.coleccion === 'teams')
+    if (empty && isFacilitatorPage()) {
       rows = toRows(createSeed())
-      await deleteAll()
       await upsertRows(rows)
+    } else if (meta?.version !== DB_VERSION && isFacilitatorPage()) {
+      await upsertRows([{ coleccion: 'meta', id: 'meta', datos: { ...(meta ?? {}), version: DB_VERSION } }])
     }
     if (!rows.some((r) => r.coleccion === 'teams')) rows = [...rows, ...toRows(createBlank()).filter((r) => r.coleccion === 'teams')]
     fromRows(rows)
@@ -215,9 +217,9 @@ const saveQuiet = (coll: Collection, item?: object) => { save(coll, item).catch(
 // ---------------------------------------------------------------------------
 // Ritmo de la jornada: qué dinámica está abierta
 // ---------------------------------------------------------------------------
-/** Dinámica abierta para todos. Si nunca se ha tocado, la primera se abre al revelar los ámbitos. */
+/** Dinámica abierta para todos. Ninguna hasta que el equipo facilitador abre la primera (el Titular). */
 function groupOpen(): number {
-  return state.event.openDynamic ?? (state.event.areasRevealed ? 0 : -1)
+  return state.event.openDynamic ?? -1
 }
 
 function allowedFor(teamId: string): number {
@@ -540,14 +542,9 @@ export function setPhase(teamId: string, phase: PhaseId, value: PhaseState) {
   saveQuiet('teams', team)
 }
 
-/** Revelar los ámbitos abre también la primera dinámica (titular) y arranca su cronómetro */
+/** Revelar los ámbitos en la sala. Ya NO abre el Titular: eso se hace siempre con «Abrir para todos». */
 export function revealAreas(revealed: boolean) {
-  const firstTime = revealed && state.event.openDynamic === undefined
   state.event.areasRevealed = revealed
-  if (firstTime) {
-    state.event.openDynamic = 0
-    state.event.openedAt = { ...(state.event.openedAt ?? {}), [TEAM_DYNAMICS[0].id]: now() }
-  }
   saveQuiet('event')
 }
 
@@ -563,8 +560,7 @@ export function openNextDynamic() {
   if (dyn) state.event.openedAt = { ...(state.event.openedAt ?? {}), [dyn.id]: now() }
   saveQuiet('event')
   // La sala acompaña: salta al momento de la escaleta de esa dinámica (solo hacia delante).
-  // La primera dinámica lleva a la revelación de los ámbitos, que va justo antes.
-  if (dyn) advanceRoomTo(next === 0 ? 'ambitos' : ROOM_STEP_OF_DYNAMIC[dyn.id] ?? dyn.id)
+  if (dyn) advanceRoomTo(ROOM_STEP_OF_DYNAMIC[dyn.id] ?? dyn.id)
 }
 
 /** Momento de la escaleta (AGENDA) de cada dinámica de equipo, cuando no se llama igual */

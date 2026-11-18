@@ -1,5 +1,9 @@
-// Reduce una foto del móvil para que ocupe poco (≈100-200 KB) antes de guardarla.
-export async function compressImage(file: File, maxSide = 1280, quality = 0.7): Promise<string> {
+// Reduce una foto del móvil antes de guardarla.
+// Con Supabase: 1800 px y calidad 0,82 (≈300-500 KB), para que se lea la letra pequeña de un rotafolio.
+// Solo en el navegador (pruebas en local): 1280 px, porque el almacenamiento del navegador es pequeño.
+import { isRemote } from '../data/store'
+
+export async function compressImage(file: File, maxSide = isRemote ? 1800 : 1280, quality = isRemote ? 0.82 : 0.7): Promise<string> {
   const url = URL.createObjectURL(file)
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {

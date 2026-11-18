@@ -6,13 +6,18 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { recallOnDevice, rememberOnDevice, useStore } from '../data/store'
+import { askConfirm } from '../composables/useConfirm'
 
 const store = useStore()
 const router = useRouter()
 const KEY = 'lr2040-equipo-del-ordenador'
 
 const equipos = computed(() => store.db.teams)
-function elegir(id: string) {
+/** Digital owner del equipo, si ya ha entrado otro ordenador */
+const ownerDe = (id: string) => store.setup(id)?.digitalOwner ?? ''
+async function elegir(id: string) {
+  const owner = ownerDe(id)
+  if (owner && !(await askConfirm(`El equipo ${id} ya tiene ordenador (digital owner: ${owner}). ¿Seguro que sois el equipo ${id}? Si es así, ${owner.split(' ')[0]} puede seguir desde aquí.`, undefined, `Sí, somos el equipo ${id}`))) return
   rememberOnDevice(KEY, id)
   router.push(`/equipo/${id}`)
 }
@@ -32,6 +37,7 @@ onMounted(() => {
         <button v-for="t in equipos" :key="t.id" type="button" class="letra" @click="elegir(t.id)">
           <strong>{{ t.id }}</strong>
           <span>{{ store.areaName(t.area) }}</span>
+          <small v-if="ownerDe(t.id)" class="letra__ya">Ya tiene ordenador</small>
         </button>
       </div>
     </div>
@@ -44,5 +50,6 @@ onMounted(() => {
 .letra{display:grid;gap:.3rem;justify-items:center;text-align:center;font:inherit;background:var(--c-white);border:0;border-radius:var(--radius-card);padding:1.2rem .8rem;cursor:pointer;transition:transform .2s var(--ease-out),box-shadow .2s}
 .letra:hover,.letra:focus-visible{transform:translateY(-3px);box-shadow:inset 0 0 0 3px var(--c-innova);outline:none}
 .letra strong{display:grid;place-items:center;width:3.6rem;height:3.6rem;border-radius:50%;background:var(--gradient-anio);color:var(--c-white);font-size:2rem;font-weight:700;line-height:1}
+.letra__ya{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c-rubi)}
 .letra span{font-size:.85rem;color:var(--c-green-dark);line-height:1.3}
 </style>

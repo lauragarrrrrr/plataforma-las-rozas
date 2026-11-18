@@ -20,7 +20,8 @@ const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 const HELP = /(^ayuda\b|^socorro|necesitamos ayuda|ayudanos|ayudame|no entiendo|no entendemos|estamos perdid|que (tengo|tenemos|hay) que hacer|no funciona)/
 // Solo en mensajes cortos, para no confundir «no se puede aparcar» con no saber
 const UNSURE = /\b(no (lo )?se|no sabemos|ni idea|no se nos ocurre(n)?( nada)?|no tenemos claro|nose)\b/
-const QUESTION_START = /^(que|como|cual|cuales|por que|donde|quien|quienes|cuando|cuanto|puedes|podrias|me dices|nos dices|sabes)\b/
+// Solo cuando nos piden algo: «Que los jóvenes…», «Cuando terminan…» suelen ser respuestas
+const QUESTION_START = /^(puedes|podrias|me dices|nos dices|sabes|nos ayudas|me ayudas)\b/
 // Avisan de que preguntan algo, aunque no lleve interrogación
 const QUESTION_ABOUT = /\b((es|tenemos|te hacemos|te hago|una) (una )?pregunta|tenemos (una )?duda|una duda)\b/
 
@@ -31,6 +32,8 @@ export function classify(text: string): ReplyKind {
   if (HELP.test(t)) return 'help'
   if (EXAMPLE.test(t) && words.length <= 10) return 'example'
   if (UNSURE.test(t) && words.length <= 6) return 'unsure'
+  // El reto se escribe como pregunta («¿Cómo podríamos…?»): es una respuesta, no una pregunta al chat
+  if (/^¿?\s*como podr(iamos|emos)\b/.test(t)) return words.length < 4 ? 'short' : 'answer'
   if (t.endsWith('?') || t.startsWith('¿') || QUESTION_START.test(t) || QUESTION_ABOUT.test(t)) return 'question'
   if (words.length < 3) return 'short'
   return 'answer'
@@ -42,7 +45,8 @@ export const advances = (text: string) => classify(text) === 'answer'
 // Frases breves y variadas antes de la siguiente pregunta
 const ACKS = ['Vale.', 'Interesante.', 'Buen punto.', 'Anotado.', 'Bien.', 'Eso da que pensar.', 'Seguimos.']
 
-const FACT = /\b(dato|datos|estudio|informe|encuesta|noticia|segun|estadistica|ine|cifra|porcentaje|articulo|fuente)\b|%|\d{2,}/
+// Un número suelto (2040, 5 empresas…) no es un dato: tienen que hablar de datos o fuentes
+const FACT = /\b(dato|datos|estudio|informe|encuesta|noticia|segun|estadistica|ine|porcentaje|articulo|fuente)\b|%/
 const HYPOTHESIS = /\b(creemos|creo|pensamos|suponemos|supongo|imaginamos|quiza|quizas|igual|seguramente|probablemente|nos parece|intuimos|hipotesis)\b/
 
 /** Comentario breve según lo que dicen, solo en la Unidad de Investigación */
@@ -91,7 +95,9 @@ export function coachReply(dynamic: TeamDynamic, text: string, answered: number,
       : `Un ejemplo: ${ej} No lo copiéis: ¿cómo sería el vuestro?`
   }
   if (kind === 'unsure') {
-    const tip = dynamic.how[turn % dynamic.how.length]
+    // Nunca la pista de hacer o subir la foto
+    const tips = dynamic.how.filter((h) => !/foto|subid|subir/i.test(h))
+    const tip = tips.length ? tips[turn % tips.length] : dynamic.what
     return `Es normal. Una pista: ${tip.charAt(0).toLowerCase()}${tip.slice(1)} ¿Qué se os ocurre?`
   }
   if (kind === 'question') {

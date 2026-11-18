@@ -5,6 +5,7 @@
 // y foto obligatoria al terminar el tiempo para poder seguir.
 // ==========================================================
 import type { PhaseId, PhotoKind } from './types'
+import { AGENDA } from './agenda'
 
 export interface TeamDynamic {
   id: string
@@ -189,6 +190,9 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
  * subir las fichas individuales de la dinámica de sala de las 10:00.
  * No tiene cronómetro ni chat: es una sola pantalla, antes de las dinámicas de equipo.
  */
+// El chat (Unidad de Investigación) solo está en la fase de Investigación (decidido el 18/11/2026)
+for (const d of TEAM_DYNAMICS) if (d.phase !== 'research') d.noChat = true
+
 export const PREMORTEM: TeamDynamic = {
   id: 'ciudad',
   phase: 'foresight',
@@ -215,9 +219,18 @@ export const ALL_DYNAMICS: TeamDynamic[] = [PREMORTEM, ...TEAM_DYNAMICS]
  */
 export function backToRoomAfter(d: TeamDynamic): boolean {
   const i = TEAM_DYNAMICS.findIndex((x) => x.id === d.id)
+  if (i < 0) return false
   const next = TEAM_DYNAMICS[i + 1]
-  return i >= 0 && (!next || next.phase !== d.phase)
+  if (!next) return true
+  // Manda la escaleta: se vuelve a la sala solo si entre esta dinámica y la siguiente
+  // hay algún momento que no es de equipo (sala principal, pausa…). Ficha → Portada: no.
+  const a = AGENDA.findIndex((s) => s.id === (AGENDA_STEP_OF[d.id] ?? d.id))
+  const b = AGENDA.findIndex((s) => s.id === (AGENDA_STEP_OF[next.id] ?? next.id))
+  if (a < 0 || b < 0) return next.phase !== d.phase
+  return AGENDA.slice(a + 1, b).some((s) => s.who !== 'Equipo')
 }
+/** Dinámicas que comparten momento en la escaleta */
+const AGENDA_STEP_OF: Record<string, string> = { 'como-podriamos': 'a-quien' }
 
 /** «de el periódico» → «del periódico» */
 export function photoOf(d: TeamDynamic): string {

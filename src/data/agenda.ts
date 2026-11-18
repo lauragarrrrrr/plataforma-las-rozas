@@ -29,9 +29,9 @@ export interface AgendaStep {
 
 export const AGENDA: AgendaStep[] = [
   { id: 'bienvenida', time: '09:00', minutes: 30, title: 'Acreditación, café y bienvenida', who: 'Toda la sala', kind: 'welcome',
-    description: 'Cada persona se acredita, recoge su identificación y se sienta frente al escenario. Café y picoteo mientras se completa la sala.' },
+    description: 'Cada persona se acredita y escanea el QR: descubre su ámbito y su equipo y se sienta en la mesa de su equipo. Café y picoteo mientras se completa la sala.' },
   { id: 'apertura', time: '09:30', minutes: 10, title: 'Apertura institucional', who: 'Toda la sala', kind: 'deck',
-    description: 'Bienvenida del alcalde y de Las Rozas Innova: por qué Las Rozas 2040 y qué se espera del día.' },
+    description: 'Bienvenida institucional y de Las Rozas Innova: por qué Las Rozas 2040 y qué se espera del día.' },
   { id: 'recorrido', time: '09:40', minutes: 5, title: 'El recorrido de la jornada', who: 'Toda la sala', kind: 'deck',
     description: 'Cómo será el día: imaginar futuros, entender una necesidad, explorar soluciones y presentar y votar.' },
   { id: 'foresight', time: '09:45', minutes: 10, title: 'Inspiración: qué es el foresight', who: 'Toda la sala', kind: 'deck',
@@ -43,8 +43,8 @@ export const AGENDA: AgendaStep[] = [
     description: 'Cada persona rellena su ficha: un hecho concreto ocurrido en 2040 y sus causas inmediata, antecedente y fundamental.' },
   { id: 'escuchar', time: '10:10', minutes: 5, title: 'Escuchar los futuros posibles', who: 'Toda la sala', kind: 'dynamic',
     description: 'Una persona comparte su ciudad y quien haya imaginado algo parecido o distinto toma el relevo.' },
-  { id: 'ambitos', time: '10:15', minutes: 10, title: 'Ámbitos y equipos', who: 'Toda la sala', kind: 'reveal',
-    description: 'Se presentan los seis ámbitos. Cada persona escanea el código, escribe su nombre y descubre su equipo, su ámbito y su sala.' },
+  { id: 'explica-titular', time: '10:15', minutes: 10, title: 'Os explicamos el Titular positivo', who: 'Toda la sala', kind: 'info',
+    description: 'Desde el escenario: cómo escribir en equipo el primer titular positivo. Después, cada equipo va a su sala y abre en su ordenador el enlace del correo.' },
   { id: 'traslado-titular', time: '10:25', minutes: 5, title: 'A vuestras salas', who: 'Toda la sala', kind: 'info',
     description: 'De la sala principal a las salas de equipo.' },
   { id: 'titular', time: '10:30', minutes: 15, title: 'Titular positivo', who: 'Equipo', kind: 'dynamic',

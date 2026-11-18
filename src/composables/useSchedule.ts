@@ -36,13 +36,15 @@ export function useSchedule() {
 
   /** Minutos desde medianoche según el horario; null si hoy no es el día del evento y no hay hora de prueba */
   const minutos = computed<number | null>(() => {
+    const d = new Date(now.value)
+    const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    // El día del evento manda SIEMPRE la hora real: una hora de prueba olvidada no cuenta
+    if (hoy === EVENT_DATE) return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60
     if (prueba.value) {
       // La hora de prueba avanza con el reloj desde que se puso (así se ve pasar el tiempo)
       return toMinutes(prueba.value.hhmm) + Math.max(0, now.value - prueba.value.desde) / 60_000
     }
-    const d = new Date(now.value)
-    const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    return hoy === EVENT_DATE ? d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60 : null
+    return null
   })
 
   const activo = computed(() => minutos.value !== null)

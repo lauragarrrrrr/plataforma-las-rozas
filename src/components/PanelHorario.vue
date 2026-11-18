@@ -1,29 +1,22 @@
 <script setup lang="ts">
 // Panel · Horario: qué toca según la hora y la escaleta.
-// · «Seguir el horario» (por defecto, sí): el momento «Ahora» avanza solo con la hora, nunca hacia atrás.
-// · Las dinámicas de los equipos NO se abren solas: si toca una, sale el botón para abrirla.
+// SOLO AVISA: no mueve nada solo (decidido el 18/11/2026). El equipo facilitador pasa cada momento.
+// · Si según la hora toca un momento posterior a «Ahora», sale el botón para marcarlo.
+// · Si toca una dinámica de equipo que no está abierta, sale el botón para abrirla.
 // · «Probar como si fueran las…»: para probar antes del evento (solo en este ordenador).
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { AGENDA } from '../data/agenda'
 import { TEAM_DYNAMICS } from '../data/dynamics'
-import { setRoomStep, setSeguirHorario, useStore } from '../data/store'
+import { setRoomStep, useStore } from '../data/store'
 import { horaPrueba, setHoraPrueba, useSchedule } from '../composables/useSchedule'
 
 const emit = defineEmits<{ abrir: [] }>()
 const store = useStore()
 const { activo, indice, reloj, desde } = useSchedule()
 
-const seguir = computed(() => store.db.event.seguirHorario !== false)
 const toca = computed(() => (indice.value >= 0 ? AGENDA[indice.value] : null))
-
-// «Ahora» sigue la hora (solo hacia delante)
-watch(
-  () => [activo.value, seguir.value, indice.value, store.db.room.step] as const,
-  ([on, sigue, i, paso]) => {
-    if (on && sigue && i > paso) setRoomStep(i)
-  },
-  { immediate: true },
-)
+/** Según la hora ya tocaría un momento posterior al que está marcado como «Ahora» */
+const vaTarde = computed(() => indice.value > store.db.room.step)
 
 /** Dinámica de equipo que corresponde al momento que toca (si es una dinámica) */
 const DINAMICAS_DEL_MOMENTO: Record<string, string> = { 'a-quien': 'a-quien' }
@@ -47,10 +40,7 @@ function cambiarPrueba(e: Event) {
   <section class="card horario" :class="{ 'horario--abrir': faltaAbrir }">
     <div class="horario__cab">
       <span class="kicker">Según el horario<template v-if="activo"> · {{ reloj }}</template></span>
-      <label class="interruptor">
-        <input type="checkbox" :checked="seguir" @change="setSeguirHorario(($event.target as HTMLInputElement).checked)" />
-        <span>Seguir el horario</span>
-      </label>
+
     </div>
 
     <template v-if="!activo">
@@ -65,14 +55,17 @@ function cambiarPrueba(e: Event) {
         <p>⏰ Los equipos todavía no tienen abierta <strong>«{{ dinamicaQueToca!.d.title }}»</strong>.</p>
         <button v-if="siguiente" class="boton" type="button" @click="emit('abrir')">Abrir para todos: {{ siguiente.title }} →</button>
       </div>
-      <p v-if="!seguir" class="nota">«Ahora» no se mueve solo: marcadlo en la escaleta.</p>
+      <div v-if="vaTarde" class="tarde">
+        <p>En la escaleta, «Ahora» sigue en <strong>{{ AGENDA[store.db.room.step]?.title }}</strong>.</p>
+        <button class="boton boton--sec" type="button" @click="setRoomStep(indice)">Marcar «{{ toca.title }}» como ahora</button>
+      </div>
     </template>
 
     <label class="prueba">
       <span>Probar como si fueran las</span>
       <input type="time" :value="horaPrueba" @change="cambiarPrueba" />
       <button v-if="horaPrueba" class="enlace" type="button" @click="setHoraPrueba('')">Quitar (usar la hora real)</button>
-      <small>Solo en este ordenador. El sábado, dejadlo vacío.</small>
+      <small>Solo en este ordenador. El sábado no hace nada: manda la hora real.</small>
     </label>
   </section>
 </template>
@@ -88,7 +81,9 @@ function cambiarPrueba(e: Event) {
 .toca span{font-size:.85rem;color:var(--c-green-dark)}
 .abrir{display:grid;gap:.5rem;justify-items:start;padding:.8rem 1rem;border-radius:1rem;background:color-mix(in srgb,var(--c-rubi) 10%,var(--c-white))}
 .abrir p{margin:0;color:var(--c-ink)}
-.nota{margin:0;font-size:.85rem;font-style:italic}
+.tarde{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem}
+.tarde p{margin:0;font-size:.9rem}
+.boton--sec{background:var(--c-green-light)}
 .prueba{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.8rem;border-top:1px solid var(--c-gris-10);padding-top:.6rem}
 .prueba input{font:inherit;padding:.2em .4em;border:1px solid var(--c-paper-line);border-radius:.5rem}
 .prueba small{width:100%;color:var(--c-green-dark)}

@@ -3,7 +3,8 @@
 // El recuento solo lo ve el equipo facilitador.
 import { askConfirm } from '../composables/useConfirm'
 import { computed } from 'vue'
-import { publishResults, setPodium, setVotingOpen, useStore } from '../data/store'
+import { publishResults, setPodium, setVotingOpen, useStore, VOTE_POINTS } from '../data/store'
+import { downloadCsv } from '../utils/csv'
 
 const store = useStore()
 const abierta = computed(() => store.votingOpen())
@@ -33,6 +34,34 @@ function cambiarPuesto(i: number, teamId: string) {
 function porVotos() {
   setPodium([])
 }
+// --- Descargas para después (CSV para Excel) ---
+const hora = (iso: string) => new Date(iso).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+function csvResultados() {
+  const comoFavorita = (teamId: string, i: number) => store.db.votes.filter((v) => v.teamIds[i] === teamId).length
+  const filas = recuento.value.map((r, n) => [
+    n + 1,
+    podio.value.includes(r.teamId) ? PUESTOS[podio.value.indexOf(r.teamId)] : '',
+    `Equipo ${r.teamId}`,
+    store.areaName(store.team(r.teamId)?.area ?? 'open'),
+    store.coverHeadline(r.teamId) ?? '',
+    r.points,
+    r.votes,
+    comoFavorita(r.teamId, 0),
+    comoFavorita(r.teamId, 1),
+    comoFavorita(r.teamId, 2),
+  ])
+  downloadCsv('Las Rozas 2040 · resultados.csv', ['Posición por puntos', 'Resultado final', 'Equipo', 'Ámbito', 'Titular de la portada', 'Puntos', 'Votos', 'Como favorita 1', 'Como favorita 2', 'Como favorita 3'], filas)
+}
+function csvVotos() {
+  // Sin nombres: solo el equipo de quien vota
+  const filas = store.db.votes.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map((v) => [
+    hora(v.createdAt),
+    `Equipo ${v.code.split('-')[0]}`,
+    ...v.teamIds.map((t, i) => `Equipo ${t} (${VOTE_POINTS[i]} pts)`),
+  ])
+  downloadCsv('Las Rozas 2040 · votos.csv', ['Hora', 'Equipo de quien vota', 'Favorita 1', 'Favorita 2', 'Favorita 3'], filas)
+}
+
 async function alternarPublicar() {
   const lineas = podio.value.map((t, i) => `${PUESTOS[i]} Equipo ${t}${store.coverHeadline(t) ? ` · ${store.coverHeadline(t)}` : ''}`)
   const texto = publicado.value
@@ -88,6 +117,11 @@ async function alternarPublicar() {
         <a class="final__ver" href="/resultados" target="_blank" rel="noopener">Abrir la página de resultados (para proyectar) ↗</a>
       </div>
       <p v-if="publicado" class="final__ok">✓ Publicados: los participantes ya los ven en su móvil y en la app del equipo.</p>
+      <div class="descargas">
+        <span>Para después (se abre en Excel):</span>
+        <button class="boton boton--sec" type="button" @click="csvResultados">Descargar resultados (CSV)</button>
+        <button class="boton boton--sec" type="button" :disabled="!personas" @click="csvVotos">Descargar votos (CSV)</button>
+      </div>
     </div>
   </section>
 </template>
@@ -113,5 +147,7 @@ details summary{cursor:pointer;font-weight:600;color:var(--c-ink);margin-top:.4r
 .final__puesto select{font:inherit;font-weight:400;font-size:.95rem;padding:.5em .8em;border:1.5px solid var(--c-paper-line);border-radius:.8rem;background:var(--c-white);min-width:0}
 .final__botones{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem}
 .final__ver{font-size:.9rem;font-weight:600;color:var(--c-innova-dark)}
+.descargas{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;font-size:.85rem;border-top:1px dashed var(--c-gris-10);padding-top:.8rem}
+.descargas .boton:disabled{opacity:.45;cursor:not-allowed}
 .final__ok{margin:0;font-weight:600;color:var(--c-innova-dark)}
 </style>

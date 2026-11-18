@@ -125,8 +125,7 @@ async function restaurar() {
         <span class="kicker">Equipo facilitador</span>
         <h1 class="titular">Panel</h1>
         <p>
-          Ahora en la jornada: <strong>{{ paso.title }}</strong> ({{ paso.time }}) ·
-          Ámbitos {{ store.db.event.areasRevealed ? 'revelados' : 'sin revelar' }}
+          Ahora en la jornada: <strong>{{ paso.title }}</strong> ({{ paso.time }})
         </p>
       </div>
 
