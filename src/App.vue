@@ -17,7 +17,7 @@ const { ready, connError } = useStore()
   <p v-if="connError" class="alerta conexion" role="alert">{{ connError }}</p>
   <RouterView v-if="ready" />
   <main v-else-if="!connError" class="cargando" aria-live="polite">Conectando…</main>
-  <SiteFooter v-if="!route.meta.fullscreen" />
+  <SiteFooter v-if="!route.meta.fullscreen" :compact="!!route.meta.compact" />
   <ConfirmDialog />
   <PhotoViewer />
 </template>

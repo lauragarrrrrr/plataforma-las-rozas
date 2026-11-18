@@ -13,6 +13,12 @@ const store = useStore()
 const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attendedAt).length)
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 
+// Enlace del correo (el ordenador de cada equipo)
+const copiado = ref(false)
+async function copiar() {
+  try { await navigator.clipboard.writeText(PUBLIC_URL + '/equipo'); copiado.value = true; setTimeout(() => (copiado.value = false), 2000) } catch { /* sin portapapeles */ }
+}
+
 // QR de /avisos para el móvil de cada persona del equipo facilitador
 const qrAvisos = ref('')
 QRCode.toDataURL(PUBLIC_URL + '/avisos', { margin: 2, width: 600 }).then((u) => (qrAvisos.value = u))
@@ -38,6 +44,15 @@ QRCode.toDataURL(PUBLIC_URL + '/avisos', { margin: 2, width: 600 }).then((u) => 
         </RouterLink>
       </div>
 
+      <section class="correo">
+        <span class="kicker">Enlace para el correo de los participantes</span>
+        <p>Es el mismo para todos los equipos. En la sala, cada equipo lo abre en su ordenador: elige su letra y su digital owner.</p>
+        <div class="correo__fila">
+          <code>{{ PUBLIC_URL }}/equipo</code>
+          <button class="boton" type="button" @click="copiar">{{ copiado ? '¡Copiado!' : 'Copiar enlace' }}</button>
+        </div>
+      </section>
+
       <section class="avisos-movil">
         <img v-if="qrAvisos" :src="qrAvisos" alt="Código QR de los avisos en el móvil" />
         <div>
@@ -61,6 +76,10 @@ QRCode.toDataURL(PUBLIC_URL + '/avisos', { margin: 2, width: 600 }).then((u) => 
 .opcion:hover{transform:translateY(-4px)}
 .opcion strong{font-size:clamp(1.4rem,2.6vw,2rem);font-weight:500;letter-spacing:-.03em;line-height:1.1;color:var(--c-ink)}
 .opcion--previa{background:var(--c-white);box-shadow:inset 0 0 0 2px var(--c-green-mid)}
+.correo{display:grid;gap:.5rem;background:var(--c-white);border-radius:var(--radius-card);padding:1.2rem;margin-top:1rem}
+.correo p{margin:0;font-size:.9rem}
+.correo__fila{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center}
+.correo code{font-size:1rem;font-weight:600;color:var(--c-ink);word-break:break-all}
 .avisos-movil{display:grid;grid-template-columns:9rem 1fr;gap:1.2rem;align-items:center;background:var(--c-white);border-radius:var(--radius-card);padding:1.2rem;margin-block:1rem}
 .avisos-movil img{width:9rem;height:9rem;border-radius:.8rem;box-shadow:0 0 0 1px var(--c-gris-10)}
 .avisos-movil div{display:grid;gap:.4rem;justify-items:start}

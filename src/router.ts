@@ -20,8 +20,8 @@ export const router = createRouter({
     { path: '/', name: 'portada', component: PortadaView },
     // Parte de participantes
     { path: '/participa', name: 'participa', component: () => import('./views/ParticipaView.vue'), meta: { title: 'Participantes', participant: true } },
-    { path: '/equipo', redirect: '/participa' },
-    { path: '/equipo/:id', name: 'equipo', component: () => import('./views/EquipoView.vue'), props: true, meta: { title: 'App del equipo', participant: true } },
+    { path: '/equipo', name: 'equipo-elegir', component: () => import('./views/EquipoElegirView.vue'), meta: { title: 'Ordenador del equipo', participant: true, compact: true } },
+    { path: '/equipo/:id', name: 'equipo', component: () => import('./views/EquipoView.vue'), props: true, meta: { title: 'App del equipo', participant: true, compact: true } },
     { path: '/subir/:id', name: 'subir', component: () => import('./views/SubirView.vue'), props: true, meta: { title: 'Subir una foto', participant: true } },
     { path: '/votar', name: 'votar', component: () => import('./views/VotarView.vue'), meta: { title: 'Votación', participant: true } },
     // Parte del equipo facilitador (sin contraseña)

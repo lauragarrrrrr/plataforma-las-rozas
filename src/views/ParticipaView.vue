@@ -3,13 +3,12 @@
 // «¿Quién eres?» → escriben su nombre, tocan el suyo → su ámbito (lo primero) y su equipo y mesa.
 // Todo se descubre a la vez al escanear, como en la metodología v3 («Ámbitos y equipos»).
 // Solo se ven los nombres que coinciden con lo que se escribe, nunca la lista entera.
-// Después: «¿Ya estáis todos juntos? ¿Quién será vuestro digital owner?». Lo elige
-// cualquiera del equipo desde su móvil y lo ven todos. El digital owner entra desde el
-// ordenador con el enlace que le envía por correo el equipo facilitador (/equipo/:id).
+// Aquí termina el móvil. En la sala, el equipo abre en su ordenador el enlace del correo
+// (/equipo: «¿Qué equipo sois?» → «¿Quién es vuestro digital owner?»).
 import { computed, ref, watch } from 'vue'
 import { AREA_QUESTIONS, AREAS } from '../data/config'
 import { ROSTER } from '../data/roster'
-import { forgetOnDevice, recallOnDevice, rememberOnDevice, saveSetup, useStore } from '../data/store'
+import { forgetOnDevice, recallOnDevice, rememberOnDevice, useStore } from '../data/store'
 
 const store = useStore()
 
@@ -46,22 +45,6 @@ const myArea = computed(() => (myTeam.value ? AREAS[myTeam.value.area] : ''))
 const myQuestion = computed(() => (myTeam.value ? AREA_QUESTIONS[myTeam.value.area] : ''))
 const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
 
-// --- Digital owner del equipo ---
-const setup = computed(() => (me.value ? store.setup(me.value.teamId) : undefined))
-const members = computed(() => (me.value ? setup.value?.members ?? ROSTER[me.value.teamId] ?? [] : []))
-const owner = computed(() => setup.value?.digitalOwner ?? '')
-const ownerFirst = computed(() => owner.value.split(' ')[0])
-const soyOwner = computed(() => !!me.value && owner.value === me.value.name)
-const changingOwner = ref(false)
-/** Han pulsado «¡Ya estamos todos juntos!»: ahora eligen digital owner */
-const juntos = ref(false)
-const teamLink = computed(() => (me.value ? `${location.host}/equipo/${me.value.teamId}` : ''))
-const teamUrl = computed(() => (me.value ? `${location.origin}/equipo/${me.value.teamId}` : ''))
-function chooseOwner(name: string) {
-  if (!me.value) return
-  saveSetup(me.value.teamId, [...members.value], name)
-  changingOwner.value = false
-}
 </script>
 
 <template>
@@ -94,34 +77,7 @@ function chooseOwner(name: string) {
             <p class="resultado__mesa">Sois el <strong>equipo {{ me.teamId }}</strong>.<br />Buscad la mesa con la letra <strong>{{ me.teamId }}</strong>.</p>
           </div>
 
-          <!-- ¿Quién será vuestro digital owner? -->
-          <div class="owner">
-            <template v-if="!owner && !juntos">
-              <p class="owner__nota">Cuando estéis todas las personas del equipo en la mesa:</p>
-              <button class="boton owner__juntos" type="button" @click="juntos = true">¡Ya estamos todos juntos!</button>
-            </template>
-            <template v-else-if="!owner || changingOwner">
-              <h2 class="owner__titulo">¿Quién será vuestro digital owner?</h2>
-              <p class="owner__nota">La persona que llevará el ordenador y centralizará toda la experiencia digital del equipo. Elegidla entre todos.</p>
-              <div class="owner__nombres">
-                <button v-for="m in members" :key="m" type="button" class="owner__nombre" :class="{ 'owner__nombre--actual': m === owner }" @click="chooseOwner(m)">{{ m }}</button>
-              </div>
-              <button v-if="!owner" class="otra" type="button" @click="juntos = false">Todavía no</button>
-              <button v-if="changingOwner" class="otra" type="button" @click="changingOwner = false">Cancelar</button>
-            </template>
-            <template v-else>
-              <span class="kicker">Vuestro digital owner</span>
-              <p class="owner__elegido">{{ owner }}</p>
-              <p v-if="soyOwner" class="owner__pasos">
-                <strong>¡Eres tú!</strong> Abre el correo que os ha enviado el equipo facilitador y entra en el enlace <strong>desde el ordenador de vuestra mesa</strong>.
-              </p>
-              <p v-else class="owner__pasos">
-                <strong>{{ ownerFirst }}</strong> abrirá el correo del equipo facilitador y entrará en el enlace desde el ordenador de vuestra mesa.
-              </p>
-              <p class="owner__link">¿No llega el correo? Abrid este enlace en el ordenador:<a :href="teamUrl" target="_blank" rel="noopener">{{ teamLink }}</a></p>
-              <button class="otra" type="button" @click="changingOwner = true">Cambiar de digital owner</button>
-            </template>
-          </div>
+          <p class="resultado__siguiente">Cuando lleguéis a vuestra sala, abrid en el ordenador del equipo el enlace que os hemos enviado por correo. Allí empezaréis a trabajar juntos.</p>
 
           <button class="otra" type="button" @click="reset">No soy {{ firstName }}</button>
         </div>
@@ -182,17 +138,5 @@ h1{font-size:clamp(3rem,10vw,8rem);line-height:.92}
 .resultado__ambito p{margin:0;font-size:.95rem;color:var(--c-green-light)}
 .otra{margin-top:.6rem;font:inherit;font-size:.85rem;color:var(--c-green-dark);background:none;border:0;text-decoration:underline;cursor:pointer}
 
-/* Digital owner */
-.owner{display:grid;gap:.6rem;justify-items:center;width:100%;box-sizing:border-box;margin-top:.8rem;padding:1.2rem;border-radius:1.2rem;border:2px dashed var(--c-green-mid)}
-.owner__titulo{margin:0;font-size:1.35rem;font-weight:600;letter-spacing:-.02em;color:var(--c-ink);line-height:1.2}
-.owner__nota{margin:0;font-size:.9rem}
-.owner__nombres{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.3rem}
-.owner__nombre{font:inherit;font-weight:500;color:var(--c-ink);background:var(--c-green-light);border:0;border-radius:99px;padding:.6em 1.1em;cursor:pointer;transition:background .2s,transform .2s var(--ease-out)}
-.owner__nombre:hover,.owner__nombre:focus-visible{background:var(--c-innova);transform:translateY(-2px);outline:none}
-.owner__nombre--actual{box-shadow:inset 0 0 0 2px var(--c-innova)}
-.owner__elegido{margin:0;font-size:1.6rem;font-weight:600;color:var(--c-ink);letter-spacing:-.02em}
-.owner__pasos{margin:0;font-size:1rem;color:var(--c-ink)}
-.owner__link{margin:0;font-size:.85rem}
-.owner__link a{display:block;word-break:break-all;font-weight:600;color:var(--c-innova-dark)}
-.owner__juntos{font-size:1.1rem}
+.resultado__siguiente{margin:.6rem 0 0;font-size:.95rem;color:var(--c-ink)}
 </style>

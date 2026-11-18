@@ -5,7 +5,7 @@
 import { computed } from 'vue'
 import { formatClock } from '../composables/useNow'
 
-const props = defineProps<{ remaining: number; minutes: number; photoDone?: boolean }>()
+const props = defineProps<{ remaining: number; minutes: number; photoDone?: boolean; compact?: boolean }>()
 
 const total = computed(() => props.minutes * 60_000)
 const left = computed(() => Math.min(total.value, Math.max(0, props.remaining)))
@@ -20,7 +20,7 @@ const label = computed(() => {
 </script>
 
 <template>
-  <div class="card reloj" :class="{ 'reloj--prisa': hurry && !photoDone, 'reloj--fin': ended }" role="timer" aria-live="off">
+  <div class="card reloj" :class="{ 'reloj--prisa': hurry && !photoDone, 'reloj--fin': ended, 'reloj--compacto': compact }" role="timer" aria-live="off">
     <div class="reloj__cabecera">
       <span class="kicker">{{ label }}</span>
       <span class="reloj__total">de {{ minutes }} min</span>
@@ -32,6 +32,11 @@ const label = computed(() => {
 
 <style scoped>
 .reloj{display:grid;gap:.7rem}
+/* Compacto: en la barra de arriba del ordenador del equipo */
+.reloj--compacto{grid-template-columns:auto auto;grid-template-areas:'cab cifra' 'barra barra';align-items:center;gap:.25rem 1rem;padding:.55rem 1.1rem;border-radius:1.1rem;background:var(--c-green-light)}
+.reloj--compacto .reloj__cabecera{grid-area:cab;display:grid;gap:0;line-height:1.2}
+.reloj--compacto .reloj__cifra{grid-area:cifra;font-size:2.3rem;line-height:1}
+.reloj--compacto .reloj__barra{grid-area:barra;height:.35rem;background:var(--c-white)}
 .reloj__cabecera{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
 .reloj__total{font-size:.85rem;color:var(--c-green-dark)}
 .reloj__cifra{font-size:clamp(3.6rem,8vw,5.5rem);font-weight:600;letter-spacing:-.05em;color:var(--c-ink);font-variant-numeric:tabular-nums;line-height:.95}

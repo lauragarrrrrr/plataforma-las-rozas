@@ -9,7 +9,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
-import { recallOnDevice, rememberOnDevice, addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
+import { forgetOnDevice, recallOnDevice, rememberOnDevice, addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
 import { openPhoto } from '../composables/usePhotoViewer'
 import CoachChat from '../components/CoachChat.vue'
@@ -58,6 +58,8 @@ watch(() => store.db.event.jornada, () => { deviceOwner.value = recallOnDevice<s
 const verified = computed(() => !!setup.value && !!deviceOwner.value)
 const teamMembers = computed(() => setup.value?.members ?? previstos)
 const picked = ref('')
+/** «No somos este equipo»: el ordenador olvida el equipo y vuelve a «¿Qué equipo sois?» */
+function cambiarEquipo() { forgetOnDevice('lr2040-equipo-del-ordenador') }
 const pickedFirst = computed(() => picked.value.split(' ')[0])
 /** owner: es la persona elegida · other: el equipo eligió a otra · new: aún no han elegido */
 const pickedKind = computed(() => {
@@ -180,9 +182,9 @@ const expediente = computed(() =>
   </main>
 
   <!-- 0 · ¿Eres el digital owner? -->
-  <main v-else-if="!setup || (!verified && !editing)" class="section s-claro">
+  <main v-else-if="!setup || (!verified && !editing)" class="section s-claro paso">
     <div class="wrap estrecho">
-      <span class="kicker">{{ team.name }}</span>
+      <span class="kicker">{{ team.name }} · {{ store.areaName(team.area) }}</span>
 
       <!-- Ya ha tocado su nombre -->
       <div v-if="picked" class="card bienvenida">
@@ -197,14 +199,24 @@ const expediente = computed(() =>
           <button class="boton" type="button" @click="enterAsOwner">Sí, soy yo el digital owner</button>
         </template>
         <template v-else>
-          <h1 class="titular">Hola, {{ pickedFirst }}</h1>
-          <p class="intro">Todavía no habéis elegido digital owner. ¿Lo eres tú?</p>
-          <button class="boton" type="button" @click="enterAsOwner">Sí, soy yo el digital owner</button>
+          <h1 class="titular">¡{{ pickedFirst }}, eres digital owner!</h1>
+          <p class="intro">Te damos la bienvenida. Desde este ordenador llevarás toda la experiencia digital del equipo {{ team.id }}.</p>
+          <button class="boton" type="button" @click="enterAsOwner">¡Empezamos!</button>
         </template>
-        <button class="enlace" type="button" @click="picked = ''">No soy {{ pickedFirst }}</button>
+        <button class="enlace" type="button" @click="picked = ''">{{ pickedKind === 'new' ? 'Nos hemos equivocado de persona' : `No soy ${pickedFirst}` }}</button>
       </div>
 
-      <!-- «Escribe tu nombre» -->
+      <!-- Todavía sin digital owner: lo elige el equipo, todos juntos -->
+      <template v-else-if="!setup?.digitalOwner">
+        <h1 class="titular">¿Quién será vuestro digital owner?</h1>
+        <p class="intro">La persona que llevará este ordenador y subirá las fotos del equipo. Elegidla entre todos y tocad su nombre.</p>
+        <div class="nombres">
+          <button v-for="m in teamMembers" :key="m" type="button" class="nombres__btn" @click="picked = m">{{ m }}</button>
+        </div>
+        <p class="nota">¿Falta alguien? Avisad al equipo facilitador. · <RouterLink :to="'/equipo'" @click="cambiarEquipo">No somos el equipo {{ team.id }}</RouterLink></p>
+      </template>
+
+      <!-- Ya hay digital owner (por ejemplo, al volver a entrar o desde otro ordenador) -->
       <template v-else>
         <h1 class="titular">¡Hola, digital owner!</h1>
         <p class="intro">¿Quién eres? Toca tu nombre para entrar.</p>
@@ -251,7 +263,7 @@ const expediente = computed(() =>
         <p class="reto__lema">Te ponemos un reto:</p>
         <p class="intro">
           Sube las fichas individuales de <strong>«{{ PREMORTEM.title }}»</strong> que ha rellenado cada persona de tu equipo.
-          Una foto por ficha, una detrás de otra.
+          Una foto por ficha: podéis hacerlas o elegirlas todas y enviarlas juntas.
         </p>
       </div>
 
@@ -280,17 +292,33 @@ const expediente = computed(() =>
 
   <!-- 2 · Antes de empezar: primero el papel, después la pantalla (se ve una vez) -->
   <main v-else-if="!progress?.introSeen?.[COMO_FUNCIONA]" class="reto">
-    <div class="wrap reto__in como">
-      <span class="kicker">{{ team.name }} · Antes de empezar</span>
-      <h1 class="titular">Primero, el papel. Después, la pantalla.</h1>
-      <p class="intro">Esta aplicación es vuestra guía durante la jornada, pero <strong>el trabajo de verdad se hace en la mesa</strong>, hablando entre todos y escribiendo en los materiales que tenéis delante.</p>
-      <ol class="como__pasos">
-        <li><span>1</span><div><strong>Mirad aquí qué toca.</strong> En cada dinámica os explicamos qué hacer y cuánto tiempo tenéis.</div></li>
-        <li><span>2</span><div><strong>Trabajad en papel.</strong> El periódico, las fichas y los post-its de vuestra mesa: ahí va todo lo que penséis.</div></li>
-        <li><span>3</span><div><strong>Al terminar, haced la foto y subidla.</strong> Así queda en vuestro expediente digital y podéis pasar a la siguiente.</div></li>
+    <div class="wrap arranque">
+      <header class="arranque__cab">
+        <span class="kicker">{{ team.name }} · Antes de empezar</span>
+        <h1 class="arranque__titulo">Primero, el papel.<br /><span>Después, la pantalla.</span></h1>
+        <p class="arranque__intro">Esta aplicación es vuestra guía durante la jornada. Pero el trabajo de verdad se hace <strong>en la mesa</strong>, hablando entre todos y escribiendo en los materiales que tenéis delante.</p>
+      </header>
+      <ol class="arranque__pasos">
+        <li>
+          <span class="arranque__num">1</span>
+          <strong>Mirad aquí qué toca</strong>
+          <p>En cada dinámica os explicamos qué hacer y cuánto tiempo tenéis.</p>
+        </li>
+        <li>
+          <span class="arranque__num">2</span>
+          <strong>Trabajad en papel</strong>
+          <p>El periódico, las fichas y los post-its de vuestra mesa: ahí va todo lo que penséis.</p>
+        </li>
+        <li>
+          <span class="arranque__num">3</span>
+          <strong>Haced la foto y subidla</strong>
+          <p>Al terminar cada dinámica. Así queda en vuestro expediente y podéis pasar a la siguiente.</p>
+        </li>
       </ol>
-      <p class="nota">No tenéis que escribir vuestro trabajo en el ordenador: la foto basta.</p>
-      <button class="boton como__boton" type="button" @click="markIntroSeen(id, COMO_FUNCIONA)">¡Entendido, empezamos!</button>
+      <footer class="arranque__pie">
+        <button class="boton arranque__boton" type="button" @click="markIntroSeen(id, COMO_FUNCIONA)">¡Entendido, empezamos!</button>
+        <p>No tenéis que escribir vuestro trabajo en el ordenador: la foto basta.</p>
+      </footer>
     </div>
     <HelpButton :team-id="id" :dynamic-id="TEAM_DYNAMICS[0].id" />
   </main>
@@ -301,8 +329,9 @@ const expediente = computed(() =>
       <div class="wrap app__cab-in">
         <div>
           <span class="kicker">{{ team.name }} · {{ store.areaName(team.area) }}</span>
-          <p class="owner-linea">Digital owner: <strong>{{ setup.digitalOwner }}</strong> · {{ setup.members.join(', ') }} · <button class="enlace" type="button" @click="startEditing">Cambiar</button></p>
+          <p class="owner-linea" :title="setup.members.join(', ')">Digital owner: <strong>{{ setup.digitalOwner }}</strong> · <button class="enlace" type="button" @click="startEditing">Cambiar</button></p>
         </div>
+        <DynamicTimer v-if="!finished && !(dynamic.intro && !progress?.introSeen?.[dynamic.id])" class="app__reloj" :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" compact />
         <ol class="pasos" aria-label="Dinámicas">
           <li v-for="(d, i) in TEAM_DYNAMICS" :key="d.id" :class="{ hecho: i < index, actual: i === index }" :title="d.title">
             <span>{{ i + 1 }}</span>
@@ -344,7 +373,6 @@ const expediente = computed(() =>
           <span class="punto" aria-hidden="true"></span>
           <span><strong>Atentos a la sala.</strong> Empezaréis «{{ dynamic.title }}» cuando lo abra el equipo facilitador: en ese momento arranca vuestro cronómetro. Mientras, podéis leer de qué va.</span>
         </p>
-        <DynamicTimer :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" />
 
         <div class="card explica">
           <span class="kicker">Dinámica {{ index + 1 }} de {{ TEAM_DYNAMICS.length }} · {{ dynamic.minutes }} min</span>
@@ -360,50 +388,56 @@ const expediente = computed(() =>
           </dl>
         </div>
 
-        <div v-if="!pendiente" class="card foto">
-          <template v-if="photo">
-            <span class="kicker">Foto registrada ✓</span>
-            <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
-            <p v-if="waitingNext" class="esperando">
-              <span class="punto" aria-hidden="true"></span>
-              <span v-if="nextOne && autoNext">¡Foto subida! Cuando acabe el tiempo pasaréis solos a <strong>«{{ nextOne.title }}»</strong>. Aprovechadlo para repasar.</span>
-              <span v-else-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
-              <span v-else>¡Hecho! Esperad indicaciones del equipo facilitador.</span>
-            </p>
-            <!-- Más fotos: post-its, borradores… -->
-            <div class="extras">
-              <div v-if="extras.length" class="extras__fotos">
-                <button v-for="(p, n) in extras" :key="p.id" type="button" @click="openPhoto(p.url, `${dynamic.title} · foto de más ${n + 1}`)">
-                  <img :src="p.url" :alt="`Foto de más ${n + 1}`" />
-                </button>
-              </div>
-              <button v-if="!showExtraQr" class="enlace" type="button" @click="showExtraQr = true">
-                ＋ Añadir más fotos (post-its, borradores…){{ extras.length ? ` · lleváis ${extras.length}` : '' }}
-              </button>
-              <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" extra @uploaded="(u) => onPhoto(u, true)" />
-            </div>
-          </template>
-          <template v-else>
-            <span class="kicker">Al terminar</span>
-            <p>Subid una foto {{ photoOf(dynamic) }} y, si queréis, de todo lo que habéis hecho y creáis importante para el reto (post-its, borradores…). Sin la foto principal no podéis pasar a la siguiente dinámica.</p>
-            <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir fotos</button>
-            <template v-else>
-              <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
-              <p class="nota">Desde el móvil podéis hacer o elegir <strong>varias fotos a la vez</strong> (la del papel y las de post-its y borradores) y enviarlas todas juntas.</p>
-              <div v-if="extras.length" class="extras">
+      </div>
+
+      <div class="dinamica__der">
+          <div v-if="!pendiente" class="card foto">
+            <template v-if="photo">
+              <span class="kicker">Foto registrada ✓</span>
+              <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
+              <p v-if="waitingNext" class="esperando">
+                <span class="punto" aria-hidden="true"></span>
+                <span v-if="nextOne && autoNext">¡Foto subida! Cuando acabe el tiempo pasaréis solos a <strong>«{{ nextOne.title }}»</strong>. Aprovechadlo para repasar.</span>
+                <span v-else-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
+                <span v-else>¡Hecho! Esperad indicaciones del equipo facilitador.</span>
+              </p>
+              <!-- Más fotos: post-its, borradores… -->
+              <div class="extras">
                 <div v-if="extras.length" class="extras__fotos">
                   <button v-for="(p, n) in extras" :key="p.id" type="button" @click="openPhoto(p.url, `${dynamic.title} · foto de más ${n + 1}`)">
                     <img :src="p.url" :alt="`Foto de más ${n + 1}`" />
                   </button>
                 </div>
+                <button v-if="!showExtraQr" class="enlace" type="button" @click="showExtraQr = true">
+                  ＋ Añadir más fotos (post-its, borradores…){{ extras.length ? ` · lleváis ${extras.length}` : '' }}
+                </button>
+                <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" extra @uploaded="(u) => onPhoto(u, true)" />
               </div>
             </template>
-          </template>
-          <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez o avisad al equipo facilitador.</p>
-        </div>
+            <template v-else>
+              <div class="foto__cab">
+                <div>
+                  <span class="kicker">Al terminar</span>
+                  <p>Subid la foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Sin la foto no podéis pasar a la siguiente.</p>
+                </div>
+                <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir fotos</button>
+              </div>
+              <template v-if="showQr">
+                <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
+                <p class="nota">Desde el móvil podéis hacer o elegir <strong>varias fotos a la vez</strong> (la del papel y las de post-its y borradores) y enviarlas todas juntas.</p>
+                <div v-if="extras.length" class="extras">
+                  <div v-if="extras.length" class="extras__fotos">
+                    <button v-for="(p, n) in extras" :key="p.id" type="button" @click="openPhoto(p.url, `${dynamic.title} · foto de más ${n + 1}`)">
+                      <img :src="p.url" :alt="`Foto de más ${n + 1}`" />
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </template>
+            <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez o avisad al equipo facilitador.</p>
+          </div>
+        <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
       </div>
-
-      <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
     </section>
 
     <!-- Se acabó el tiempo: hay que subir la foto para seguir -->
@@ -489,7 +523,15 @@ const expediente = computed(() =>
 .nota{font-size:.85rem;font-style:italic}
 .boton:disabled{opacity:.45;cursor:not-allowed;transform:none}
 
-.reto{background:var(--c-green-light);padding-bottom:6rem}
+.reto{background:var(--c-green-light);padding-bottom:5rem;min-height:calc(100dvh - 7.5rem);display:grid;align-content:center}
+/* Pantallas de paso (digital owner, reto, antes de empezar): centradas en la pantalla */
+.paso{min-height:calc(100dvh - 7.5rem);display:grid;align-content:center}
+.reto > .wrap,.paso > .wrap{width:100%;box-sizing:border-box}
+.paso .estrecho{display:grid;gap:1rem;justify-items:center;text-align:center;max-width:48rem}
+.paso .titular,.reto .titular{font-size:clamp(2rem,3.6vw,3rem);line-height:1.08;letter-spacing:-.035em}
+.paso .intro{max-width:38rem;margin:0}
+.paso .nombres{justify-content:center}
+.paso .bienvenida{justify-items:center;text-align:center;width:100%;box-sizing:border-box}
 .reto__in{display:grid;gap:1.5rem;padding-block:2.5rem}
 .reto__cab{display:grid;gap:.6rem}
 .reto__lema{font-size:clamp(1.3rem,2.6vw,2rem);font-weight:500;letter-spacing:-.02em;color:var(--c-innova-dark)}
@@ -500,19 +542,31 @@ const expediente = computed(() =>
 .reto__cifra small{font-size:1.2rem;font-weight:500;color:var(--c-green-dark)}
 .reto__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
 .reto__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width .4s var(--ease-out)}
-.como{max-width:52rem}
-.como__pasos{list-style:none;margin:0;padding:0;display:grid;gap:.7rem}
-.como__pasos li{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start;background:var(--c-white);border-radius:1.2rem;padding:1rem 1.2rem;color:var(--c-ink);font-size:1.05rem}
-.como__pasos li > span{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--gradient-anio);color:var(--c-white);font-weight:700}
-.como__pasos strong{display:block;font-weight:600}
-.como__boton{font-size:1.05rem;padding:.9em 1.6em}
+.arranque{display:grid;gap:clamp(1.2rem,3vh,2rem);max-width:66rem;padding-block:clamp(1rem,3vh,2rem)}
+.arranque__cab{display:grid;gap:.6rem;justify-items:center;text-align:center}
+.arranque__titulo{margin:0;font-size:clamp(1.9rem,3.4vw,2.8rem);font-weight:600;letter-spacing:-.04em;line-height:1.05;color:var(--c-ink)}
+.arranque__titulo span{color:var(--c-innova-dark)}
+.arranque__intro{margin:0;max-width:44rem;font-size:clamp(1rem,1.3vw,1.12rem);color:var(--c-green-dark)}
+.arranque__intro strong{color:var(--c-ink)}
+.arranque__pasos{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+@media(max-width:760px){.arranque__pasos{grid-template-columns:1fr}}
+.arranque__pasos li{display:grid;gap:.45rem;align-content:start;background:var(--c-white);border-radius:var(--radius-card);padding:1.3rem 1.4rem}
+.arranque__num{display:grid;place-items:center;width:2.5rem;height:2.5rem;border-radius:50%;background:var(--gradient-anio);color:var(--c-white);font-size:1.1rem;font-weight:700;margin-bottom:.2rem}
+.arranque__pasos strong{font-size:1.12rem;font-weight:600;letter-spacing:-.02em;color:var(--c-ink);line-height:1.25}
+.arranque__pasos p{margin:0;font-size:.95rem;line-height:1.45}
+.arranque__pie{display:grid;gap:.8rem;justify-items:center;text-align:center}
+.arranque__pie p{margin:0;font-size:.9rem;font-style:italic}
+.arranque__boton{justify-self:center;font-size:1.1rem;padding:.9em 2em}
 .reto__fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.4rem}
 .reto__fotos img{aspect-ratio:3/4;object-fit:cover;border-radius:.6rem;width:100%}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;font-size:.85rem;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
 
-.app{background:var(--c-green-light);padding-bottom:6rem}
+.app{background:var(--c-green-light);padding-bottom:5rem;min-height:calc(100dvh - 7.5rem)}
+.app__cab{position:sticky;top:0;z-index:20}
+.app__reloj{order:2}
 .app__cab{background:var(--c-white);border-bottom:1px solid var(--c-gris-10)}
-.app__cab-in{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.8rem 2rem;padding-block:.9rem}
+.app__cab-in{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:.6rem 1.5rem;padding-block:.6rem}
+@media(max-width:900px){.app__cab-in{grid-template-columns:1fr auto}.app__cab-in .pasos{grid-column:1/-1;order:3}}
 .owner-linea{font-size:.85rem}
 .owner-linea strong{color:var(--c-ink)}
 .pasos{list-style:none;margin:0;padding:0;display:flex;gap:.35rem}
@@ -520,28 +574,35 @@ const expediente = computed(() =>
 .pasos .hecho span{background:var(--c-green-deep);color:var(--c-white);box-shadow:none}
 .pasos .actual span{background:var(--c-innova);color:var(--c-ink);box-shadow:0 0 0 3px var(--c-white),0 0 0 5px var(--c-innova)}
 
-.dinamica{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:1.25rem;padding-block:1.5rem;align-items:start}
-@media(max-width:960px){.dinamica{grid-template-columns:1fr}}
+.dinamica{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:1.25rem;padding-block:1.25rem;align-items:start}
+@media(max-width:960px){.dinamica{grid-template-columns:1fr}.dinamica__der{position:static;max-height:none}}
 /* Sin chat: explicación a la izquierda y cronómetro + foto a la derecha */
-.dinamica--sin-chat{grid-template-columns:1fr}
-.dinamica--sin-chat .dinamica__izq{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:start}
+.dinamica--sin-chat{grid-template-columns:minmax(0,1.6fr) minmax(0,.7fr)}
+.dinamica--sin-chat .dinamica__der{max-height:none}
+.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}
 /* Sin chat: cronómetro arriba a todo el ancho; debajo, la explicación y la foto, una al lado de la otra */
 .dinamica--sin-chat .reloj{grid-column:1/-1}
 .avanzar{grid-column:1/-1;margin:0;padding:.9rem 1.2rem;border-radius:1.2rem;background:var(--c-rubi);color:var(--c-white);font-size:1.05rem}
 .avanzar strong{color:var(--c-white)}
 @media(max-width:960px){.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}}
-.dinamica__izq{display:grid;gap:1.25rem}
-.dinamica__chat{position:sticky;top:1rem}
-.dinamica__titulo{font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
+.dinamica__izq{display:grid;gap:1rem}
+.dinamica__der{display:flex;flex-direction:column;gap:1rem;position:sticky;top:6.5rem;max-height:calc(100dvh - 11.5rem);min-height:0}
+.dinamica__der .dinamica__chat{flex:1 1 auto;min-height:18rem;max-height:none}
+.dinamica__titulo{font-size:clamp(1.7rem,2.8vw,2.4rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
 .que{font-size:1.1rem;color:var(--c-ink)}
 .qpco{margin:.4rem 0 0;display:grid;border-top:1px solid var(--c-gris-10)}
-.qpco > div{display:grid;grid-template-columns:9rem 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--c-gris-10)}
+.qpco > div{display:grid;grid-template-columns:7rem 1fr;gap:.8rem;padding:.5rem 0;border-bottom:1px solid var(--c-gris-10)}
 .qpco dt{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);padding-top:.2rem}
 .qpco dd{margin:0;min-width:0}
 .como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
 @media(max-width:520px){.qpco > div{grid-template-columns:1fr;gap:.15rem}}
 
 
+.foto__cab{display:grid;gap:.7rem;justify-items:start}
+.foto__cab p{margin:.2rem 0 0;font-size:.92rem}
+@media(max-width:700px){.foto__cab{grid-template-columns:1fr}}
+.explica{padding:clamp(1.2rem,2.2vw,1.7rem)}
+.foto{padding:1.1rem 1.4rem}
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}
 .extras{display:grid;gap:.6rem;border-top:1px solid var(--c-gris-10);padding-top:.8rem}
 .extras__fotos{display:flex;flex-wrap:wrap;gap:.4rem}
