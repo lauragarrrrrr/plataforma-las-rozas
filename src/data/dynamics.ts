@@ -222,6 +222,8 @@ export function backToRoomAfter(d: TeamDynamic): boolean {
   if (i < 0) return false
   const next = TEAM_DYNAMICS[i + 1]
   if (!next) return true
+  // Decidido por Laura (18/11/2026): antes de la Portada también se vuelve a la sala principal
+  if (VUELTA_A_SALA_ANTES_DE.has(next.id)) return true
   // Manda la escaleta: se vuelve a la sala solo si entre esta dinámica y la siguiente
   // hay algún momento que no es de equipo (sala principal, pausa…). Ficha → Portada: no.
   const a = AGENDA.findIndex((s) => s.id === (AGENDA_STEP_OF[d.id] ?? d.id))
@@ -229,6 +231,8 @@ export function backToRoomAfter(d: TeamDynamic): boolean {
   if (a < 0 || b < 0) return next.phase !== d.phase
   return AGENDA.slice(a + 1, b).some((s) => s.who !== 'Equipo')
 }
+/** Dinámicas antes de las que siempre se vuelve a la sala principal, diga lo que diga la escaleta */
+const VUELTA_A_SALA_ANTES_DE = new Set(['portada'])
 /** Dinámicas que comparten momento en la escaleta */
 const AGENDA_STEP_OF: Record<string, string> = { 'como-podriamos': 'a-quien' }
 
