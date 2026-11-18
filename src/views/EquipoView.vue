@@ -367,21 +367,16 @@ const expediente = computed(() =>
           <template v-else>
             <span class="kicker">Al terminar</span>
             <p>Subid una foto {{ photoOf(dynamic) }} y, si queréis, de todo lo que habéis hecho y creáis importante para el reto (post-its, borradores…). Sin la foto principal no podéis pasar a la siguiente dinámica.</p>
-            <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir foto</button>
+            <button v-if="!showQr" class="boton" type="button" @click="showQr = true">Ya hemos terminado: subir fotos</button>
             <template v-else>
               <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
-              <p class="nota">Con el mismo QR, después de la foto principal podréis añadir más (post-its, borradores…).</p>
-              <!-- También antes de la principal, por si las tienen a mano -->
-              <div class="extras">
+              <p class="nota">Desde el móvil podéis hacer o elegir <strong>varias fotos a la vez</strong> (la del papel y las de post-its y borradores) y enviarlas todas juntas.</p>
+              <div v-if="extras.length" class="extras">
                 <div v-if="extras.length" class="extras__fotos">
                   <button v-for="(p, n) in extras" :key="p.id" type="button" @click="openPhoto(p.url, `${dynamic.title} · foto de más ${n + 1}`)">
                     <img :src="p.url" :alt="`Foto de más ${n + 1}`" />
                   </button>
                 </div>
-                <button v-if="!showExtraQr" class="enlace" type="button" @click="showExtraQr = true">
-                  ＋ Añadir ya fotos de post-its y borradores{{ extras.length ? ` · lleváis ${extras.length}` : '' }}
-                </button>
-                <PhotoQr v-else :team-id="id" :dynamic-id="dynamic.id" extra @uploaded="(u) => onPhoto(u, true)" />
               </div>
             </template>
           </template>

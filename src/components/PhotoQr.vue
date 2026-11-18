@@ -25,17 +25,17 @@ watchEffect(async () => {
     <div class="qr__pasos">
       <ol v-if="multi">
         <li>Abre la cámara del móvil y apunta al código.</li>
-        <li>Haz la foto de una ficha y pulsa «Subir otra» para la siguiente.</li>
+        <li>Haz o elige las fotos de las fichas y envíalas todas juntas.</li>
         <li>Las fichas aparecen aquí según llegan.</li>
       </ol>
       <ol v-else-if="extra">
         <li>Abrid la cámara del móvil y apuntad al código.</li>
-        <li>Haced las fotos que queráis: post-its, borradores, esquemas…</li>
+        <li>Haced o elegid las fotos que queráis y enviadlas juntas.</li>
         <li>Van llegando a vuestro expediente.</li>
       </ol>
       <ol v-else>
         <li>Abrid la cámara del móvil y apuntad al código.</li>
-        <li>Haced la foto.</li>
+        <li>Haced o elegid las fotos y enviadlas todas juntas.</li>
         <li>Esperad aquí: la pantalla avanza sola cuando llega.</li>
       </ol>
       <p class="qr__espera"><span class="punto" aria-hidden="true"></span> {{ multi ? 'Esperando las fichas…' : extra ? 'Esperando las fotos…' : 'Esperando la foto…' }}</p>
