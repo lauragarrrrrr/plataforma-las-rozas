@@ -80,6 +80,8 @@ const nextOne = computed(() => TEAM_DYNAMICS[index.value + 1])
 const photo = computed(() => store.photoFor(props.id, dynamic.value.id))
 
 /** Hasta qué dinámica nos deja llegar el equipo facilitador */
+/** Pantalla «Antes de empezar» (una sola vez por equipo) */
+const COMO_FUNCIONA = 'como-funciona'
 const allowed = computed(() => store.allowed(props.id))
 /** Todavía no se ha abierto la primera dinámica: la ven, pero el cronómetro no corre */
 const pendiente = computed(() => allowed.value < 0)
@@ -274,6 +276,23 @@ const expediente = computed(() =>
       </div>
     </div>
     <HelpButton :team-id="id" :dynamic-id="PREMORTEM.id" />
+  </main>
+
+  <!-- 2 · Antes de empezar: primero el papel, después la pantalla (se ve una vez) -->
+  <main v-else-if="!progress?.introSeen?.[COMO_FUNCIONA]" class="reto">
+    <div class="wrap reto__in como">
+      <span class="kicker">{{ team.name }} · Antes de empezar</span>
+      <h1 class="titular">Primero, el papel. Después, la pantalla.</h1>
+      <p class="intro">Esta aplicación es vuestra guía durante la jornada, pero <strong>el trabajo de verdad se hace en la mesa</strong>, hablando entre todos y escribiendo en los materiales que tenéis delante.</p>
+      <ol class="como__pasos">
+        <li><span>1</span><div><strong>Mirad aquí qué toca.</strong> En cada dinámica os explicamos qué hacer y cuánto tiempo tenéis.</div></li>
+        <li><span>2</span><div><strong>Trabajad en papel.</strong> El periódico, las fichas y los post-its de vuestra mesa: ahí va todo lo que penséis.</div></li>
+        <li><span>3</span><div><strong>Al terminar, haced la foto y subidla.</strong> Así queda en vuestro expediente digital y podéis pasar a la siguiente.</div></li>
+      </ol>
+      <p class="nota">No tenéis que escribir vuestro trabajo en el ordenador: la foto basta.</p>
+      <button class="boton como__boton" type="button" @click="markIntroSeen(id, COMO_FUNCIONA)">¡Entendido, empezamos!</button>
+    </div>
+    <HelpButton :team-id="id" :dynamic-id="TEAM_DYNAMICS[0].id" />
   </main>
 
   <!-- 3 · Dinámicas -->
@@ -481,6 +500,12 @@ const expediente = computed(() =>
 .reto__cifra small{font-size:1.2rem;font-weight:500;color:var(--c-green-dark)}
 .reto__barra{height:.6rem;border-radius:99px;background:var(--c-green-light);overflow:hidden}
 .reto__barra span{display:block;height:100%;background:var(--gradient-verde);transition:width .4s var(--ease-out)}
+.como{max-width:52rem}
+.como__pasos{list-style:none;margin:0;padding:0;display:grid;gap:.7rem}
+.como__pasos li{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start;background:var(--c-white);border-radius:1.2rem;padding:1rem 1.2rem;color:var(--c-ink);font-size:1.05rem}
+.como__pasos li > span{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--gradient-anio);color:var(--c-white);font-weight:700}
+.como__pasos strong{display:block;font-weight:600}
+.como__boton{font-size:1.05rem;padding:.9em 1.6em}
 .reto__fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.4rem}
 .reto__fotos img{aspect-ratio:3/4;object-fit:cover;border-radius:.6rem;width:100%}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;font-size:.85rem;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
