@@ -119,11 +119,25 @@ watch(
   { immediate: true },
 )
 
+// Al final de una fase, el equipo SIEMPRE ve «¡Volved a la sala principal!» antes de pasar
+// (también si sube la foto tarde, cuando el resto ya ha empezado la siguiente: entonces pulsa «Seguir»).
+const salaKey = computed(() => 'sala-' + dynamic.value.id)
+const salaVista = computed(() => !!progress.value?.introSeen?.[salaKey.value])
+const vuelveASala = computed(() => !finished.value && !!photo.value && backToRoomAfter(dynamic.value))
+/** Ha subido la foto tarde: el resto ya está en la siguiente */
+const salaTarde = computed(() => vuelveASala.value && allowed.value > index.value && !salaVista.value)
+// Si ha visto el aviso mientras esperaba, ya cuenta como visto
+watch(
+  () => vuelveASala.value && waitingNext.value,
+  (visto) => { if (visto && !salaVista.value) markIntroSeen(props.id, salaKey.value) },
+  { immediate: true },
+)
+
 // Con la foto subida, el equipo pasa solo en cuanto el equipo facilitador abre la siguiente
 watch(
-  () => [!!photo.value, allowed.value, index.value] as const,
-  ([hasPhoto, open, i]) => {
-    if (hasPhoto && i < open) nextDynamic(props.id)
+  () => [!!photo.value, allowed.value, index.value, salaVista.value] as const,
+  ([hasPhoto, open, i, vista]) => {
+    if (hasPhoto && i < open && !(backToRoomAfter(dynamic.value) && !vista)) nextDynamic(props.id)
   },
   { immediate: true },
 )
@@ -394,7 +408,7 @@ const expediente = computed(() =>
 
       <div class="dinamica__der">
         <CoachChat v-if="!dynamic.noChat" class="dinamica__chat" :team-id="id" :dynamic="dynamic" />
-          <div v-if="!pendiente" class="card foto" :class="{ 'foto--boton': !photo && !showQr }">
+          <div v-if="!pendiente" class="card foto" :class="{ 'foto--boton': !photo && !showQr && !dynamic.noChat }">
             <template v-if="photo">
               <span class="kicker">Foto registrada ✓</span>
               <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
@@ -419,7 +433,14 @@ const expediente = computed(() =>
             </template>
             <template v-else>
               <!-- Un solo botón; al pulsarlo sale el QR -->
-              <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">📷 Subir imágenes</button>
+              <!-- Sin chat: una tarjeta que explica qué subir -->
+              <div v-if="!showQr && dynamic.noChat" class="foto__intro">
+                <span class="foto__icono" aria-hidden="true">📷</span>
+                <span class="kicker">Al terminar</span>
+                <strong>Subid vuestras imágenes</strong>
+                <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Sin la foto no podéis pasar a la siguiente.</p>
+              </div>
+              <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">{{ dynamic.noChat ? 'Subir imágenes' : '📷 Subir imágenes' }}</button>
               <div v-else class="foto__cab">
                 <span class="kicker">Subir imágenes</span>
                 <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores.</p>
@@ -453,7 +474,7 @@ const expediente = computed(() =>
     </div>
 
     <!-- Fin de fase: todos a la sala principal hasta que se abra la siguiente -->
-    <div v-if="!finished && waitingNext && backToRoomAfter(dynamic)" class="bloqueo sala-aviso" :class="{ 'sala-aviso--pausa': pausa }" role="dialog" aria-modal="true" aria-labelledby="sala-titulo">
+    <div v-if="vuelveASala && (waitingNext || salaTarde)" class="bloqueo sala-aviso" :class="{ 'sala-aviso--pausa': pausa }" role="dialog" aria-modal="true" aria-labelledby="sala-titulo">
       <div class="sala-aviso__caja">
         <!-- Si después de esta fase toca la pausa (11:45, metodología v3) -->
         <template v-if="pausa">
@@ -467,7 +488,11 @@ const expediente = computed(() =>
           <h2 id="sala-titulo">¡Volved a la sala principal!</h2>
           <p>Habéis terminado {{ nextOne ? 'esta fase' : 'el trabajo en equipo' }}. Id todos a la sala principal.</p>
         </template>
-        <p v-if="nextOne" class="nota">Cuando sea el momento, accederéis todos a la siguiente fase desde aquí.</p>
+        <template v-if="salaTarde && nextOne">
+          <p class="nota">Los demás equipos ya han empezado «{{ nextOne.title }}». Cuando volváis de la sala principal, pulsad «Seguir».</p>
+          <button class="sala-aviso__seguir" type="button" @click="markIntroSeen(id, salaKey)">Ya hemos vuelto: seguir →</button>
+        </template>
+        <p v-else-if="nextOne" class="nota">Cuando sea el momento, accederéis todos a la siguiente fase desde aquí.</p>
         <!-- Por si algo falla: esta pantalla tapa el botón de «Pedir ayuda» -->
         <p v-if="store.pendingHelp(id)" class="sala-aviso__enviado">Aviso enviado: el equipo facilitador viene a vuestra mesa.</p>
         <button v-else class="sala-aviso__error" type="button" @click="requestHelp(id, dynamic.id)">
@@ -605,6 +630,10 @@ const expediente = computed(() =>
 .foto__cab{display:grid;gap:.3rem;justify-items:start}
 /* Antes de subir: solo el botón, sin tarjeta */
 .foto--boton{background:none !important;box-shadow:none !important;padding:0 !important}
+.foto__intro{display:grid;gap:.35rem;justify-items:start}
+.foto__icono{display:grid;place-items:center;width:3rem;height:3rem;border-radius:50%;background:var(--c-green-light);font-size:1.4rem;margin-bottom:.3rem}
+.foto__intro strong{font-size:1.3rem;font-weight:600;letter-spacing:-.02em;color:var(--c-ink);line-height:1.2}
+.foto__intro p{margin:0;font-size:.95rem}
 .foto__subir{justify-self:stretch;justify-content:center;font-size:1.15rem;padding:1em 1.2em}
 .foto__cab p{margin:.2rem 0 0;font-size:.92rem}
 @media(max-width:700px){.foto__cab{grid-template-columns:1fr}}
@@ -640,6 +669,7 @@ const expediente = computed(() =>
 .sala-aviso h2{color:var(--c-white);font-size:clamp(2.2rem,6vw,4rem);font-weight:600;letter-spacing:-.04em;line-height:1}
 .sala-aviso p{font-size:1.2rem}
 .sala-aviso .nota{font-size:.95rem;opacity:.9}
+.sala-aviso__seguir{margin-top:.6rem;border:0;border-radius:99px;padding:.8em 1.6em;background:var(--c-white);color:var(--c-ink);font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
 .sala-aviso__error{margin-top:1rem;border:2px solid var(--c-white);border-radius:99px;padding:.6em 1.3em;background:transparent;color:var(--c-white);font:inherit;font-weight:600;cursor:pointer}
 .sala-aviso__error:hover{background:var(--c-white);color:var(--c-rubi)}
 .sala-aviso__enviado{margin-top:1rem;background:var(--c-white);color:var(--c-rubi);border-radius:1rem;padding:.6rem 1.2rem;font-weight:600}
