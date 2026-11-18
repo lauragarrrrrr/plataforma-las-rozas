@@ -100,14 +100,15 @@ watch(() => messages.value.length, scrollToEnd)
 <style scoped>
 .chat{grid-template-rows:auto 1fr auto;gap:.8rem;min-height:26rem;max-height:34rem;background:var(--c-white)}
 .chat{box-shadow:inset 0 0 0 3px var(--c-innova)}
-.chat__cab{display:grid;grid-template-columns:auto 1fr;gap:.8rem;align-items:center;margin:-.4rem -.4rem 0;padding:.9rem 1rem;border-radius:1.2rem;background:var(--gradient-dark);color:var(--c-white)}
+.chat.card{padding:.75rem;gap:.6rem}
+.chat__cab{display:grid;grid-template-columns:auto 1fr;gap:.8rem;align-items:center;margin:0;padding:.7rem .9rem;border-radius:1.2rem;background:var(--gradient-dark);color:var(--c-white)}
 .chat__cab div{display:grid;gap:.1rem}
 .chat__icono{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--c-innova);color:var(--c-ink);font-size:1.3rem;font-weight:700}
 .chat__titulo{font-size:1.2rem;font-weight:600;letter-spacing:-.02em;color:var(--c-white)}
 .chat__cab small{font-size:.8rem;color:var(--c-green-light)}
-.chat__lista{list-style:none;margin:0;padding:0 .2rem;display:flex;flex-direction:column;gap:.5rem;overflow-y:auto;min-height:0}
+.chat__lista{list-style:none;margin:0;padding:.2rem .4rem;display:flex;flex-direction:column;gap:.5rem;overflow-y:auto;min-height:0}
 .chat__separador{align-self:center;font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);margin:.6rem 0 .2rem}
-.burbuja{max-width:85%;padding:.7rem 1rem;font-size:.92rem;line-height:1.45;white-space:pre-wrap}
+.burbuja{max-width:88%;padding:.75rem 1.05rem;font-size:1rem;line-height:1.45;white-space:pre-wrap}
 .burbuja--reto{align-self:flex-start;background:var(--c-green-light);color:var(--c-ink);border-radius:1.1rem 1.1rem 1.1rem .3rem}
 .burbuja--equipo{align-self:flex-end;background:var(--c-innova-dark);color:var(--c-white);border-radius:1.1rem 1.1rem .3rem 1.1rem}
 .burbuja--escribe{display:flex;gap:.3rem}
@@ -115,6 +116,6 @@ watch(() => messages.value.length, scrollToEnd)
 .burbuja--escribe i:nth-child(2){animation-delay:.15s}.burbuja--escribe i:nth-child(3){animation-delay:.3s}
 @keyframes punto{30%{opacity:1;transform:translateY(-3px)}}
 .chat__form{display:flex;gap:.5rem}
-.chat__form input{flex:1;min-width:0;font:inherit;font-size:.92rem;padding:.65rem .9rem;border:1.5px solid var(--c-green-mid);border-radius:99px;color:var(--c-ink)}
+.chat__form input{flex:1;min-width:0;font:inherit;font-size:1rem;padding:.65rem .9rem;border:1.5px solid var(--c-green-mid);border-radius:99px;color:var(--c-ink)}
 .chat__form input:focus-visible{outline:3px solid var(--c-innova-dark);outline-offset:1px}
 </style>

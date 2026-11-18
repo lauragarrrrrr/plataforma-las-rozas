@@ -588,8 +588,8 @@ const expediente = computed(() =>
 .avanzar strong{color:var(--c-white)}
 @media(max-width:960px){.dinamica--sin-chat .dinamica__izq{grid-template-columns:1fr}}
 .dinamica__izq{display:grid;gap:1rem}
-.dinamica__der{display:flex;flex-direction:column;gap:1rem;position:sticky;top:6.5rem;max-height:calc(100dvh - 11.5rem);min-height:0}
-.dinamica__der .dinamica__chat{flex:1 1 auto;min-height:18rem;max-height:none}
+.dinamica__der{display:flex;flex-direction:column;gap:1rem;position:sticky;top:6.5rem;max-height:calc(100dvh - 11.5rem);min-height:0;overflow-y:auto;scrollbar-width:thin}
+.dinamica__der .dinamica__chat{flex:1 1 auto;min-height:26rem;max-height:none}
 .dinamica__titulo{font-size:clamp(1.7rem,2.8vw,2.4rem);font-weight:500;letter-spacing:-.04em;line-height:1.05}
 .que{font-size:1.1rem;color:var(--c-ink)}
 .qpco{margin:.4rem 0 0;display:grid;border-top:1px solid var(--c-gris-10)}
