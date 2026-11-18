@@ -12,7 +12,7 @@ import { AREAS, TEAM_AREAS } from './config'
 import { backToRoomAfter, TEAM_DYNAMICS } from './dynamics'
 import { createBlank, createSeed, DB_VERSION } from './seed'
 import {
-  deleteAll, fetchAll, LISTS, sb, SINGLETONS, subscribe, toRows, upsertRows, uploadPhoto,
+  deleteAll, deleteRow, fetchAll, LISTS, sb, SINGLETONS, subscribe, toRows, upsertRows, uploadPhoto,
   type Collection, type ListName, type Row,
 } from './remote'
 import type { AreaId, Database, PhaseId, PhaseState, Photo, PhotoKind, TeamProgress } from './types'
@@ -399,6 +399,22 @@ export async function addPhoto(teamId: string, dynamicId: string, kind: PhotoKin
   await save('photos', photo)
   if (!state.photos.some((p) => p.id === id)) state.photos.push(photo)
   return id
+}
+
+/** Panel: cambia la imagen de una foto ya subida (se queda en la misma dinámica y con el mismo tipo) */
+export async function replacePhoto(photoId: string, dataUrl: string) {
+  const p = state.photos.find((x) => x.id === photoId)
+  if (!p) return
+  p.url = isRemote ? await uploadPhoto(`${p.teamId}/${p.dynamicId}-${uid()}.jpg`, dataUrl) : dataUrl
+  await save('photos', p)
+}
+
+/** Panel: quita una foto del expediente del equipo */
+export async function removePhoto(photoId: string) {
+  const i = state.photos.findIndex((x) => x.id === photoId)
+  if (i < 0) return
+  state.photos.splice(i, 1)
+  if (isRemote) await deleteRow('photos', photoId)
 }
 
 /**

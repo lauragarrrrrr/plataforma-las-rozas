@@ -60,6 +60,12 @@ export async function upsertRows(rows: Row[]) {
   if (error) throw error
 }
 
+/** Borra un solo registro (por ejemplo, una foto que se quita desde el panel) */
+export async function deleteRow(coleccion: string, id: string) {
+  const { error } = await sb!.from(TABLE).delete().eq('coleccion', coleccion).eq('id', id)
+  if (error) throw error
+}
+
 export async function deleteAll() {
   const { error } = await sb!.from(TABLE).delete().neq('coleccion', '')
   if (error) throw error

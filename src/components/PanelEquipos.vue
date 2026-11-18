@@ -2,14 +2,17 @@
 // Panel · seguimiento de los equipos
 // 1. Fotos recién subidas por todos los equipos (la más nueva primero).
 // 2. Una tarjeta por equipo: dónde va, si ha subido la foto, sus fotos y el ritmo.
-// 3. Ventana con todas las fotos de un equipo, agrupadas por dinámica.
+// 3. Ventana con todas las fotos de un equipo, por dinámica: se pueden cambiar, quitar o añadir
+//    (por si alguna está mal o el equipo no tiene ordenador).
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ALL_DYNAMICS, TEAM_DYNAMICS } from '../data/dynamics'
-import { setTeamPace, useStore } from '../data/store'
+import { compressImage } from '../utils/image'
+import { addPhoto, removePhoto, replacePhoto, setTeamPace, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
 import { openPhoto } from '../composables/usePhotoViewer'
-import type { Team } from '../data/types'
+import type { Photo, Team } from '../data/types'
+import type { TeamDynamic } from '../data/dynamics'
 
 const store = useStore()
 const now = useNow()
@@ -55,8 +58,49 @@ const dialogo = ref<HTMLDialogElement>()
 const fotosDe = computed(() => {
   if (!viendo.value) return []
   const fotos = store.photos(viendo.value.id)
-  return ALL_DYNAMICS.map((d) => ({ d, fotos: fotos.filter((p) => p.dynamicId === d.id) })).filter((x) => x.fotos.length)
+  // Todas las dinámicas, aunque no tengan foto: así se puede añadir una por el equipo
+  return ALL_DYNAMICS.map((d) => ({ d, fotos: fotos.filter((p) => p.dynamicId === d.id) }))
 })
+
+// --- Cambiar, quitar o añadir fotos ---
+const selector = ref<HTMLInputElement>()
+/** Qué se va a hacer con la imagen que se elija */
+const accion = ref<{ tipo: 'cambiar'; foto: Photo } | { tipo: 'anadir'; d: TeamDynamic } | null>(null)
+const trabajando = ref('')
+const fallo = ref('')
+const quitando = ref('')
+function cambiar(foto: Photo) { accion.value = { tipo: 'cambiar', foto }; selector.value?.click() }
+function anadir(d: TeamDynamic) { accion.value = { tipo: 'anadir', d }; selector.value?.click() }
+async function elegida(e: Event) {
+  const input = e.target as HTMLInputElement
+  const files = [...(input.files ?? [])]
+  const a = accion.value
+  input.value = ''
+  if (!files.length || !a || !viendo.value) return
+  fallo.value = ''
+  trabajando.value = a.tipo === 'cambiar' ? a.foto.id : a.d.id
+  try {
+    if (a.tipo === 'cambiar') {
+      await replacePhoto(a.foto.id, await compressImage(files[0]))
+    } else {
+      for (const file of files) {
+        // La primera es la principal si la dinámica todavía no tiene; las demás, fotos de más
+        const tienePrincipal = !!store.photoFor(viendo.value.id, a.d.id)
+        await addPhoto(viendo.value.id, a.d.id, tienePrincipal ? 'other' : a.d.photo.kind, await compressImage(file))
+      }
+    }
+  } catch {
+    fallo.value = 'No se ha podido guardar la foto. Comprobad la conexión y probad otra vez.'
+  } finally {
+    trabajando.value = ''
+    accion.value = null
+  }
+}
+async function quitar(foto: Photo) {
+  quitando.value = ''
+  try { await removePhoto(foto.id) } catch { fallo.value = 'No se ha podido quitar la foto. Probad otra vez.' }
+}
+const esPrincipal = (p: Photo) => p.kind !== 'other'
 function verFotos(t: Team) {
   viendo.value = t
   dialogo.value?.showModal()
@@ -115,8 +159,8 @@ function verFotos(t: Team) {
       </template>
 
       <div class="equipo__pie">
-        <button class="ver" type="button" :disabled="!c.fotos" @click="verFotos(c.team)">
-          Ver fotos ({{ c.fotos }})
+        <button class="ver" type="button" @click="verFotos(c.team)">
+          Fotos ({{ c.fotos }}) · ver o cambiar
         </button>
         <RouterLink class="abrir" :to="`/equipo/${c.team.id}`">Abrir su pantalla</RouterLink>
       </div>
@@ -142,16 +186,38 @@ function verFotos(t: Team) {
       <button class="cerrar" type="button" aria-label="Cerrar" @click="dialogo?.close()">✕</button>
     </header>
     <div class="visor__cuerpo">
-      <section v-for="x in fotosDe" :key="x.d.id" class="visor__bloque">
-        <h3>{{ x.d.title }} <small>· {{ x.fotos.length }} {{ x.fotos.length === 1 ? 'foto' : 'fotos' }}</small></h3>
-        <div class="visor__grid">
-          <a v-for="p in x.fotos" :key="p.id" :href="p.url" @click.prevent="openPhoto(p.url, `${viendo?.name ?? ''} · ${x.d.title}`)">
-            <img :src="p.url" :alt="x.d.title" loading="lazy" />
-            <span>{{ new Date(p.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }}</span>
-          </a>
+      <p class="nota">Si alguna foto está mal, cambiadla o quitadla. También podéis subir fotos por el equipo (por ejemplo, si no tiene ordenador).</p>
+      <p v-if="fallo" class="alerta">{{ fallo }}</p>
+      <section v-for="x in fotosDe" :key="x.d.id" class="visor__bloque" :class="{ 'visor__bloque--vacio': !x.fotos.length }">
+        <div class="visor__tit">
+          <h3>{{ x.d.title }} <small>· {{ x.fotos.length ? `${x.fotos.length} ${x.fotos.length === 1 ? 'foto' : 'fotos'}` : 'sin fotos' }}</small></h3>
+          <button class="mini-boton" type="button" :disabled="!!trabajando" @click="anadir(x.d)">
+            {{ trabajando === x.d.id ? 'Subiendo…' : '＋ Añadir foto' }}
+          </button>
+        </div>
+        <div v-if="x.fotos.length" class="visor__grid">
+          <figure v-for="p in x.fotos" :key="p.id" class="foto">
+            <a :href="p.url" @click.prevent="openPhoto(p.url, `${viendo?.name ?? ''} · ${x.d.title}`)">
+              <img :src="p.url" :alt="x.d.title" loading="lazy" />
+            </a>
+            <figcaption>
+              <span :class="{ principal: esPrincipal(p) }">{{ esPrincipal(p) ? 'Principal' : 'De más' }} · {{ new Date(p.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }}</span>
+              <span class="foto__botones">
+                <template v-if="quitando === p.id">
+                  <button type="button" class="peligro" @click="quitar(p)">Sí, quitar</button>
+                  <button type="button" @click="quitando = ''">No</button>
+                </template>
+                <template v-else>
+                  <button type="button" :disabled="!!trabajando" @click="cambiar(p)">{{ trabajando === p.id ? 'Cambiando…' : 'Cambiar' }}</button>
+                  <button type="button" @click="quitando = p.id">Quitar</button>
+                </template>
+              </span>
+            </figcaption>
+          </figure>
         </div>
       </section>
       <p class="nota">Para guardar una foto: ábrela y usa «Guardar imagen como…».</p>
+      <input ref="selector" class="oculto" type="file" accept="image/*" :multiple="accion?.tipo === 'anadir'" @change="elegida" />
     </div>
   </dialog>
 </template>
@@ -210,6 +276,18 @@ function verFotos(t: Team) {
 .visor__bloque h3{font-size:1rem;font-weight:600;color:var(--c-ink)}
 .visor__bloque small{font-weight:400;color:var(--c-green-dark)}
 .visor__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr));gap:.6rem}
+.visor__bloque--vacio{opacity:.75}
+.visor__tit{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem}
+.mini-boton{font:inherit;font-size:.8rem;font-weight:600;color:var(--c-ink);background:var(--c-green-light);border:0;border-radius:99px;padding:.35em .9em;cursor:pointer}
+.mini-boton:disabled{opacity:.5;cursor:wait}
+.foto{margin:0;display:grid;gap:.3rem}
+.foto figcaption{display:grid;gap:.25rem;font-size:.72rem}
+.foto .principal{font-weight:700;color:var(--c-innova-dark)}
+.foto__botones{display:flex;flex-wrap:wrap;gap:.3rem}
+.foto__botones button{font:inherit;font-size:.75rem;font-weight:600;color:var(--c-ink);background:var(--c-white);border:1px solid var(--c-paper-line);border-radius:99px;padding:.2em .7em;cursor:pointer}
+.foto__botones button:disabled{opacity:.5;cursor:wait}
+.foto__botones .peligro{background:var(--c-rubi);border-color:var(--c-rubi);color:var(--c-white)}
+.oculto{display:none}
 .visor__grid a{display:grid;gap:.2rem;text-decoration:none;font-size:.72rem;color:var(--c-innova-dark)}
 .visor__grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.7rem}
 .nota{font-size:.82rem;font-style:italic}
