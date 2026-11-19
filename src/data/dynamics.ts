@@ -70,98 +70,46 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     ],
   },
   {
-    id: 'a-quien', phase: 'research', title: '¿A quién queremos ayudar?', minutes: 20, research: true,
-    what: 'Entended al colectivo al que queréis ayudar con **cinco preguntas sencillas**.',
+    // Escaleta del 19/11/2026: «¿A quién queremos ayudar?» y «¿Cómo podríamos…?» son una sola dinámica
+    id: 'a-quien', phase: 'research', title: '¿A quién queremos ayudar? y ¿Cómo podríamos…?', minutes: 25, research: true,
+    what: 'Entended a vuestro **cliente** y convertid lo aprendido en **vuestro reto**.',
     why: 'Que la idea responda a una **necesidad real**.',
     how: [
-      '¿**A quién** queremos ayudar?',
-      '¿**Cuándo** le pasa? En qué situación aparece la necesidad.',
-      '¿Qué intenta **conseguir**?',
-      '¿Qué le **impide** hacerlo hoy?',
-      '¿Cómo lo **resuelve hoy** y por qué no le vale?',
+      '**Cliente:** ¿a quién queremos ayudar? ¿En qué situación le pasa?',
+      '**Problema:** ¿qué le duele hoy? ¿Qué le impide conseguir lo que quiere?',
+      '**Beneficio:** ¿qué ganaría si se resolviera?',
+      '**El reto:** escribidlo en una frase que empiece por **«¿Cómo podríamos…?»**, sin dar la solución por hecha.',
     ],
-    output: 'El **expediente** del colectivo completo.',
+    output: 'Vuestro **cliente**, su **problema**, el **beneficio** y el **reto** del equipo.',
     photo: { kind: 'dossier', label: 'el expediente de investigación' },
     challenges: [
       '¿A quién queréis ayudar? Sed concretos: no «los jóvenes», sino qué jóvenes.',
-      '¿Qué sabemos y qué estamos suponiendo sobre ese colectivo?',
-      '¿En qué momento concreto le aparece la necesidad?',
-      '¿Qué le impide hoy conseguir lo que quiere?',
-      '¿Cómo lo resuelve hoy? ¿Por qué no le vale?',
-    ],
-  },
-  {
-    id: 'como-podriamos', phase: 'research', title: '¿Cómo podríamos…?', minutes: 5, research: true,
-    what: 'Convertid lo aprendido en **una pregunta**.',
-    why: 'Que sea el punto de partida para idear.',
-    how: [
-      'Escribid vuestro reto en una frase que empiece por **«¿Cómo podríamos…?»**.',
-      'Centradla en una **necesidad concreta**.',
-      '**No deis la solución** por hecha.',
-    ],
-    output: 'El **reto** del equipo.',
-    photo: { kind: 'challenge', label: 'vuestro reto «¿Cómo podríamos…?»' },
-    challenges: [
+      '¿En qué situación concreta le aparece la necesidad?',
+      '¿Qué le duele hoy? ¿Qué le impide conseguir lo que quiere?',
+      '¿Qué sabéis y qué estáis suponiendo sobre esa persona?',
+      '¿Qué ganaría si se resolviera su problema?',
       'Escribid aquí vuestro reto, empezando por «¿Cómo podríamos…?».',
       '¿Vuestra pregunta ya está dando por hecha una solución?',
-      '¿Se entiende a quién ayuda y qué necesidad resuelve?',
     ],
   },
   {
-    id: 'cartas', phase: 'ideation', title: 'Cartas de giros y de personajes', minutes: 15,
+    // Escaleta del 19/11/2026: una sola dinámica de ideación, con el sobre de 4 cartas como apoyo
+    id: 'ideacion', phase: 'ideation', title: 'Ideación libre · Nuestra iniciativa', minutes: 20,
     intro: {
       title: '¿Tenéis el sobre de la mesa?',
-      text: 'Es el momento de abrirlo. ¿Qué os encontráis?',
+      text: 'Dentro hay 4 cartas. Usadlas si os atascáis: cambian las reglas para que salgan otras ideas.',
       button: '¡Sí, ya lo tenemos!',
     },
-    what: 'Robad **cartas que cambian las reglas** de vuestro reto y mirad la idea **con los ojos de otra persona**.',
-    why: 'Explorar soluciones diferentes antes de quedaros con una, y pensar en quien hoy queda fuera.',
+    what: 'Buscad **la solución** a vuestro reto y completad la ficha de **«Nuestra iniciativa»**.',
+    why: 'Pasar del reto a **una propuesta concreta** que se pueda contar y poner en marcha.',
     how: [
-      '**Giros:** sin pantallas, con un presupuesto mínimo, multiplicando su impacto o con una primera solución en 24 horas.',
-      '**Personajes:** una persona mayor, un adolescente, una persona emprendedora, alguien con movilidad reducida, alguien recién llegado…',
-      'Generad **varias ideas** con cada carta.',
+      'Proponed ideas **libremente** y quedaos con **una**.',
+      'Completad la ficha: **la solución**, su **nombre**, **tres palancas** para impulsarla y **el primer paso**.',
+      '¿Os atascáis? Mirad las **cartas del sobre**.',
     ],
-    output: 'Varias alternativas por equipo, pensadas para más personas.',
-    photo: { kind: 'ideas', label: 'las ideas que han salido con las cartas' },
-    challenges: [
-      '¿Qué carta habéis robado? ¿Qué idea os sale con ella?',
-      '¿Y si tuvierais que ponerla en marcha en 24 horas?',
-      '¿Cómo la vería una persona mayor, o alguien recién llegado?',
-    ],
-  },
-  {
-    id: 'ideacion', phase: 'ideation', title: 'Ideación libre', minutes: 15,
-    what: 'Seguid **generando ideas libremente**, a partir de lo que han abierto las cartas.',
-    why: 'Ampliar las posibilidades, sin las reglas de las cartas.',
-    how: [
-      'Proponed, **combinad y evolucionad** ideas en equipo.',
-      'Las cartas quedan como apoyo si necesitáis inspiración.',
-    ],
-    output: 'Un conjunto de ideas para seleccionar una propuesta.',
-    photo: { kind: 'ideas', label: 'vuestras ideas' },
-    challenges: [
-      '¿Qué dos ideas podríais combinar en una?',
-      '¿Cuál responde mejor a vuestro reto «¿Cómo podríamos…?»?',
-    ],
-  },
-  {
-    id: 'ficha', phase: 'ideation', title: 'Ficha de iniciativa', minutes: 25,
-    what: 'Elegid **una única propuesta** y desarrolladla en la ficha.',
-    why: 'Poder compartirla y compararla. **No hace falta un modelo de negocio.**',
-    how: [
-      '**Seis campos:** nombre, a quién ayudamos, problema, beneficio, solución y tres palancas para impulsarla.',
-      'Primero, **a quién ayudamos** y su problema.',
-      'Después, **lo que obtiene** (beneficio).',
-      'Al final, **lo que vamos a hacer** (solución).',
-    ],
-    output: '**Una iniciativa** por equipo.',
-    photo: { kind: 'initiative', label: 'la ficha de iniciativa' },
-    challenges: [
-      '¿A quién ayuda vuestra iniciativa y qué problema le resuelve?',
-      '¿Qué obtiene esa persona? Contadlo sin hablar todavía de la solución.',
-      '¿Qué tres palancas harían falta para impulsarla?',
-      '¿Cómo se llama vuestra iniciativa?',
-    ],
+    output: '**Una iniciativa** por equipo, con nombre, tres palancas y primer paso.',
+    photo: { kind: 'initiative', label: 'la ficha de «Nuestra iniciativa»' },
+    challenges: [],
   },
   {
     id: 'portada', phase: 'pitch', title: 'Portada', minutes: 15,
@@ -185,14 +133,14 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
   },
 ]
 
-/**
- * Reto del digital owner, justo después de decir quiénes sois:
- * subir las fichas individuales de la dinámica de sala de las 10:00.
- * No tiene cronómetro ni chat: es una sola pantalla, antes de las dinámicas de equipo.
- */
 // El chat (Unidad de Investigación) solo está en la fase de Investigación (decidido el 18/11/2026)
 for (const d of TEAM_DYNAMICS) if (d.phase !== 'research') d.noChat = true
 
+/**
+ * Fichas individuales de «¿Cuál es la ciudad que no elegirías?».
+ * Desde el 19/11/2026 se quedan en papel y NO se suben (ya no hay reto del digital owner).
+ * Se mantiene solo para poder ver las fotos que se hubieran subido antes.
+ */
 export const PREMORTEM: TeamDynamic = {
   id: 'ciudad',
   phase: 'foresight',
@@ -222,19 +170,13 @@ export function backToRoomAfter(d: TeamDynamic): boolean {
   if (i < 0) return false
   const next = TEAM_DYNAMICS[i + 1]
   if (!next) return true
-  // Decidido por Laura (18/11/2026): antes de la Portada también se vuelve a la sala principal
-  if (VUELTA_A_SALA_ANTES_DE.has(next.id)) return true
-  // Manda la escaleta: se vuelve a la sala solo si entre esta dinámica y la siguiente
-  // hay algún momento que no es de equipo (sala principal, pausa…). Ficha → Portada: no.
-  const a = AGENDA.findIndex((s) => s.id === (AGENDA_STEP_OF[d.id] ?? d.id))
-  const b = AGENDA.findIndex((s) => s.id === (AGENDA_STEP_OF[next.id] ?? next.id))
+  // Manda la escaleta: se vuelve a la sala si entre esta dinámica y la siguiente
+  // hay algún momento que no es de equipo (sala principal, pausa…)
+  const a = AGENDA.findIndex((s) => s.id === d.id)
+  const b = AGENDA.findIndex((s) => s.id === next.id)
   if (a < 0 || b < 0) return next.phase !== d.phase
   return AGENDA.slice(a + 1, b).some((s) => s.who !== 'Equipo')
 }
-/** Dinámicas antes de las que siempre se vuelve a la sala principal, diga lo que diga la escaleta */
-const VUELTA_A_SALA_ANTES_DE = new Set(['portada'])
-/** Dinámicas que comparten momento en la escaleta */
-const AGENDA_STEP_OF: Record<string, string> = { 'como-podriamos': 'a-quien' }
 
 /** «de el periódico» → «del periódico» */
 export function photoOf(d: TeamDynamic): string {

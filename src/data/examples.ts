@@ -35,10 +35,9 @@ export const EJEMPLOS: Record<string, string[]> = {
     'Un joven recién formado quiere empezar su carrera sin tener que desplazarse lejos cada día.',
     '¿A quién? Jóvenes recién formados. ¿Cuándo le pasa? Al terminar sus estudios, cuando busca su primera experiencia.',
     '¿Qué se lo impide hoy? No conoce a las empresas locales y ellas no le conocen a él.',
+    'El reto: «¿Cómo podríamos ayudar a jóvenes recién formados a encontrar su primera oportunidad en empresas locales?»',
   ],
-  'como-podriamos': [
-    '«¿Cómo podríamos ayudar a jóvenes recién formados a encontrar su primera oportunidad en empresas locales?»',
-  ],
+
   ideacion: [
     'Si pensamos en una plataforma de empleo, «sin pantallas» obliga a imaginar encuentros, redes locales o experiencias presenciales.',
     'Combinad dos ideas que os gusten en una sola, o llevad una al extremo.',

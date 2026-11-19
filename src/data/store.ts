@@ -580,7 +580,7 @@ export function openNextDynamic() {
 }
 
 /** Momento de la escaleta (AGENDA) de cada dinámica de equipo, cuando no se llama igual */
-const ROOM_STEP_OF_DYNAMIC: Record<string, string> = { 'como-podriamos': 'a-quien' }
+const ROOM_STEP_OF_DYNAMIC: Record<string, string> = {}
 
 function advanceRoomTo(stepId: string) {
   const i = AGENDA.findIndex((s) => s.id === stepId)

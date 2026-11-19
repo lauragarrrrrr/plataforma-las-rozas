@@ -28,7 +28,7 @@ const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attende
 const atendidas = computed(() => store.db.helpRequests.filter((h) => h.attendedAt).slice(-8).reverse())
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 /** Desde el momento de la votación, la votación sube arriba del todo (con su botón de abrirla) */
-const MOMENTOS_VOTACION = ['votacion', 'valoracion', 'resultados', 'cierre', 'comida']
+const MOMENTOS_VOTACION = ['explica-votacion', 'votacion', 'valoracion', 'resultados', 'cierre', 'comida']
 const votacionArriba = computed(() => MOMENTOS_VOTACION.includes(paso.value.id))
 /** Durante el traslado y el speed pitch se escriben los titulares: también suben arriba */
 const titularesArriba = computed(() => votacionArriba.value || ['traslado', 'pitch'].includes(paso.value.id))

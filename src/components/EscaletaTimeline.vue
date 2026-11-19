@@ -13,7 +13,7 @@ const actual = computed(() => store.db.room.step)
 const pista = ref<HTMLElement>()
 
 /** Dinámicas de equipo que corresponden a cada momento de la escaleta */
-const DYNAMICS_OF_STEP: Record<string, string[]> = { 'a-quien': ['a-quien', 'como-podriamos'] }
+const DYNAMICS_OF_STEP: Record<string, string[]> = {}
 const abierta = computed(() => TEAM_DYNAMICS[store.openDynamic()]?.id)
 function abiertaEnEquipos(stepId: string) {
   const ids = DYNAMICS_OF_STEP[stepId] ?? [stepId]

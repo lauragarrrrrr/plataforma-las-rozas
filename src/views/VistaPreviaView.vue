@@ -14,7 +14,6 @@ import VotacionEquipo from '../components/VotacionEquipo.vue'
 /** Pasos: el reto del digital owner, las pantallas previas (el sobre) y las 8 dinámicas */
 type Paso = { tipo: 'reto' | 'intro' | 'dinamica' | 'votacion'; d: TeamDynamic; etiqueta: string }
 const pasos: Paso[] = [
-  { tipo: 'reto', d: PREMORTEM, etiqueta: '★' },
   ...TEAM_DYNAMICS.flatMap((d, n) => [
     ...(d.intro ? [{ tipo: 'intro' as const, d, etiqueta: '✉' }] : []),
     { tipo: 'dinamica' as const, d, etiqueta: String(n + 1) },

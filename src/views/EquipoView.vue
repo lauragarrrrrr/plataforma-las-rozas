@@ -5,12 +5,11 @@ import { rich } from '../utils/rich'
 // 2. Mientras la sala está en la parte de facilitación: ya ven «Titular positivo», sin cronómetro en marcha.
 // 3. Cuando se revelan los ámbitos: las dinámicas, una a una, con explicación,
 //    chat que os reta, cronómetro, «Pedir ayuda» y foto obligatoria para seguir.
-import { askConfirm } from '../composables/useConfirm'
 import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
-import { ALL_DYNAMICS, backToRoomAfter, photoOf, PREMORTEM, TEAM_DYNAMICS } from '../data/dynamics'
-import { forgetOnDevice, recallOnDevice, rememberOnDevice, addPhoto, autoAdvance, canAutoAdvance, finishPremortem, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
+import { ALL_DYNAMICS, backToRoomAfter, photoOf, TEAM_DYNAMICS } from '../data/dynamics'
+import { forgetOnDevice, recallOnDevice, rememberOnDevice, addPhoto, autoAdvance, canAutoAdvance, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
 import { openPhoto } from '../composables/usePhotoViewer'
 import CoachChat from '../components/CoachChat.vue'
@@ -88,15 +87,14 @@ const allowed = computed(() => store.allowed(props.id))
 /** Todavía no se ha abierto la primera dinámica: la ven, pero el cronómetro no corre */
 const pendiente = computed(() => allowed.value < 0)
 /** El equipo ya está en las dinámicas (para el aviso «¡Cambiamos de pantalla!») */
-const inDynamics = computed(() => !!setup.value?.premortemDone && allowed.value >= 0 && !finished.value)
+const inDynamics = computed(() => !!setup.value && allowed.value >= 0 && !finished.value)
 const waitingNext = computed(() => !!photo.value && index.value >= allowed.value)
 /**
  * ¿Toca pausa después de esta dinámica? Sí, si en la escaleta el siguiente momento es un descanso
  * (la pausa para café de las 11:45). Devuelve sus minutos y a qué hora se vuelve a la sala.
  */
 const pausa = computed(() => {
-  const stepId = dynamic.value.id === 'como-podriamos' ? 'a-quien' : dynamic.value.id
-  const i = AGENDA.findIndex((s) => s.id === stepId)
+  const i = AGENDA.findIndex((s) => s.id === dynamic.value.id)
   const siguiente = AGENDA[i + 1]
   if (i < 0 || !siguiente || siguiente.kind !== 'break' || siguiente.id === 'comida') return null
   return { minutes: siguiente.minutes, vuelta: AGENDA[i + 2]?.time ?? '' }
@@ -110,10 +108,10 @@ const timeUp = computed(() => remaining.value <= 0)
 
 // Apuntamos cuándo llega el equipo a cada dinámica (el cronómetro cuenta desde que se abrió)
 watch(
-  // Solo cuando el equipo VE la dinámica (después del reto de las fichas y de «Antes de empezar»)
-  () => [allowed.value, setup.value?.teamId, dynamic.value.id, finished.value, !!setup.value?.premortemDone, !!progress.value?.introSeen?.[COMO_FUNCIONA]] as const,
-  ([open, hasSetup, dynId, isFinished, retoHecho, leido]) => {
-    if (open >= 0 && hasSetup && !isFinished && retoHecho && leido) startDynamic(props.id, dynId)
+  // Solo cuando el equipo VE la dinámica (después de «Antes de empezar»)
+  () => [allowed.value, setup.value?.teamId, dynamic.value.id, finished.value, !!progress.value?.introSeen?.[COMO_FUNCIONA]] as const,
+  ([open, hasSetup, dynId, isFinished, leido]) => {
+    if (open >= 0 && hasSetup && !isFinished && leido) startDynamic(props.id, dynId)
   },
   { immediate: true },
 )
@@ -167,20 +165,6 @@ async function onPhoto(url: string, extra = false) {
   }
 }
 
-// --- 1b. Reto de las fichas individuales ---------------------------------------
-const premortemPhotos = computed(() => store.photos(props.id).filter((p) => p.dynamicId === PREMORTEM.id))
-async function onPremortem(url: string) {
-  try {
-    await addPhoto(props.id, PREMORTEM.id, PREMORTEM.photo.kind, url)
-    saveFailed.value = store.lastSaveFailed()
-  } catch {
-    saveFailed.value = true
-  }
-}
-/** El reto no es obligatorio: si no hay fichas, solo se confirma */
-async function seguirReto() {
-  if (premortemPhotos.value.length || (await askConfirm('No has subido ninguna ficha. ¿Seguir sin subirlas?'))) finishPremortem(props.id)
-}
 
 const expediente = computed(() =>
   ALL_DYNAMICS.map((d) => ({ d, photos: store.photos(props.id).filter((p) => p.dynamicId === d.id) })).filter((x) => x.photos.length),
@@ -267,42 +251,6 @@ const expediente = computed(() =>
         <button class="boton" type="submit" :disabled="!named.includes(form.owner)">Empezar</button>
       </form>
     </div>
-  </main>
-
-  <!-- 1b · Reto del digital owner: subir las fichas individuales -->
-  <main v-else-if="!setup.premortemDone" class="reto">
-    <div class="wrap reto__in">
-      <div class="reto__cab">
-        <span class="kicker">{{ team.name }} · Primer reto</span>
-        <h1 class="titular">¡{{ setup.digitalOwner.split(" ")[0] }}, digital owner!</h1>
-        <p class="reto__lema">Te ponemos un reto:</p>
-        <p class="intro">
-          Sube las fichas individuales de <strong>«{{ PREMORTEM.title }}»</strong> que ha rellenado cada persona de tu equipo.
-          Una foto por ficha: podéis hacerlas o elegirlas todas y enviarlas juntas.
-        </p>
-      </div>
-
-      <div class="reto__grid">
-        <div class="card">
-          <span class="kicker">Con el móvil</span>
-          <PhotoQr :team-id="id" :dynamic-id="PREMORTEM.id" multi @uploaded="onPremortem" />
-        </div>
-
-        <div class="card reto__contador">
-          <span class="kicker">Fichas subidas</span>
-          <strong class="reto__cifra">{{ premortemPhotos.length }}</strong>
-          <div v-if="premortemPhotos.length" class="reto__fotos">
-            <img v-for="p in premortemPhotos" :key="p.id" :src="p.url" alt="Ficha individual" />
-          </div>
-          <p class="nota">Cuando hayas subido las fichas que tengáis, sigue.</p>
-          <button class="boton" type="button" @click="seguirReto">
-            {{ premortemPhotos.length ? '¡Reto superado! Seguir →' : 'Seguir →' }}
-          </button>
-          <p v-if="saveFailed" class="alerta">No se ha podido guardar la foto. Probad otra vez.</p>
-        </div>
-      </div>
-    </div>
-    <HelpButton :team-id="id" :dynamic-id="PREMORTEM.id" />
   </main>
 
   <!-- 2 · Antes de empezar: primero el papel, después la pantalla (se ve una vez) -->

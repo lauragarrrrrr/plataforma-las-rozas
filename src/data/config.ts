@@ -5,7 +5,7 @@ import type { AreaId, PhaseId } from './types'
 export const EVENT_DATE = '2026-11-21'
 
 /** Equipo facilitador que recibe avisos en el móvil (/avisos). Solo el nombre de pila. */
-export const FACILITATORS = ['Andrea', 'Juanjo', 'Irene', 'Laura']
+export const FACILITATORS = ['Andrea', 'Juanjo', 'Irene', 'Marina', 'Laura']
 
 /** Dirección de la web pública (Cloudflare). Los QR para los participantes llevan siempre aquí. */
 export const PUBLIC_URL = 'https://plataforma-las-rozas.hackathon-las-rozas-2040.workers.dev'
