@@ -2,8 +2,8 @@
 // Votación en el panel: abrirla o cerrarla y ver el recuento.
 // El recuento solo lo ve el equipo facilitador.
 import { askConfirm } from '../composables/useConfirm'
-import { computed } from 'vue'
-import { publishResults, setPodium, setVotingOpen, useStore, VOTE_POINTS } from '../data/store'
+import { computed, ref } from 'vue'
+import { publishResults, removeVote, setPodium, setVotingOpen, useStore, VOTE_POINTS } from '../data/store'
 import { downloadCsv } from '../utils/csv'
 
 const store = useStore()
@@ -11,6 +11,33 @@ const abierta = computed(() => store.votingOpen())
 const recuento = computed(() => store.voteCounts())
 const maximo = computed(() => Math.max(1, ...recuento.value.map((r) => r.points)))
 const personas = computed(() => store.db.votes.length)
+/** Personas de la lista (las que pueden votar) */
+const totalPersonas = computed(() => Object.values(store.roster()).reduce((n, v) => n + v.length, 0))
+
+// --- Quién ha votado (solo si ha votado, nunca a quién) y anular un voto ---
+const porEquipo = computed(() => {
+  const r = store.roster()
+  return store.db.teams.map((t) => {
+    const nombres = r[t.id] ?? []
+    const gente = nombres.map((n, i) => ({ i, n, voto: store.hasVoted(t.id, i) }))
+    return { id: t.id, gente, hechos: gente.filter((g) => g.voto).length }
+  })
+})
+const anulando = ref('')
+const avisoAnular = ref('')
+async function anular(teamId: string, i: number, nombre: string) {
+  if (!(await askConfirm(`¿Anular el voto de ${nombre} (equipo ${teamId})? Se borrará y podrá volver a votar desde su móvil.`, '', 'Sí, anular'))) return
+  anulando.value = `${teamId}-${i}`
+  avisoAnular.value = ''
+  try {
+    await removeVote(teamId, i)
+    avisoAnular.value = `Voto de ${nombre} anulado. Ya puede volver a votar.`
+  } catch {
+    avisoAnular.value = 'No se ha podido anular. Comprobad la conexión y probad otra vez.'
+  } finally {
+    anulando.value = ''
+  }
+}
 
 async function alternar() {
   const texto = abierta.value
@@ -76,13 +103,30 @@ async function alternarPublicar() {
     <div class="votacion__cab">
       <div>
         <span class="kicker">Votación</span>
-        <p v-if="abierta"><strong>Abierta.</strong> Han votado {{ personas }} {{ personas === 1 ? 'persona' : 'personas' }}.</p>
-        <p v-else>Cerrada. Los equipos la ven bloqueada al final de su app. Abridla al terminar el speed pitch.</p>
+        <p v-if="abierta"><strong>Abierta.</strong> Han votado <strong class="cuenta">{{ personas }} de {{ totalPersonas }}</strong> personas.</p>
+        <p v-else>Cerrada{{ personas ? ` · han votado ${personas} de ${totalPersonas} personas` : '' }}. Los equipos la ven bloqueada al final de su app. Abridla al terminar el speed pitch.</p>
       </div>
       <button class="boton" :class="{ 'boton--sec': abierta }" type="button" @click="alternar">
         {{ abierta ? 'Cerrar la votación' : 'Abrir la votación' }}
       </button>
     </div>
+
+    <details v-if="personas" class="quien">
+      <summary>Quién ha votado · anular un voto</summary>
+      <p class="nota">Solo se ve si cada persona ha votado, nunca a quién. Si alguien dice que «ya ha votado» sin haberlo hecho, anulad su voto y podrá votar otra vez.</p>
+      <ul class="quien__equipos">
+        <li v-for="e in porEquipo" :key="e.id">
+          <span class="quien__letra">{{ e.id }} <small>{{ e.hechos }}/{{ e.gente.length }}</small></span>
+          <span class="quien__gente">
+            <template v-for="g in e.gente" :key="g.i">
+              <button v-if="g.voto" class="quien__si" type="button" :disabled="anulando === `${e.id}-${g.i}`" :title="`Anular el voto de ${g.n}`" @click="anular(e.id, g.i, g.n)">✓ {{ g.n }} ✕</button>
+              <span v-else class="quien__no">{{ g.n }}</span>
+            </template>
+          </span>
+        </li>
+      </ul>
+      <p v-if="avisoAnular" class="final__ok">{{ avisoAnular }}</p>
+    </details>
 
     <details v-if="personas">
       <summary>Ver recuento (solo para el equipo facilitador)</summary>
@@ -150,4 +194,15 @@ details summary{cursor:pointer;font-weight:600;color:var(--c-ink);margin-top:.4r
 .descargas{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;font-size:.85rem;border-top:1px dashed var(--c-gris-10);padding-top:.8rem}
 .descargas .boton:disabled{opacity:.45;cursor:not-allowed}
 .final__ok{margin:0;font-weight:600;color:var(--c-innova-dark)}
+.cuenta{font-size:1.15rem;color:var(--c-ink)}
+.quien__equipos{list-style:none;margin:.6rem 0 0;padding:0;display:grid;gap:.4rem}
+.quien__equipos li{display:grid;grid-template-columns:3.5rem 1fr;gap:.6rem;align-items:start}
+.quien__letra{font-weight:700;color:var(--c-ink)}
+.quien__letra small{font-weight:400;font-size:.75rem;color:var(--c-green-dark)}
+.quien__gente{display:flex;flex-wrap:wrap;gap:.3rem}
+.quien__si,.quien__no{font:inherit;font-size:.8rem;border-radius:99px;padding:.15em .7em}
+.quien__si{border:0;cursor:pointer;background:var(--c-green-light);color:var(--c-ink);font-weight:600}
+.quien__si:hover{background:color-mix(in srgb,var(--c-rubi) 15%,var(--c-white))}
+.quien__si:disabled{opacity:.5;cursor:progress}
+.quien__no{background:var(--c-white);box-shadow:inset 0 0 0 1px var(--c-gris-10);color:var(--c-green-dark)}
 </style>

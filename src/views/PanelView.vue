@@ -2,7 +2,7 @@
 // /panel · Seguimiento del equipo facilitador
 // Peticiones de ayuda arriba; debajo, por dónde va cada equipo.
 import { askChoice, askConfirm } from '../composables/useConfirm'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { photosZip, saveFile } from '../data/photoZip'
 import { AGENDA } from '../data/agenda'
 import { PHASES } from '../data/config'
@@ -26,6 +26,49 @@ const hora = (iso: string) => new Date(iso).toLocaleTimeString('es-ES', { hour: 
 
 const pendientes = computed(() => store.db.helpRequests.filter((h) => !h.attendedAt).slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)))
 const atendidas = computed(() => store.db.helpRequests.filter((h) => h.attendedAt).slice(-8).reverse())
+
+// --- Aviso de ayuda nueva: suena y sale en el título de la pestaña («(2) Panel») ---
+// El navegador solo deja sonar después de tocar la página: el sonido se prepara con el primer clic.
+let audio: AudioContext | null = null
+function prepararSonido() {
+  try {
+    audio ??= new AudioContext()
+    audio.resume().catch(() => {})
+  } catch { audio = null }
+}
+document.addEventListener('pointerdown', prepararSonido, { once: true })
+function sonar() {
+  if (!audio || audio.state !== 'running') return
+  const t = audio.currentTime
+  for (const [i, f] of [880, 1175].entries()) {
+    const o = audio.createOscillator()
+    const g = audio.createGain()
+    o.frequency.value = f
+    g.gain.setValueAtTime(0.0001, t + i * 0.18)
+    g.gain.exponentialRampToValueAtTime(0.4, t + i * 0.18 + 0.02)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.18 + 0.16)
+    o.connect(g).connect(audio.destination)
+    o.start(t + i * 0.18)
+    o.stop(t + i * 0.18 + 0.18)
+  }
+}
+const vistas = new Set(pendientes.value.map((h) => h.id))
+watch(pendientes, (lista) => {
+  const nuevas = lista.filter((h) => !vistas.has(h.id))
+  lista.forEach((h) => vistas.add(h.id))
+  if (nuevas.length) sonar()
+})
+const TITULO = 'Panel · Las Rozas 2040'
+watch(() => pendientes.value.length, (n) => {
+  document.title = n ? `(${n}) 🆘 ${TITULO}` : TITULO
+}, { immediate: true })
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', prepararSonido)
+  audio?.close().catch(() => {})
+})
+function irAAyudas() {
+  document.getElementById('ayudas')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 const paso = computed(() => AGENDA[store.db.room.step] ?? AGENDA[0])
 /** Desde el momento de la votación, la votación sube arriba del todo (con su botón de abrirla) */
 const MOMENTOS_VOTACION = ['explica-votacion', 'votacion', 'valoracion', 'resultados', 'cierre', 'comida']
@@ -121,6 +164,9 @@ async function restaurar() {
 
 <template>
   <main class="section s-claro panel">
+    <button v-if="pendientes.length" class="aviso-ayuda" type="button" @click="irAAyudas">
+      🆘 {{ pendientes.length === 1 ? `${store.team(pendientes[0].teamId)?.name ?? 'Un equipo'} pide ayuda` : `${pendientes.length} equipos piden ayuda` }} · Ver
+    </button>
     <div class="wrap">
       <div class="cabeza">
         <span class="kicker">Equipo facilitador</span>
@@ -161,7 +207,7 @@ async function restaurar() {
         </div>
       </section>
 
-      <section class="card ayudas" :class="{ 'ayudas--activa': pendientes.length }">
+      <section id="ayudas" class="card ayudas" :class="{ 'ayudas--activa': pendientes.length }">
         <span class="kicker">Peticiones de ayuda</span>
         <p v-if="!pendientes.length" class="vacio">Ningún equipo pide ayuda ahora mismo.</p>
         <ul v-else class="ayudas__lista">
@@ -215,6 +261,10 @@ async function restaurar() {
 </template>
 
 <style scoped>
+.aviso-ayuda{position:fixed;top:1rem;right:1rem;z-index:55;border:0;cursor:pointer;font:inherit;font-weight:600;font-size:1rem;color:var(--c-white);background:var(--c-rubi);border-radius:99px;padding:.7em 1.3em;animation:latido 1.6s var(--ease-out) infinite}
+@keyframes latido{50%{transform:scale(1.05)}}
+@media (prefers-reduced-motion:reduce){.aviso-ayuda{animation:none}}
+#ayudas{scroll-margin-top:5rem}
 .ayuda__va{justify-self:start;display:inline-block;margin-top:.2rem;background:var(--c-green-light);color:var(--c-ink);border-radius:99px;padding:.1em .7em;font-size:.8rem;font-weight:600}
 .zip-aviso{margin:0;font-weight:600;color:var(--c-innova-dark)}
 .boton:disabled{opacity:.6;cursor:progress;transform:none}

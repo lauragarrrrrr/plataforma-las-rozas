@@ -132,7 +132,11 @@ function applyRowTo(target: Database, row: Row, deleted: boolean) {
   }
 }
 
-const applyRow = (row: Row, deleted: boolean) => applyRowTo(state, row, deleted)
+/** Cambio que llega de otro dispositivo. Si aquí hay uno pendiente de guardar del mismo elemento, manda el de aquí. */
+const applyRow = (row: Row, deleted: boolean) => {
+  if (pending.has(keyOf(row))) return
+  applyRowTo(state, row, deleted)
+}
 
 /**
  * Monta la base de datos completa a partir de las filas y la cambia de golpe,
@@ -142,6 +146,8 @@ function fromRows(rows: Row[]) {
   const db = createBlank()
   for (const name of Object.keys(LISTS) as ListName[]) (db[name] as unknown[]) = []
   for (const r of rows) applyRowTo(db, r, false)
+  // Lo que aún no se ha podido guardar desde aquí se queda como está
+  for (const r of pending.values()) applyRowTo(db, r, false)
   replaceState(db)
 }
 
@@ -153,6 +159,7 @@ async function resync() {
   try {
     fromRows(await fetchAll())
     connError.value = ''
+    flush()
   } catch {
     connError.value = 'Sin conexión con la base de datos. Reintentando…'
   } finally {
@@ -176,6 +183,7 @@ async function initRemote() {
     }
     if (!rows.some((r) => r.coleccion === 'teams')) rows = [...rows, ...toRows(createBlank()).filter((r) => r.coleccion === 'teams')]
     fromRows(rows)
+    restorePending()
     subscribe(applyRow, () => { window.setTimeout(resync, 3500) })
     ready.value = true
     // Mantener todas las pestañas y dispositivos a la par
@@ -197,23 +205,107 @@ function isFacilitatorPage() {
   return /^\/(panel|sala|facilitacion|vista-previa)(\/|$)/.test(window.location.pathname)
 }
 
-// Arranque: después de declarar todo lo que usa
-if (isRemote) initRemote()
 
-/** Guarda en Supabase un elemento que acaba de cambiar. En modo navegador no hace nada. */
+function rowOf(coll: Collection, item?: Record<string, unknown> | object): Row {
+  if (coll === 'meta') return { coleccion: 'meta', id: 'meta', datos: { version: state.version, demoTeamIds: clone(state.demoTeamIds) } }
+  if (coll === 'event' || coll === 'room') return { coleccion: coll, id: coll, datos: clone(state[coll]) }
+  return { coleccion: coll, id: String((item as Record<string, unknown>)[LISTS[coll]]), datos: clone(item) }
+}
+
+/**
+ * Guarda en Supabase y ESPERA a que se guarde (fotos y votos: la pantalla dice si ha fallado).
+ * En modo navegador no hace nada.
+ */
 function save(coll: Collection, item?: Record<string, unknown> | object): Promise<void> {
   if (!isRemote) return Promise.resolve()
-  let row: Row
-  if (coll === 'meta') row = { coleccion: 'meta', id: 'meta', datos: { version: state.version, demoTeamIds: clone(state.demoTeamIds) } }
-  else if (coll === 'event' || coll === 'room') row = { coleccion: coll, id: coll, datos: clone(state[coll]) }
-  else row = { coleccion: coll, id: String((item as Record<string, unknown>)[LISTS[coll]]), datos: clone(item) }
-  return upsertRows([row]).catch((e) => {
+  return upsertRows([rowOf(coll, item)]).catch((e) => {
     connError.value = 'No se ha podido guardar el último cambio. Comprobad la conexión a internet.'
     console.error(e)
     throw e
   })
 }
-const saveQuiet = (coll: Collection, item?: object) => { save(coll, item).catch(() => {}) }
+
+// ---------------------------------------------------------------------------
+// Cola de cambios pendientes (para la wifi mala)
+// Todo lo demás se guarda a través de esta cola: si falla, se queda aquí (también en
+// el navegador, por si se recarga la página) y se reintenta solo cada pocos segundos.
+// Mientras esté pendiente, lo que llega de Supabase no lo pisa.
+// ---------------------------------------------------------------------------
+const PENDING_KEY = 'lr2040:pendientes'
+/** Los pendientes guardados en el navegador valen como mucho 3 horas */
+const PENDING_MAX_AGE = 3 * 60 * 60_000
+const pending = new Map<string, Row>()
+const keyOf = (r: { coleccion: string; id: string }) => `${r.coleccion}:${r.id}`
+/** Aviso para la pantalla cuando hay cambios sin guardar */
+const unsaved = ref('')
+let flushing = false
+let flushAgain = false
+let retryTimer = 0
+
+function persistPending() {
+  try {
+    if (pending.size) localStorage.setItem(PENDING_KEY, JSON.stringify({ jornada: state.event.jornada ?? '', at: Date.now(), rows: [...pending.values()] }))
+    else localStorage.removeItem(PENDING_KEY)
+  } catch { /* sin almacenamiento: siguen en memoria */ }
+}
+
+async function flush() {
+  if (!isRemote || !pending.size) return
+  if (flushing) { flushAgain = true; return }
+  flushing = true
+  window.clearTimeout(retryTimer)
+  const batch = [...pending.values()]
+  try {
+    await upsertRows(batch)
+    // Solo se quitan los que no han vuelto a cambiar mientras se enviaban
+    for (const r of batch) if (pending.get(keyOf(r)) === r) pending.delete(keyOf(r))
+    persistPending()
+    if (!pending.size) unsaved.value = ''
+  } catch (e) {
+    console.error(e)
+    const n = pending.size
+    unsaved.value = `Sin conexión: ${n} ${n === 1 ? 'cambio está' : 'cambios están'} sin guardar. Se guardarán solos al volver la conexión. No cerréis esta página.`
+    retryTimer = window.setTimeout(flush, 4000)
+  } finally {
+    flushing = false
+    if (flushAgain) { flushAgain = false; if (pending.size) flush() }
+  }
+}
+
+/** Guarda sin esperar: si no hay conexión, se queda en la cola y se reintenta solo */
+const saveQuiet = (coll: Collection, item?: object) => {
+  if (!isRemote) return
+  const row = rowOf(coll, item)
+  pending.set(keyOf(row), row)
+  persistPending()
+  flush()
+}
+
+/** Al arrancar: recupera lo que no se llegó a guardar antes de recargar la página */
+function restorePending() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PENDING_KEY) ?? 'null') as { jornada?: string; at?: number; rows?: Row[] } | null
+    if (!raw?.rows?.length || raw.jornada !== (state.event.jornada ?? '') || Date.now() - (raw.at ?? 0) > PENDING_MAX_AGE) {
+      localStorage.removeItem(PENDING_KEY)
+      return
+    }
+    for (const r of raw.rows) {
+      pending.set(keyOf(r), r)
+      applyRowTo(state, r, false)
+    }
+    flush()
+  } catch { /* nada que recuperar */ }
+}
+
+if (isRemote) {
+  window.addEventListener('online', () => { flush() })
+  // Si quedan cambios sin guardar, el navegador pregunta antes de cerrar la página
+  window.addEventListener('beforeunload', (e) => {
+    if (!pending.size) return
+    e.preventDefault()
+    e.returnValue = ''
+  })
+}
 
 // ---------------------------------------------------------------------------
 // Ritmo de la jornada: qué dinámica está abierta
@@ -251,6 +343,7 @@ export function useStore() {
     db,
     ready,
     connError,
+    unsaved,
     areaName: (area: AreaId) => AREAS[area],
     team: (teamId: string) => db.teams.find((t) => t.id === teamId),
     setup: (teamId: string) => db.setups.find((s) => s.teamId === teamId),
@@ -701,7 +794,22 @@ export async function castVote(teamId: string, memberIndex: number, choices: str
   return ''
 }
 
+/**
+ * Panel: anula el voto de una persona (por ejemplo, si alguien votó con el nombre de otra).
+ * Esa persona puede volver a votar.
+ */
+export async function removeVote(teamId: string, memberIndex: number) {
+  const code = voterCode(teamId, memberIndex)
+  pending.delete(keyOf({ coleccion: 'votes', id: code }))
+  if (isRemote) await deleteRow('votes', code)
+  const i = state.votes.findIndex((v) => v.code === code)
+  if (i >= 0) state.votes.splice(i, 1)
+}
+
 async function replaceEverything(next: Database) {
+  pending.clear()
+  persistPending()
+  unsaved.value = ''
   if (isRemote) {
     await deleteAll()
     await upsertRows(toRows(next))
@@ -714,3 +822,6 @@ export const resetToSeed = () => replaceEverything(createSeed())
 
 /** Deja todo en blanco, como el día del evento. */
 export const clearAll = () => replaceEverything(createBlank())
+
+// Arranque: al final, cuando ya está declarado todo lo que usa (también la cola de pendientes)
+if (isRemote) initRemote()

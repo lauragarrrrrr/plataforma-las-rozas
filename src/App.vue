@@ -8,13 +8,14 @@ import FacilitacionNav from './components/FacilitacionNav.vue'
 import { useStore } from './data/store'
 
 const route = useRoute()
-const { ready, connError } = useStore()
+const { ready, connError, unsaved } = useStore()
 </script>
 
 <template>
   <SiteHeader v-if="!route.meta.fullscreen" />
   <FacilitacionNav v-if="route.meta.facilitator && !route.meta.fullscreen" />
   <p v-if="connError" class="alerta conexion" role="alert">{{ connError }}</p>
+  <p v-else-if="unsaved" class="alerta conexion" role="alert">{{ unsaved }}</p>
   <RouterView v-if="ready" />
   <main v-else-if="!connError" class="cargando" aria-live="polite">Conectando…</main>
   <SiteFooter v-if="!route.meta.fullscreen" :compact="!!route.meta.compact" />
