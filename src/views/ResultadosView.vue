@@ -17,7 +17,7 @@ function fullscreen() {
     <div class="resultados__in">
       <header class="cab">
         <span class="kicker">Las Rozas 2040 · Hackathon de innovación</span>
-        <h1 class="titulo">✦ Equipos ganadores</h1>
+        <h1 class="titulo">✦ Las 3 iniciativas más votadas por el público</h1>
       </header>
       <ResultadosPodio grande />
       <footer class="pie">

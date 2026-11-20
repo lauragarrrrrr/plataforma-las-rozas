@@ -99,7 +99,7 @@ async function alternarPublicar() {
 
     <!-- Resultado final -->
     <div class="final">
-      <span class="kicker">Resultado final</span>
+      <span class="kicker">Las 3 más votadas por el público</span>
       <p class="nota">Por defecto, los más votados. Podéis cambiar cualquier puesto antes de publicar.</p>
       <div class="final__puestos">
         <label v-for="(t, i) in podio" :key="i" class="final__puesto">
@@ -111,7 +111,7 @@ async function alternarPublicar() {
       </div>
       <div class="final__botones">
         <button class="boton" :class="{ 'boton--sec': publicado }" type="button" @click="alternarPublicar">
-          {{ publicado ? 'Retirar los resultados' : 'Publicar resultados' }}
+          {{ publicado ? 'Retirar los resultados' : 'Publicar las más votadas' }}
         </button>
         <button v-if="store.db.event.podium?.length" class="boton boton--sec" type="button" @click="porVotos">Volver a los más votados</button>
         <a class="final__ver" href="/resultados" target="_blank" rel="noopener">Abrir la página de resultados (para proyectar) ↗</a>

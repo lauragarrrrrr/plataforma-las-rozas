@@ -8,6 +8,7 @@ import { rich } from '../utils/rich'
 import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AGENDA } from '../data/agenda'
+import { PHASES } from '../data/config'
 import { ALL_DYNAMICS, backToRoomAfter, photoOf, TEAM_DYNAMICS } from '../data/dynamics'
 import { forgetOnDevice, recallOnDevice, rememberOnDevice, addPhoto, autoAdvance, canAutoAdvance, markIntroSeen, nextDynamic, requestHelp, saveSetup, startDynamic, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
@@ -82,6 +83,11 @@ const photo = computed(() => store.photoFor(props.id, dynamic.value.id))
 
 /** Hasta qué dinámica nos deja llegar el equipo facilitador */
 /** Pantalla «Antes de empezar» (una sola vez por equipo) */
+/** Las cuatro fases arriba, como en la presentación: hecha, en curso o por venir */
+const fases = computed(() => {
+  const actual = PHASES.findIndex((ph) => ph.id === dynamic.value.phase)
+  return PHASES.map((ph, n) => ({ id: ph.id, name: ph.name, estado: finished.value || n < actual ? 'hecha' : n === actual ? 'actual' : 'pendiente' }))
+})
 const COMO_FUNCIONA = 'como-funciona'
 const allowed = computed(() => store.allowed(props.id))
 /** Todavía no se ha abierto la primera dinámica: la ven, pero el cronómetro no corre */
@@ -295,10 +301,8 @@ const expediente = computed(() =>
           <p class="owner-linea" :title="setup.members.join(', ')">Digital owner: <strong>{{ setup.digitalOwner }}</strong> · <button class="enlace" type="button" @click="startEditing">Cambiar</button></p>
         </div>
         <DynamicTimer v-if="!finished && !(dynamic.intro && !progress?.introSeen?.[dynamic.id])" class="app__reloj" :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" compact />
-        <ol class="pasos" aria-label="Dinámicas">
-          <li v-for="(d, i) in TEAM_DYNAMICS" :key="d.id" :class="{ hecho: i < index, actual: i === index }" :title="d.title">
-            <span>{{ i + 1 }}</span>
-          </li>
+        <ol class="fases" aria-label="Fases de la jornada">
+          <li v-for="f in fases" :key="f.id" :class="'fase--' + f.estado">{{ f.name }}<span v-if="f.estado === 'hecha'" aria-hidden="true"> ✓</span></li>
         </ol>
       </div>
     </header>
@@ -387,9 +391,9 @@ const expediente = computed(() =>
                 <strong>Subid vuestras imágenes</strong>
                 <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Sin la foto no podéis pasar a la siguiente.</p>
               </div>
-              <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">{{ dynamic.noChat ? 'Subir imágenes' : '📷 Subir imágenes' }}</button>
+              <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">＋ Registrar fotografía</button>
               <div v-else class="foto__cab">
-                <span class="kicker">Subir imágenes</span>
+                <span class="kicker">Registrar fotografía</span>
                 <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Podéis hacer <strong>varias fotos a la vez</strong> y enviarlas todas juntas.</p>
               </div>
               <template v-if="showQr">
@@ -539,9 +543,13 @@ const expediente = computed(() =>
 .app__reloj{order:2}
 .app__cab{background:var(--c-white);border-bottom:1px solid var(--c-gris-10)}
 .app__cab-in{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:.6rem 1.5rem;padding-block:.6rem}
-@media(max-width:900px){.app__cab-in{grid-template-columns:1fr auto}.app__cab-in .pasos{grid-column:1/-1;order:3}}
+@media(max-width:900px){.app__cab-in{grid-template-columns:1fr auto}.app__cab-in .fases{grid-column:1/-1;order:3}}
 .owner-linea{font-size:.85rem}
 .owner-linea strong{color:var(--c-ink)}
+.fases{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.35rem}
+.fases li{font-size:.78rem;font-weight:600;padding:.35em .9em;border-radius:99px;background:var(--c-white);color:var(--c-green-dark);box-shadow:inset 0 0 0 1.5px var(--c-green-mid)}
+.fases .fase--hecha{background:var(--c-green-light);box-shadow:none}
+.fases .fase--actual{background:var(--c-innova);color:var(--c-ink);box-shadow:none}
 .pasos{list-style:none;margin:0;padding:0;display:flex;gap:.35rem}
 .pasos li span{display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;font-size:.75rem;font-weight:700;background:var(--c-white);color:var(--c-green-dark);box-shadow:inset 0 0 0 2px var(--c-green-mid)}
 .pasos .hecho span{background:var(--c-green-deep);color:var(--c-white);box-shadow:none}

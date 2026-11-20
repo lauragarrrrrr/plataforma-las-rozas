@@ -22,7 +22,7 @@ watchEffect(async () => {
     <span class="kicker">Votación</span>
     <!-- Resultados publicados por el equipo facilitador -->
     <template v-if="store.resultsPublished()">
-      <h2>✦ ¡Ya tenemos ganadores!</h2>
+      <h2>✦ Las más votadas por el público</h2>
       <ResultadosPodio :mi-equipo="teamId" />
     </template>
     <template v-else-if="!open">

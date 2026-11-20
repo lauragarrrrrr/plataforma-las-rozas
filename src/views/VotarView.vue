@@ -64,8 +64,8 @@ async function enviar() {
 
       <!-- Resultados publicados por el equipo facilitador -->
       <template v-if="store.resultsPublished()">
-        <h1 class="titulo">✦ ¡Ya tenemos ganadores!</h1>
-        <p>Gracias por votar. Estos son los equipos ganadores de Las Rozas 2040.</p>
+        <h1 class="titulo">✦ Las más votadas por el público</h1>
+        <p>Gracias por votar. Estas son las 3 iniciativas más votadas por el público.</p>
         <ResultadosPodio :mi-equipo="equipo" />
       </template>
 

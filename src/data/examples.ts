@@ -1,6 +1,6 @@
 // ==========================================================
 // EJEMPLOS PARA EL CHAT · cuando el equipo pide «dame un ejemplo»
-// Textos de la metodología v3 (docs/metodologia.html). Todo es ficticio.
+// Mismos ejemplos que las fichas en papel (presentación v5, 19/11/2026). Todo es ficticio.
 // ⚠️ Cuando lleguen las cartas definitivas de giros y personajes, cambiarlas aquí.
 // ==========================================================
 
@@ -26,28 +26,27 @@ export const CARTAS_PERSONAJES = [
 
 /** Ejemplos por dinámica (id de TEAM_DYNAMICS) */
 export const EJEMPLOS: Record<string, string[]> = {
+  // Los mismos ejemplos que las fichas en papel (presentación v5)
+  titular: [
+    '«Lista de espera para abrir tienda en Las Rozas: la ciudad con más comercio de barrio de España no tiene ni un local libre».',
+  ],
   senales: [
-    'Nuevas profesiones que hace diez años no existían.',
-    'Cambios en la movilidad: más bicis y patinetes, coches compartidos.',
-    'Nuevas formas de aprender: cursos cortos en línea en lugar de carreras largas.',
+    'París organiza sus barrios para que todo quede a 15 minutos a pie. Fuente: noticias sobre la «ciudad de los 15 minutos».',
+    'Cada vez compramos más por internet y los pedidos llegan en menos de 24 horas.',
+    'Los mercados de abastos se reinventan: suman restauración y actividades para atraer a nuevo público.',
   ],
   'a-quien': [
-    'Un joven recién formado quiere empezar su carrera sin tener que desplazarse lejos cada día.',
-    '¿A quién? Jóvenes recién formados. ¿Cuándo le pasa? Al terminar sus estudios, cuando busca su primera experiencia.',
-    '¿Qué se lo impide hoy? No conoce a las empresas locales y ellas no le conocen a él.',
-    'El reto: «¿Cómo podríamos ayudar a jóvenes recién formados a encontrar su primera oportunidad en empresas locales?»',
+    'Cliente: personas mayores que viven solas en el centro y no conducen, cuando necesitan hacer la compra del día.',
+    'Problema: las tiendas de su calle han cerrado y la más cercana está a 20 minutos andando. Sus hijos les hacen la compra por internet, pero pierden autonomía y el trato con el barrio.',
+    'Beneficio: comprar solas, cerca de casa, y seguir sintiéndose autónomas y parte del barrio.',
+    'Reto: «¿Cómo podríamos ayudar a las personas mayores que viven solas en el centro a hacer su compra diaria cerca de casa, sin depender de nadie?»',
   ],
-
   ideacion: [
-    'Si pensamos en una plataforma de empleo, «sin pantallas» obliga a imaginar encuentros, redes locales o experiencias presenciales.',
-    'Combinad dos ideas que os gusten en una sola, o llevad una al extremo.',
-  ],
-  ficha: [
-    'Nombre: Primer Paso. A quién ayudamos: jóvenes recién formados de Las Rozas. Solución: estancias de dos semanas en empresas del municipio.',
-    'Tres palancas: empresas del Hub · centros educativos · sin burocracia.',
+    'La Plaza Vuelve: un mercado semanal de comercios locales que rota por las plazas del centro, con reparto a pie para quien no pueda cargar.',
+    'Tres palancas: comercios del municipio · plazas y espacios municipales · vecinos voluntarios. Primer paso: un piloto de tres meses en una plaza del centro, un día por semana.',
   ],
   portada: [
-    '«Las Rozas conecta a 1.000 jóvenes con su primera oportunidad profesional».',
+    '«La plaza vuelve: 300 vecinos mayores del centro ya hacen la compra a pie, cada semana».',
   ],
 }
 
