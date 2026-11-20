@@ -84,7 +84,7 @@ const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
         <!-- Todavía no: «¿Quién eres?» -->
         <div v-else class="buscar">
           <h2 class="titular">¿Quién eres?</h2>
-          <label class="buscar__label" for="nombre">Escribe tu nombre y toca el tuyo.</label>
+          <label class="buscar__label" for="nombre">Escribe tu nombre y tócalo en la lista.</label>
           <input
             id="nombre"
             v-model="query"

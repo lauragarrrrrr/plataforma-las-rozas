@@ -64,7 +64,7 @@ export function createSeed(): Database {
     teamId: id,
     name: 'Primer Paso',
     whoWeHelp: 'Jóvenes recién formados que viven en Las Rozas',
-    problem: 'No conocen a las empresas locales y ellas no les conocen a ellos',
+    problem: 'No conocen a las empresas locales y ellas tampoco los conocen',
     benefit: 'Una primera experiencia real cerca de casa, y empresas que conocen al talento local',
     solution: 'Estancias de dos semanas en empresas del municipio',
     levers: ['Alianzas con empresas del Hub', 'Centros educativos que derivan', 'Estancias cortas y sin burocracia'],

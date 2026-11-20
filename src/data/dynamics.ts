@@ -30,6 +30,8 @@ export interface TeamDynamic {
   noChat?: boolean
   /** Pantalla previa a la dinámica (por ejemplo, abrir el sobre de la mesa) */
   intro?: { title: string; text: string; button: string }
+  /** Ejemplo ya rellenado en papel, para ver cómo queda (imagen en public/) */
+  example?: { image: string; caption: string }
 }
 
 export const TEAM_DYNAMICS: TeamDynamic[] = [
@@ -39,7 +41,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     what: 'Escribid en positivo **un titular de periódico**: **concreto, con un dato y que sorprenda**.',
     why: 'Pasar del futuro que queremos evitar **al que sí queremos**, con un punto de partida común.',
     how: [
-      'Cada idea, **en un pósit**, sobre la plantilla de **Las Rozas Times**.',
+      'Cada idea, **en un post-it**, sobre la plantilla de **Las Rozas Times**.',
       'Afinad el titular con **las tres preguntas**:\n· ¿Qué nos gustaría que se dijera de Las Rozas en 2040?\n· ¿Qué tendría que haber cambiado?\n· ¿Cómo sabríamos que lo hemos conseguido?',
       'Los **2 últimos minutos**, haced la foto y subidla.',
     ],
@@ -54,7 +56,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
     why: 'Comprobar qué parte de ese 2040 **ya está empezando a pasar**.',
     how: [
       'Buscad en **tendencias, datos, noticias, tecnología, normativa, hábitos de consumo y comportamientos**.',
-      'Cada señal, con **título, descripción y fuentes**. En pósits.',
+      'Cada señal, con **título, descripción y fuentes**. En post-its.',
       'Marcad si cada señal es **fuente** o **hipótesis**.',
     ],
     output: '**Las cuatro señales** con título, descripción y fuentes.',
@@ -126,6 +128,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
       '**Subiréis al escenario** con vuestra portada: **30 segundos** para contarla y **1:30** de preguntas del jurado.',
     ],
     output: 'La portada terminada y su foto subida.',
+    example: { image: '/ejemplos/portada-ejemplo.jpg', caption: 'Una portada ya rellenada: «La Plaza Vuelve»' },
     photo: { kind: 'cover', label: 'vuestra portada en papel' },
     challenges: [],
   },

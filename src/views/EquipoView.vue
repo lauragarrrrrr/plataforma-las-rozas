@@ -353,6 +353,13 @@ const expediente = computed(() =>
             </div>
             <div><dt>¿Qué tendríais que obtener?</dt><dd v-html="rich(dynamic.output)"></dd></div>
           </dl>
+          <figure v-if="dynamic.example" class="ejemplo">
+            <figcaption><span class="kicker">Un ejemplo</span> {{ dynamic.example.caption }}</figcaption>
+            <button type="button" class="ejemplo__img" @click="openPhoto(dynamic.example.image, dynamic.example.caption)">
+              <img :src="dynamic.example.image" :alt="dynamic.example.caption" loading="lazy" />
+              <span class="ejemplo__ver">🔍 Tocad para verla en grande</span>
+            </button>
+          </figure>
         </div>
 
       </div>
@@ -365,7 +372,7 @@ const expediente = computed(() =>
               <img :src="photo.url" :alt="`Foto: ${dynamic.photo.label}`" />
               <p v-if="waitingNext" class="esperando">
                 <span class="punto" aria-hidden="true"></span>
-                <span v-if="nextOne && autoNext">¡Foto subida! Cuando acabe el tiempo pasaréis solos a <strong>«{{ nextOne.title }}»</strong>. Aprovechadlo para repasar.</span>
+                <span v-if="nextOne && autoNext">¡Foto subida! Cuando acabe el tiempo, pasaréis solos a <strong>«{{ nextOne.title }}»</strong>. Aprovechadlo para repasar.</span>
                 <span v-else-if="nextOne">Esperad: el equipo facilitador abrirá <strong>«{{ nextOne.title }}»</strong> cuando sea el momento.</span>
                 <span v-else>¡Hecho! Esperad indicaciones del equipo facilitador.</span>
               </p>
@@ -430,7 +437,7 @@ const expediente = computed(() =>
         <template v-if="pausa">
           <span class="sala-aviso__icono" aria-hidden="true">☕</span>
           <h2 id="sala-titulo">¡Pausa! Hay que descansar un poco</h2>
-          <p>Habéis terminado esta fase. Id a levantar las piernas y a tomaros algo.</p>
+          <p>Habéis terminado esta fase. Aprovechad para estirar las piernas y tomar algo.</p>
           <p class="nota">En {{ pausa.minutes }} minutos exactos nos vemos en la sala principal.</p>
         </template>
         <template v-else>
@@ -592,6 +599,12 @@ const expediente = computed(() =>
 .foto__cab p{margin:.2rem 0 0;font-size:.92rem}
 @media(max-width:700px){.foto__cab{grid-template-columns:1fr}}
 .explica{padding:clamp(1.2rem,2.2vw,1.7rem)}
+.ejemplo{margin:1.2rem 0 0;display:grid;gap:.5rem}
+.ejemplo figcaption{font-size:.9rem;color:var(--c-ink)}
+.ejemplo figcaption .kicker{margin-right:.4rem}
+.ejemplo__img{position:relative;display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in;border-radius:1rem;overflow:hidden;box-shadow:0 0 0 1px var(--c-gris-10)}
+.ejemplo__img img{display:block;width:100%;height:auto}
+.ejemplo__ver{position:absolute;right:.6rem;bottom:.6rem;background:var(--c-white);color:var(--c-ink);font-size:.8rem;font-weight:600;border-radius:99px;padding:.25em .8em;box-shadow:0 0 0 1px var(--c-gris-10)}
 .foto{padding:1.1rem 1.4rem}
 .dinamica__chat + .foto{background:color-mix(in srgb,var(--c-white) 70%,transparent);box-shadow:inset 0 0 0 1px var(--c-green-mid)}
 .foto img{border-radius:1rem;max-height:18rem;object-fit:cover;width:100%}

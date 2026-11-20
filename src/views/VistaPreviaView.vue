@@ -6,6 +6,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { backToRoomAfter, PREMORTEM, TEAM_DYNAMICS, photoOf, type TeamDynamic } from '../data/dynamics'
 import { useNow } from '../composables/useNow'
+import { openPhoto } from '../composables/usePhotoViewer'
 import PhotoQr from '../components/PhotoQr.vue'
 import CoachChat from '../components/CoachChat.vue'
 import DynamicTimer from '../components/DynamicTimer.vue'
@@ -117,6 +118,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
             <div><dt>Cómo</dt><dd><ol class="como"><li v-for="h in d.how" :key="h" v-html="rich(h)"></li></ol></dd></div>
             <div><dt>¿Qué tendríais que obtener?</dt><dd v-html="rich(d.output)"></dd></div>
           </dl>
+          <figure v-if="d.example" class="ejemplo">
+            <figcaption><span class="kicker">Un ejemplo</span> {{ d.example.caption }}</figcaption>
+            <button type="button" class="ejemplo__img" @click="openPhoto(d.example.image, d.example.caption)">
+              <img :src="d.example.image" :alt="d.example.caption" loading="lazy" />
+              <span class="ejemplo__ver">🔍 Tocad para verla en grande</span>
+            </button>
+          </figure>
         </div>
         <div class="card">
           <span class="kicker">Al terminar</span>
@@ -163,6 +171,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .qpco > div{display:grid;grid-template-columns:9rem 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--c-gris-10)}
 .qpco dt{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-innova-dark);padding-top:.2rem}
 .qpco dd{margin:0}
+.ejemplo{margin:1.2rem 0 0;display:grid;gap:.5rem}
+.ejemplo figcaption{font-size:.9rem;color:var(--c-ink)}
+.ejemplo figcaption .kicker{margin-right:.4rem}
+.ejemplo__img{position:relative;display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in;border-radius:1rem;overflow:hidden;box-shadow:0 0 0 1px var(--c-gris-10)}
+.ejemplo__img img{display:block;width:100%;height:auto}
+.ejemplo__ver{position:absolute;right:.6rem;bottom:.6rem;background:var(--c-white);color:var(--c-ink);font-size:.8rem;font-weight:600;border-radius:99px;padding:.25em .8em;box-shadow:0 0 0 1px var(--c-gris-10)}
 .como{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
 .chat-demo{position:sticky;top:7rem}
 .enlace-previa{justify-self:start;border:0;background:none;padding:0;font:inherit;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
