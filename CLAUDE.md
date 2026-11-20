@@ -544,9 +544,9 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 
 ---
 
-## 14. Estado a 20/11/2026 y pendientes (traspaso a otra cuenta)
+## 14. Estado a 20/11/2026 (noche, víspera del evento) y pendientes
 
-*Escrito al cambiar de cuenta de Claude. Léelo antes de seguir.*
+*Actualizado el 20/11/2026 por la noche. Léelo antes de seguir.*
 
 **Cómo trabaja Laura:**
 
@@ -568,22 +568,32 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 
 **Probar en local:** `npm run dev:local` (puerto 5174, sin Supabase). Copia limpia: configuración `prueba-limpia` de `.claude/launch.json` (puerto 5176). Los nombres reales están solo en `src/data/roster.local.json` (no se sube).
 
-**Hecho y publicado (hasta el commit «Escaleta final y presentación v5…»):** decisiones 22-27 de arriba; cinco dinámicas; escaleta final; panel con cronómetro fijo, «Personas de cada equipo», cambiar/quitar/añadir fotos por equipo y CSV de votos y resultados; volver a una dinámica anterior lleva a todos los equipos; «Volved a la sala» también para quien sube tarde; subir varias fotos a la vez desde el móvil.
+**Estado de la web publicada (comprobado en Supabase el 20/11 por la noche):** en blanco y lista para el sábado. **67 personas** cargadas en `event.roster` (A 6 · B 5 · C 6 · D 6 · E 5 · F 5 · G 6 · H 6 · I 5 · J 6 · K 5 · L 6), sin fotos, votos, ayudas ni digital owners, ninguna dinámica abierta, votación cerrada y sala en el primer momento.
 
-**Lo que tiene que hacer el equipo antes del sábado:**
+**Equipos (decidido el 20/11):** salen de `Hackathon_LasRozas2040_Asignacion_Ambitos_v6.xlsx` (la guía de Las Rozas Innova: ámbitos por perfil; dentro de cada ámbito, dos equipos con confirmados repartidos, misma organización separada y mujeres y hombres equilibrados) más la persona nueva del listado final (perfil inversor), que va a **L · Mirada abierta**. Nombres con nombre de pila e inicial del apellido; si dos coinciden, dos letras del apellido. Los nombres reales están en `src/data/roster.local.json` (no se sube) y en Supabase. Se pueden cambiar en el momento desde «Personas de cada equipo».
 
-1. En el panel publicado: **«Dejar todo en blanco»** (los datos de prueba son de las 8 dinámicas antiguas).
-2. Después, **cargar la lista de personas** en «Personas de cada equipo» (pegar desde Excel: letra y nombre). 61 inscritos: un equipo tendrá 6.
-3. Abrir la votación desde el panel al terminar el speed pitch («Abrir la votación»).
-4. Presentación: QR de `/votar` en la diapositiva 52 o 53; revisar «con IA» en la diapositiva 23 (el chat no es una IA de verdad).
+**Hecho y publicado el 20/11** (además de las decisiones 22-27):
+- Cola de reintentos con mala wifi: lo que no se guarda queda en cola (también en el navegador) y se reintenta solo, con aviso arriba (`store.ts`, `saveQuiet`).
+- Panel: suena, pone «(1) 🆘» en el título de la pestaña y un botón rubí fijo cuando un equipo pide ayuda.
+- Votación: «Han votado X de 67», «Quién ha votado · anular un voto» (`removeVote`).
+- Revisión de ortografía de todos los textos («post-it», no «pósit»).
+- Portada: imagen de ejemplo rellenada («La Plaza Vuelve», `public/ejemplos/portada-ejemplo.jpg`, con la tilde de «¿Cómo» corregida) que se amplía al tocarla. Solo en la Portada, no en el Titular (decidido por Laura).
+- `/participa` habla de «tú» («Tu ámbito», «Eres del equipo», «Busca la mesa»); «vosotros» solo cuando ya están juntos.
+- App del equipo usable desde el móvil (por si algún equipo no tiene ordenador): una columna, barra de arriba compacta, «Hacer la foto con este móvil» en vez del QR, foto en grande que se amplía y se mueve con el dedo.
+- Panel: **«Descargar copia de seguridad»** y **«Recuperar desde una copia…»** (`backupJson`, `restoreBackup`).
+- **«Dejar todo en blanco» ya NO borra la lista de personas** (`clearAll`).
+- Si el equipo facilitador sube la foto de un equipo desde el panel, ese equipo avanza aunque no tenga su pantalla abierta (`advanceIfReady`).
+- La escaleta de la plataforma coincide con la escaleta definitiva (`Las_Rozas_2040_Escaleta (3).xlsx`): mismas horas y minutos.
 
-**Pendiente en la plataforma (por orden de importancia, de la revisión del 18/11):**
+**Para el sábado (equipo facilitador):**
 
-1. Con mala wifi, un cambio que no se guarda se pierde sin avisar (no hay cola de reintentos).
-2. La votación se puede falsear eligiendo el nombre de otra persona; falta «X de 61 han votado» y poder deshacer un voto.
-3. El panel no suena ni avisa en el título cuando un equipo pide ayuda.
-4. /avisos en iPhone: no vibra y se corta con la pantalla bloqueada.
-5. Si el equipo facilitador sube la foto de un equipo que no tiene la pantalla abierta, ese equipo no avanza.
-6. Los botones de borrar están en una dirección pública y no hay copia de seguridad.
+1. **No pulsar «Dejar todo en blanco».** Descargar una copia de seguridad en cada pausa (11:50 y tras la votación).
+2. Panel abierto en un ordenador y un clic en él al empezar (para que pueda sonar). Facilitadores con `/avisos` en el móvil, sin modo silencio y con la pantalla desbloqueada (en iPhone no vibra ni avisa con la pantalla bloqueada; Laura descartó usar una app de notificaciones).
+3. Abrir la votación desde el panel al terminar el speed pitch.
+4. Al terminar: descargar el ZIP de fotos y el CSV de votos y resultados.
 
-**Historial completo de la conversación anterior** (por si hace falta un detalle): `C:\Users\lauro\.claude\projects\C--Users-lauro-Documents-plataforma-las-rozas\5064f920-5c6d-4d29-be14-8e9e14e287ce.jsonl`. Las notas guardadas de Claude están en `C:\Users\lauro\.claude\projects\C--Users-lauro-Documents-plataforma-las-rozas\memory\`.
+**Fuera de la plataforma (pendiente, lo hace Laura):** en las notas de la presentación, los minutos del cronómetro (Titular 15, «¿A quién…?» 25, Ideación 20) y el sobre (4 cartas según la escaleta); QR de `/votar` en la diapositiva de la votación; tilde de «¿Cómo» en el PDF de la portada si se imprime. En la presentación se dice que hay 6 ordenadores para 12 equipos: cada ordenador se acuerda de un solo equipo en `/equipo`; si se comparten, hay que entrar por `/equipo/:letra`.
+
+**Riesgos conocidos y aceptados:** se puede votar con el nombre de otra persona (se ve quién ha votado y se puede anular); los datos se leen sin contraseña; la cola de reintentos no se ha probado con un corte de wifi real.
+
+**Historial completo de las conversaciones anteriores** (por si hace falta un detalle): `C:\Users\lauro\.claude\projects\C--Users-lauro-Documents-plataforma-las-rozas\5064f920-5c6d-4d29-be14-8e9e14e287ce.jsonl` (hasta el 19/11) y `…\71c79aee-b15b-4039-b705-43e7bd7b65fc.jsonl` (20/11). Las notas guardadas de Claude están en `C:\Users\lauro\.claude\projects\C--Users-lauro-Documents-plataforma-las-rozas\memory\`.
