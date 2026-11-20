@@ -8,7 +8,7 @@ import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ALL_DYNAMICS, TEAM_DYNAMICS } from '../data/dynamics'
 import { compressImage } from '../utils/image'
-import { addPhoto, removePhoto, replacePhoto, setTeamPace, useStore } from '../data/store'
+import { addPhoto, advanceIfReady, removePhoto, replacePhoto, setTeamPace, useStore } from '../data/store'
 import { useNow } from '../composables/useNow'
 import { openPhoto } from '../composables/usePhotoViewer'
 import type { Photo, Team } from '../data/types'
@@ -88,6 +88,8 @@ async function elegida(e: Event) {
         const tienePrincipal = !!store.photoFor(viendo.value.id, a.d.id)
         await addPhoto(viendo.value.id, a.d.id, tienePrincipal ? 'other' : a.d.photo.kind, await compressImage(file))
       }
+      // Si el resto ya está en la siguiente, el equipo pasa también (aunque no tenga su pantalla abierta)
+      advanceIfReady(viendo.value.id, true)
     }
   } catch {
     fallo.value = 'No se ha podido guardar la foto. Comprobad la conexión y probad otra vez.'

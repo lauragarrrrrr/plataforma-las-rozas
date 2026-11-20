@@ -532,6 +532,29 @@ export function nextDynamic(teamId: string) {
 }
 
 /**
+ * Hace avanzar a un equipo que ya tiene la foto aunque no tenga su pantalla abierta
+ * (por ejemplo, si el equipo facilitador ha subido la foto por él desde el panel).
+ * Mismas reglas que en su pantalla: solo si el equipo facilitador ya ha abierto la siguiente.
+ * `porElPanel`: la foto la ha subido el equipo facilitador; el aviso «Volved a la sala» ya no hace falta.
+ */
+export function advanceIfReady(teamId: string, porElPanel = false) {
+  const p = state.progress.find((x) => x.teamId === teamId)
+  if (!p) return
+  const current = TEAM_DYNAMICS[p.current]
+  if (!current) return
+  if (!state.photos.some((x) => x.teamId === teamId && x.dynamicId === current.id && x.kind !== 'other')) return
+  const salaKey = `sala-${current.id}`
+  if (porElPanel && backToRoomAfter(current) && !p.introSeen?.[salaKey]) {
+    // La foto la ha subido el equipo facilitador: el aviso «Volved a la sala» ya no hace falta
+    p.introSeen = { ...(p.introSeen ?? {}), [salaKey]: true }
+    saveQuiet('progress', p)
+  }
+  if (p.current >= allowedFor(teamId)) return
+  if (backToRoomAfter(current) && !p.introSeen?.[salaKey]) return // lo verá en su pantalla y pulsará «Seguir»
+  nextDynamic(teamId)
+}
+
+/**
  * ¿Puede el equipo pasar solo a la siguiente dinámica cuando se le acabe el tiempo?
  * Sí, salvo al final de una fase (vuelven a la sala principal) o si el equipo
  * facilitador lo ha retenido (en el panel sale «Retenido»). Decidido por Laura el 16/11/2026.
@@ -668,6 +691,8 @@ export function openNextDynamic() {
   const dyn = TEAM_DYNAMICS[next]
   if (dyn) state.event.openedAt = { ...(state.event.openedAt ?? {}), [dyn.id]: now() }
   saveQuiet('event')
+  // Los equipos que ya tienen la foto pasan, aunque no tengan su pantalla abierta
+  for (const t of state.teams) advanceIfReady(t.id)
   // La sala acompaña: salta al momento de la escaleta de esa dinámica (solo hacia delante).
   if (dyn) advanceRoomTo(ROOM_STEP_OF_DYNAMIC[dyn.id] ?? dyn.id)
 }
@@ -820,8 +845,49 @@ async function replaceEverything(next: Database) {
 /** Vuelve a los datos de ejemplo (equipo 07). Para preparar y probar. */
 export const resetToSeed = () => replaceEverything(createSeed())
 
-/** Deja todo en blanco, como el día del evento. */
-export const clearAll = () => replaceEverything(createBlank())
+/**
+ * Deja todo en blanco, como el día del evento.
+ * Se queda la lista de personas de cada equipo (se cargó aparte y no es trabajo de los equipos).
+ */
+export const clearAll = () => {
+  const next = createBlank()
+  if (state.event.roster && Object.keys(state.event.roster).length) next.event.roster = clone(state.event.roster)
+  return replaceEverything(next)
+}
+
+// ---------------------------------------------------------------------------
+// Copia de seguridad: todo lo que hay ahora, en un archivo, y vuelta atrás desde ese archivo.
+// Las fotos se guardan como su dirección (las imágenes siguen en el almacenamiento).
+// ---------------------------------------------------------------------------
+export function backupJson(): string {
+  return JSON.stringify({ tipo: 'las-rozas-2040-copia', fecha: new Date().toISOString(), datos: clone(state) }, null, 1)
+}
+
+/** Devuelve un mensaje de error para la pantalla, o '' si se ha recuperado bien */
+export async function restoreBackup(json: string): Promise<string> {
+  let datos: Database
+  try {
+    const raw = JSON.parse(json) as { tipo?: string; datos?: Database }
+    if (raw.tipo !== 'las-rozas-2040-copia' || !raw.datos || !Array.isArray(raw.datos.teams) || !raw.datos.teams.length) {
+      return 'Este archivo no es una copia de seguridad de la plataforma.'
+    }
+    datos = raw.datos
+  } catch {
+    return 'No se ha podido leer el archivo.'
+  }
+  // Por si la copia es de una versión anterior: completar lo que falte
+  const base = createBlank()
+  for (const k of Object.keys(base) as (keyof Database)[]) {
+    if (datos[k] === undefined) (datos as unknown as Record<string, unknown>)[k] = base[k]
+  }
+  datos.version = DB_VERSION
+  try {
+    await replaceEverything(datos)
+  } catch {
+    return 'No se ha podido recuperar la copia. Comprobad la conexión y probad otra vez.'
+  }
+  return ''
+}
 
 // Arranque: al final, cuando ya está declarado todo lo que usa (también la cola de pendientes)
 if (isRemote) initRemote()

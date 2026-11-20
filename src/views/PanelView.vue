@@ -7,7 +7,7 @@ import { photosZip, saveFile } from '../data/photoZip'
 import { AGENDA } from '../data/agenda'
 import { PHASES } from '../data/config'
 import { TEAM_DYNAMICS } from '../data/dynamics'
-import { attendHelp, clearAll, closeLastDynamic, openNextDynamic, resetToSeed, setTeamPace, useStore } from '../data/store'
+import { attendHelp, backupJson, clearAll, restoreBackup, closeLastDynamic, openNextDynamic, resetToSeed, setTeamPace, useStore } from '../data/store'
 import { formatClock, useNow } from '../composables/useNow'
 import EscaletaTimeline from '../components/EscaletaTimeline.vue'
 import PanelEquipos from '../components/PanelEquipos.vue'
@@ -155,7 +155,26 @@ function confirmar(texto: string) {
   return askConfirm(`${texto}\n\nAfecta a todos los equipos y dispositivos.`, 'BORRAR', 'Borrar')
 }
 async function vaciar() {
-  if (await confirmar('Se borrará todo lo registrado por los equipos, también el ejemplo del equipo E.')) await clearAll()
+  if (await confirmar('Se borrará todo lo registrado por los equipos (fotos, ayudas, votos…) y la jornada volverá al principio. Se mantiene la lista de personas de cada equipo.\n\nConsejo: antes, descargad una copia de seguridad.')) await clearAll()
+}
+
+// --- Copia de seguridad: descargarla y, si hace falta, volver a ella ---
+const copiaAviso = ref('')
+function descargarCopia() {
+  const d = new Date()
+  const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}.${String(d.getMinutes()).padStart(2, '0')}`
+  saveFile(new Blob([backupJson()], { type: 'application/json' }), `Las Rozas 2040 · Copia ${stamp}.json`)
+  copiaAviso.value = `✓ Copia descargada (${stamp.slice(11).replace('.', ':')}). Guardadla en vuestro Drive.`
+}
+const archivoCopia = ref<HTMLInputElement>()
+async function recuperarCopia(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (archivoCopia.value) archivoCopia.value.value = ''
+  if (!file) return
+  const texto = await file.text()
+  if (!(await confirmar(`Se sustituirá todo lo que hay ahora por la copia «${file.name}».`))) return
+  const error = await restoreBackup(texto)
+  copiaAviso.value = error || '✓ Copia recuperada: todo está como cuando se descargó.'
 }
 async function restaurar() {
   if (await confirmar('Se sustituirán todos los datos por los datos de ejemplo.')) await resetToSeed()
@@ -249,8 +268,19 @@ async function restaurar() {
       </section>
 
       <section class="card">
+        <span class="kicker">Copia de seguridad</span>
+        <p>Guarda en un archivo <strong>todo lo que hay ahora</strong>: equipos, personas, fotos, ayudas y votos. Descargadla en cada pausa. Si algo se borra por error, se recupera desde ese archivo.</p>
+        <div class="botones">
+          <button class="boton" type="button" @click="descargarCopia">Descargar copia de seguridad</button>
+          <button class="boton boton--sec" type="button" @click="archivoCopia?.click()">Recuperar desde una copia…</button>
+          <input ref="archivoCopia" type="file" accept=".json,application/json" hidden @change="recuperarCopia" />
+        </div>
+        <p v-if="copiaAviso" class="zip-aviso">{{ copiaAviso }}</p>
+      </section>
+
+      <section class="card">
         <span class="kicker">Datos</span>
-        <p>Antes del evento hay que dejar todo en blanco. Mientras preparamos, podéis volver a los datos de ejemplo.</p>
+        <p>«Dejar todo en blanco» borra el trabajo de los equipos y vuelve al principio de la jornada. <strong>La lista de personas se mantiene.</strong> Mientras preparamos, podéis volver a los datos de ejemplo.</p>
         <div class="botones">
           <button class="boton" type="button" @click="restaurar">Restaurar datos de ejemplo</button>
           <button class="boton boton--sec" type="button" @click="vaciar">Dejar todo en blanco</button>
