@@ -541,3 +541,49 @@ Si una tarea depende de uno de estos puntos, pregunta antes de seguir.
 | IA conectada al chat | Para que el chat responda de verdad, lea las fotos y proponga la portada hace falta una cuenta de la API de Anthropic (unos 20-50 € la jornada). La cuenta Team no sirve para esto. Lo deciden Laura, Marina y Avantis, con la privacidad confirmada con Las Rozas Innova |
 | Nombres de los participantes | Se guarda el nombre de pila de cada persona y quién es el digital owner. Confirmar con el aviso de datos personales |
 | Seguridad de Supabase | Sin contraseña (decidido el 16/11/2026). Cualquiera con la dirección de la web puede leer y escribir los datos (permisos de `supabase/schema.sql`). Aceptado para un evento pequeño de un día |
+
+---
+
+## 14. Estado a 20/11/2026 y pendientes (traspaso a otra cuenta)
+
+*Escrito al cambiar de cuenta de Claude. Léelo antes de seguir.*
+
+**Cómo trabaja Laura:**
+
+- Habla **siempre en castellano** con ella. No es programadora: frases cortas, sin jerga.
+- Trabaja sola desde el 16/11: commit en `Lau` y push directo a `main` (`git push origin Lau && git push origin Lau:main`). La web pública se publica sola en Cloudflare al subir a `main`.
+- **Nunca** borres ni reinicies Supabase sin preguntar («Dejar todo en blanco», cambiar `DB_VERSION`…).
+- La presentación del evento es suya: no la modifiques; adapta la plataforma a ella.
+
+**Enlaces fijos** (no cambian al publicar):
+
+| Para qué | Dirección |
+| --- | --- |
+| QR de llegada (móvil) | https://plataforma-las-rozas.hackathon-las-rozas-2040.workers.dev/participa |
+| Enlace del correo (ordenador del equipo) | …/equipo |
+| QR de la votación (móvil) | …/votar |
+| Avisos del equipo facilitador (móvil) | …/avisos |
+| Panel | …/panel |
+| Entrada de facilitación (QR y enlace del correo) | …/facilitacion |
+
+**Probar en local:** `npm run dev:local` (puerto 5174, sin Supabase). Copia limpia: configuración `prueba-limpia` de `.claude/launch.json` (puerto 5176). Los nombres reales están solo en `src/data/roster.local.json` (no se sube).
+
+**Hecho y publicado (hasta el commit «Escaleta final y presentación v5…»):** decisiones 22-27 de arriba; cinco dinámicas; escaleta final; panel con cronómetro fijo, «Personas de cada equipo», cambiar/quitar/añadir fotos por equipo y CSV de votos y resultados; volver a una dinámica anterior lleva a todos los equipos; «Volved a la sala» también para quien sube tarde; subir varias fotos a la vez desde el móvil.
+
+**Lo que tiene que hacer el equipo antes del sábado:**
+
+1. En el panel publicado: **«Dejar todo en blanco»** (los datos de prueba son de las 8 dinámicas antiguas).
+2. Después, **cargar la lista de personas** en «Personas de cada equipo» (pegar desde Excel: letra y nombre). 61 inscritos: un equipo tendrá 6.
+3. Abrir la votación desde el panel al terminar el speed pitch («Abrir la votación»).
+4. Presentación: QR de `/votar` en la diapositiva 52 o 53; revisar «con IA» en la diapositiva 23 (el chat no es una IA de verdad).
+
+**Pendiente en la plataforma (por orden de importancia, de la revisión del 18/11):**
+
+1. Con mala wifi, un cambio que no se guarda se pierde sin avisar (no hay cola de reintentos).
+2. La votación se puede falsear eligiendo el nombre de otra persona; falta «X de 61 han votado» y poder deshacer un voto.
+3. El panel no suena ni avisa en el título cuando un equipo pide ayuda.
+4. /avisos en iPhone: no vibra y se corta con la pantalla bloqueada.
+5. Si el equipo facilitador sube la foto de un equipo que no tiene la pantalla abierta, ese equipo no avanza.
+6. Los botones de borrar están en una dirección pública y no hay copia de seguridad.
+
+**Historial completo de la conversación anterior** (por si hace falta un detalle): `C:\Users\lauro\.claude\projects\C--Users-lauro-Documents-plataforma-las-rozas\5064f920-5c6d-4d29-be14-8e9e14e287ce.jsonl`. Las notas guardadas de Claude están en `C:\Users\lauro\.claude\projects\C--Users-lauro-Documents-plataforma-las-rozas\memory\`.
