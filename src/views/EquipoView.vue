@@ -195,7 +195,7 @@ const expediente = computed(() =>
       <div v-if="picked" class="card bienvenida">
         <template v-if="pickedKind === 'owner'">
           <h1 class="titular">¡{{ pickedFirst }}, eres digital owner!</h1>
-          <p class="intro">Te damos la bienvenida. Desde este ordenador llevarás toda la experiencia digital del equipo {{ team.id }}.</p>
+          <p class="intro">Te damos la bienvenida. Desde aquí llevarás toda la experiencia digital del equipo {{ team.id }}.</p>
           <button class="boton" type="button" @click="enterAsOwner">¡Empezamos!</button>
         </template>
         <template v-else-if="pickedKind === 'other'">
@@ -205,7 +205,7 @@ const expediente = computed(() =>
         </template>
         <template v-else>
           <h1 class="titular">¡{{ pickedFirst }}, eres digital owner!</h1>
-          <p class="intro">Te damos la bienvenida. Desde este ordenador llevarás toda la experiencia digital del equipo {{ team.id }}.</p>
+          <p class="intro">Te damos la bienvenida. Desde aquí llevarás toda la experiencia digital del equipo {{ team.id }}.</p>
           <button class="boton" type="button" @click="enterAsOwner">¡Empezamos!</button>
         </template>
         <button class="enlace" type="button" @click="picked = ''">{{ pickedKind === 'new' ? 'Nos hemos equivocado de persona' : `No soy ${pickedFirst}` }}</button>
@@ -214,7 +214,7 @@ const expediente = computed(() =>
       <!-- Todavía sin digital owner: lo elige el equipo, todos juntos -->
       <template v-else-if="!setup?.digitalOwner">
         <h1 class="titular">¿Quién será vuestro digital owner?</h1>
-        <p class="intro">La persona que llevará este ordenador y subirá las fotos del equipo. Elegidla entre todos y tocad su nombre.</p>
+        <p class="intro">La persona que llevará la herramienta y subirá las fotos del equipo. Elegidla entre todos y tocad su nombre.</p>
         <div class="nombres">
           <button v-for="m in teamMembers" :key="m" type="button" class="nombres__btn" @click="picked = m">{{ m }}</button>
         </div>
@@ -286,7 +286,7 @@ const expediente = computed(() =>
       </ol>
       <footer class="arranque__pie">
         <button class="boton arranque__boton" type="button" @click="markIntroSeen(id, COMO_FUNCIONA)">¡Entendido, empezamos!</button>
-        <p>No tenéis que escribir vuestro trabajo en el ordenador: la foto basta.</p>
+        <p>No tenéis que escribir vuestro trabajo en la pantalla: la foto basta.</p>
       </footer>
     </div>
     <HelpButton :team-id="id" :dynamic-id="TEAM_DYNAMICS[0].id" />
@@ -297,7 +297,7 @@ const expediente = computed(() =>
     <header class="app__cab">
       <div class="wrap app__cab-in">
         <div>
-          <span class="kicker">{{ team.name }} · {{ store.areaName(team.area) }}</span>
+          <span class="kicker">{{ team.name }}<span class="cab__ambito"> · {{ store.areaName(team.area) }}</span></span>
           <p class="owner-linea" :title="setup.members.join(', ')">Digital owner: <strong>{{ setup.digitalOwner }}</strong> · <button class="enlace" type="button" @click="startEditing">Cambiar</button></p>
         </div>
         <DynamicTimer v-if="!finished && !(dynamic.intro && !progress?.introSeen?.[dynamic.id])" class="app__reloj" :remaining="remaining" :minutes="dynamic.minutes" :photo-done="!!photo" compact />
@@ -401,7 +401,7 @@ const expediente = computed(() =>
               <button v-if="!showQr" class="boton foto__subir" type="button" @click="showQr = true">＋ Registrar fotografía</button>
               <div v-else class="foto__cab">
                 <span class="kicker">Registrar fotografía</span>
-                <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores. Podéis hacer <strong>varias fotos a la vez</strong> y enviarlas todas juntas.</p>
+                <p>La foto {{ photoOf(dynamic) }} y, si queréis, las de post-its y borradores.<span class="solo-ordenador"> Podéis hacer <strong>varias fotos a la vez</strong> y enviarlas todas juntas.</span></p>
               </div>
               <template v-if="showQr">
                 <PhotoQr :team-id="id" :dynamic-id="dynamic.id" @uploaded="onPhoto" />
@@ -649,4 +649,29 @@ const expediente = computed(() =>
 .expediente__foto{display:block;border-radius:.7rem;overflow:hidden;transition:transform .2s var(--ease-out)}
 .expediente__foto:hover{transform:scale(1.03)}
 .expediente img{aspect-ratio:4/3;object-fit:cover;width:100%;display:block}
+
+/* ---------- Por si algún equipo usa el móvil en vez del ordenador ----------
+   Va al final para que mande sobre las reglas de arriba. */
+@media(max-width:960px){
+  .dinamica,.dinamica--sin-chat{grid-template-columns:minmax(0,1fr)}
+  .dinamica__der{position:static}
+  .dinamica__der .dinamica__chat{height:28rem}
+}
+@media(max-width:760px){
+  /* En el móvil las fotos se hacen de una en una, con el propio móvil */
+  .solo-ordenador{display:none}
+}
+@media(max-width:600px){
+  /* Barra de arriba compacta: equipo y cronómetro en una línea; sin fases ni digital owner */
+  .app__cab-in{grid-template-columns:minmax(0,1fr) auto;gap:.4rem .8rem;padding-block:.45rem}
+  .app__cab-in > div:first-child{min-width:0}
+  .app__cab-in .kicker{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .owner-linea,.app__cab-in .fases,.cab__ambito{display:none}
+  .app__cab-in .kicker{font-size:.9rem}
+  .dinamica{padding-block:.9rem;gap:.9rem}
+  .explica{padding:1.1rem}
+  .foto{padding:1rem}
+  /* Que «Pedir ayuda» no tape lo último de la pantalla */
+  .app{padding-bottom:6.5rem}
+}
 </style>

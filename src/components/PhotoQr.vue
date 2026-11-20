@@ -13,6 +13,12 @@ const emit = defineEmits<{ uploaded: [dataUrl: string] }>()
 const link = computed(() => `${location.origin}/subir/${props.teamId}?d=${props.dynamicId}${props.extra ? '&extra=1' : ''}`)
 const qr = ref('')
 const showBackup = ref(false)
+/**
+ * ¿Se está usando la app del equipo desde un móvil? (por si algún equipo no tiene ordenador)
+ * Entonces no tiene sentido escanear un QR con el mismo móvil: la foto se hace directamente.
+ */
+const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches
+const showQrOnPhone = ref(false)
 
 watchEffect(async () => {
   qr.value = await QRCode.toDataURL(link.value, { margin: 1, width: 320, color: { dark: '#000000', light: '#ffffff' } })
@@ -20,8 +26,14 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <div class="qr">
-    <img v-if="qr" :src="qr" width="200" height="200" alt="Código QR para subir la foto con el móvil" />
+  <!-- En el móvil: la foto se hace con este mismo móvil -->
+  <div v-if="isPhone && !showQrOnPhone" class="movil">
+    <PhotoUpload :no-review="multi || extra" label="Hacer la foto con este móvil" @uploaded="(u) => emit('uploaded', u)" />
+    <p class="movil__nota">Que se vea entera y se pueda leer: de frente, con luz y sin sombras.</p>
+    <button class="enlace" type="button" @click="showQrOnPhone = true">¿La hacéis con otro móvil? Ver el código QR</button>
+  </div>
+  <div v-else class="qr">
+    <img v-if="qr":src="qr" width="200" height="200" alt="Código QR para subir la foto con el móvil" />
     <div class="qr__pasos">
       <ol v-if="multi">
         <li>Abre la cámara del móvil y apunta al código.</li>
@@ -53,5 +65,9 @@ watchEffect(async () => {
 .qr__espera{display:flex;align-items:center;gap:.5rem;font-weight:600;color:var(--c-innova-dark)}
 .punto{width:.7rem;height:.7rem;border-radius:50%;background:var(--c-innova);animation:latir 1.2s ease-in-out infinite}
 @keyframes latir{50%{opacity:.3;transform:scale(.8)}}
+.movil{display:grid;gap:.6rem}
+.movil :deep(.subida > .boton){justify-self:stretch;justify-content:center;font-size:1.1rem;padding:1em 1.2em}
+.movil__nota{margin:0;font-size:.85rem}
+@media(max-width:480px){.qr img{width:160px;height:160px}.qr__pasos{min-width:0}}
 .enlace{justify-self:start;border:0;background:none;padding:0;font:inherit;font-size:.85rem;color:var(--c-innova-dark);text-decoration:underline;cursor:pointer}
 </style>
