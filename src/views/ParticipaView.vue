@@ -65,7 +65,7 @@ const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
 
           <!-- Lo primero, el ámbito -->
           <div class="resultado__ambito">
-            <span class="kicker">Vuestro ámbito</span>
+            <span class="kicker">Tu ámbito</span>
             <strong>{{ myArea }}</strong>
             <p v-if="myQuestion">{{ myQuestion }}</p>
           </div>
@@ -73,10 +73,10 @@ const firstName = computed(() => me.value?.name.split(' ')[0] ?? '')
           <!-- Después, el equipo y la mesa -->
           <div class="resultado__equipo">
             <span class="resultado__letra">{{ me.teamId }}</span>
-            <p class="resultado__mesa">Sois el <strong>equipo {{ me.teamId }}</strong>.<br />Buscad la mesa con la letra <strong>{{ me.teamId }}</strong>.</p>
+            <p class="resultado__mesa">Eres del <strong>equipo {{ me.teamId }}</strong>.<br />Busca la mesa con la letra <strong>{{ me.teamId }}</strong>.</p>
           </div>
 
-          <p class="resultado__siguiente">Cuando lleguéis a vuestra sala, abrid en el ordenador del equipo el enlace que os hemos enviado por correo. Allí empezaréis a trabajar juntos.</p>
+          <p class="resultado__siguiente">Cuando estéis todos juntos en vuestra sala, abrid en el ordenador del equipo el enlace que os hemos enviado por correo. Allí empezaréis a trabajar juntos.</p>
 
           <button class="otra" type="button" @click="reset">No soy {{ firstName }}</button>
         </div>
