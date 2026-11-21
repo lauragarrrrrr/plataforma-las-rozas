@@ -118,7 +118,7 @@ export const TEAM_DYNAMICS: TeamDynamic[] = [
   },
   {
     // Diapositivas 33-35 · Portada de Las Rozas Times
-    id: 'portada', phase: 'pitch', title: 'Portada', minutes: 15,
+    id: 'portada', phase: 'pitch', title: 'Portada', minutes: 25,
     what: 'Cread **vuestra portada en papel** a partir de vuestra iniciativa. Es la que presentaréis en el speed pitch.',
     why: 'Que cualquier persona entienda vuestra idea **en segundos**.',
     how: [

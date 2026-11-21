@@ -77,7 +77,7 @@ export const AGENDA: AgendaStep[] = [
     description: 'Cómo se hace la portada y cómo será el speed pitch.' },
   { id: 'traslado-portada', time: '12:45', minutes: 5, title: 'A vuestras salas', who: 'Toda la sala', kind: 'info',
     description: 'De la sala principal a las salas de equipo.' },
-  { id: 'portada', time: '12:50', minutes: 15, title: 'Portada', who: 'Equipo', kind: 'dynamic',
+  { id: 'portada', time: '12:50', minutes: 25, title: 'Portada', who: 'Equipo', kind: 'dynamic',
     description: 'Cada equipo rellena su portada de Las Rozas Times 2040 en papel y sube la foto.' },
   { id: 'traslado', time: '13:05', minutes: 5, title: 'Al escenario con la portada', who: 'Toda la sala', kind: 'info',
     description: 'De las salas de equipo al escenario, cada equipo con su portada en papel.' },
